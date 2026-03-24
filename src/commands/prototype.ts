@@ -24,7 +24,7 @@ export function registerPrototypeCommand(program: Command, engine: ArkEngine) {
       const scenes = await buildScenesFromSpecs(engine.registry, opts.previewUrl);
 
       if (scenes.length === 0) {
-        console.log("  No specs found. Create some with `ark spec` first.\n");
+        console.log("  No specs found. Create some with `noche spec` first.\n");
         return;
       }
 

@@ -81,7 +81,7 @@ export default function App() {
       {${galleryItems.length} === 0 && (
         <div className="text-center text-muted-foreground py-20">
           <p>No generated components yet.</p>
-          <p className="text-sm mt-2">Run <code>ark spec component MyComponent</code> then <code>ark generate</code></p>
+          <p className="text-sm mt-2">Run <code>noche spec component MyComponent</code> then <code>noche generate</code></p>
         </div>
       )}
     </div>

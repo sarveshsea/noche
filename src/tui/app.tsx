@@ -78,7 +78,7 @@ function SpecsSummary({ engine }: TuiProps) {
     <Box flexDirection="column" paddingX={1}>
       <Text bold underline>Specs</Text>
       {specs.length === 0 && (
-        <Text color="gray">No specs — run `ark spec component Name`</Text>
+        <Text color="gray">No specs — run `noche spec component Name`</Text>
       )}
       {specs.map((s, i) => (
         <Text key={i}>

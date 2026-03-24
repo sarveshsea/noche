@@ -102,7 +102,7 @@ export class ArkEngine extends EventEmitter {
 
   async pullDesignSystem(): Promise<void> {
     if (!this.figma.isConnected) {
-      throw new Error("Not connected to Figma. Run `ark connect` first.");
+      throw new Error("Not connected to Figma. Run `noche connect` first.");
     }
 
     const designSystem = await this.figma.extractDesignSystem();

@@ -41,7 +41,7 @@ export async function writeTokenFiles(
 export function generateShadcnTokenMapping(tokens: DesignToken[]): string {
   const lines: string[] = [
     "/* Noche Design Tokens — mapped from Figma to shadcn CSS variables */",
-    "/* Auto-generated — re-run `ark tokens` to update */",
+    "/* Auto-generated — re-run `noche tokens` to update */",
     "",
     "@layer base {",
     "  :root {",

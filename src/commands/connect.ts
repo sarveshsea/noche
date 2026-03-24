@@ -92,7 +92,7 @@ export function registerConnectCommand(program: Command, engine: ArkEngine) {
         if (!inputToken) {
           console.log("\n  No token provided. You can set it later:");
           console.log("    export FIGMA_TOKEN=\"figd_xxxxx\"");
-          console.log("  Or re-run: ark connect\n");
+          console.log("  Or re-run: noche connect\n");
           process.exit(0);
         }
 
@@ -115,7 +115,7 @@ export function registerConnectCommand(program: Command, engine: ArkEngine) {
         // ── Step 2: File key (optional) ───────────────────
         console.log("  STEP 2 / 3 — Default Figma File (optional)\n");
         console.log("  If you have one main design file, paste its URL or file key.");
-        console.log("  This lets `ark pull` work without specifying a file each time.\n");
+        console.log("  This lets `noche pull` work without specifying a file each time.\n");
         console.log("  Example URL: figma.com/design/abc123def/MyProject");
         console.log("  Example key: abc123def\n");
 

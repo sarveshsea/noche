@@ -547,7 +547,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
           </tbody>
         </table>
       </div>
-    </div>` : `<div class="section"><div class="empty">No specs yet. Run <code>ark init</code> to start.</div></div>`}
+    </div>` : `<div class="section"><div class="empty">No specs yet. Run <code>noche init</code> to start.</div></div>`}
   </div>
 
   <!-- Tokens Panel -->
@@ -583,7 +583,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
       </div>
     </div>` : ""}
 
-    ${tokens.length === 0 ? `<div class="empty">No tokens yet. Run <code>ark connect</code> then <code>ark pull</code></div>` : ""}
+    ${tokens.length === 0 ? `<div class="empty">No tokens yet. Run <code>noche connect</code> then <code>noche pull</code></div>` : ""}
   </div>
 
   <!-- Components Panel -->
@@ -607,7 +607,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
           </div>
         </div>`;
       }).join("")}
-    </div>` : `<div class="empty">No components. Run <code>ark spec component MyComponent</code></div>`}
+    </div>` : `<div class="empty">No components. Run <code>noche spec component MyComponent</code></div>`}
   </div>
 
   <!-- DataViz Panel -->
@@ -630,7 +630,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
           </div>
         </div>`;
       }).join("")}
-    </div>` : `<div class="empty">No dataviz. Run <code>ark spec dataviz MyChart</code></div>`}
+    </div>` : `<div class="empty">No dataviz. Run <code>noche spec dataviz MyChart</code></div>`}
   </div>
 
   <!-- Pages Panel -->
@@ -654,7 +654,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
           </div>
         </div>`;
       }).join("")}
-    </div>` : `<div class="empty">No pages. Run <code>ark spec page MyPage</code></div>`}
+    </div>` : `<div class="empty">No pages. Run <code>noche spec page MyPage</code></div>`}
   </div>
 
   <!-- Design Panel -->
@@ -699,7 +699,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
           ${s.linkedSpecs.map((l: string) => `<span class="badge badge-muted" style="margin:2px">${esc(l)}</span>`).join("")}` : ""}
         </div>`;
       }).join("")}
-    </div>` : `<div class="empty">No design specs. Run <code>ark spec design MyDesign</code> for pixel-level annotations.</div>`}
+    </div>` : `<div class="empty">No design specs. Run <code>noche spec design MyDesign</code> for pixel-level annotations.</div>`}
   </div>
 
   <!-- IA Panel -->
@@ -749,7 +749,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
           <div>${ia.globals.map((g) => `<span class="badge badge-info" style="margin:2px">${esc(g.label)}${g.linkedPageSpec ? ` → ${esc(g.linkedPageSpec)}` : ""}</span>`).join("")}</div>` : ""}
         </div>
       </div>`;
-    }).join("") : `<div class="empty">No IA specs. Run <code>ark ia extract MyIA</code> to extract from Figma or <code>ark ia create MyIA</code>.</div>`}
+    }).join("") : `<div class="empty">No IA specs. Run <code>noche ia extract MyIA</code> to extract from Figma or <code>noche ia create MyIA</code>.</div>`}
   </div>
 
   <!-- Research Panel -->
@@ -773,7 +773,7 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
         </tr>`).join("")}
         </tbody>
       </table>
-    </div>` : `<div class="empty">No research. Run <code>ark research from-file data.xlsx</code></div>`}
+    </div>` : `<div class="empty">No research. Run <code>noche research from-file data.xlsx</code></div>`}
   </div>
 
   <!-- Figma Panel -->
@@ -801,10 +801,10 @@ tr:hover td { background: hsl(var(--muted) / 0.4); }
       <div class="card" style="line-height:2.2; font-size:12px">
         <div><strong>1.</strong> Get Figma token: <code>Figma &rarr; Settings &rarr; Personal Access Tokens</code></div>
         <div><strong>2.</strong> Set env: <code>export FIGMA_TOKEN="figd_..."</code></div>
-        <div><strong>3.</strong> Start server: <code>ark connect</code></div>
+        <div><strong>3.</strong> Start server: <code>noche connect</code></div>
         <div><strong>4.</strong> In Figma: <code>Plugins &rarr; Dev &rarr; Import manifest &rarr; ark/plugin/manifest.json</code></div>
-        <div><strong>5.</strong> Pull system: <code>ark pull</code></div>
-        <div><strong>6.</strong> Refresh: <code>ark dashboard</code></div>
+        <div><strong>5.</strong> Pull system: <code>noche pull</code></div>
+        <div><strong>6.</strong> Refresh: <code>noche dashboard</code></div>
       </div>
     </div>
   </div>

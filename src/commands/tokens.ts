@@ -15,7 +15,7 @@ export function registerTokensCommand(program: Command, engine: ArkEngine) {
 
       const ds = engine.registry.designSystem;
       if (ds.tokens.length === 0) {
-        console.log("\n  No design tokens found. Run `ark pull` first.\n");
+        console.log("\n  No design tokens found. Run `noche pull` first.\n");
         return;
       }
 

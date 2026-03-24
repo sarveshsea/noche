@@ -181,30 +181,30 @@ export function registerInitCommand(program: Command, engine: ArkEngine) {
   Next steps (one at a time):
 
     STEP 1 — Connect to Figma (guided):
-       ark connect
+ *   noche connect
        (walks you through token setup, file key, and plugin install)
 
     STEP 2 — Pull your design system:
-       ark pull
+ *   noche pull
 
     STEP 3 — Extract information architecture:
-       ark ia extract MyApp
+ *   noche ia extract MyApp
 
     STEP 4 — Launch the dashboard:
-       ark dashboard
+ *   noche dashboard
 
     STEP 5 — Create more specs:
-       ark spec component MyComponent
-       ark spec page MyPage
-       ark spec dataviz MyChart
-       ark spec design MyDesign
-       ark ia create MySitemap
+ *   noche spec component MyComponent
+ *   noche spec page MyPage
+ *   noche spec dataviz MyChart
+ *   noche spec design MyDesign
+ *   noche ia create MySitemap
 
     STEP 6 — Generate code:
-       ark generate
+ *   noche generate
 
-  Run \`ark status\` anytime to check progress.
-  Run \`ark --help\` to see all commands.
+  Run \`noche status\` anytime to check progress.
+  Run \`noche --help\` to see all commands.
 `);
     });
 }

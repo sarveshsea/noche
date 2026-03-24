@@ -64,7 +64,7 @@ export function registerSpecCommand(program: Command, engine: ArkEngine) {
 
       await engine.registry.saveSpec(newSpec);
       console.log(`\n  Created: specs/components/${name}.json`);
-      console.log(`  Run \`ark generate ${name}\` to generate code.\n`);
+      console.log(`  Run \`noche generate ${name}\` to generate code.\n`);
     });
 
   spec
@@ -92,7 +92,7 @@ export function registerSpecCommand(program: Command, engine: ArkEngine) {
 
       await engine.registry.saveSpec(newSpec);
       console.log(`\n  Created: specs/pages/${name}.json`);
-      console.log("  Edit the spec to add sections, then run `ark generate`.\n");
+      console.log("  Edit the spec to add sections, then run `noche generate`.\n");
     });
 
   spec
@@ -124,7 +124,7 @@ export function registerSpecCommand(program: Command, engine: ArkEngine) {
 
       await engine.registry.saveSpec(newSpec);
       console.log(`\n  Created: specs/dataviz/${name}.json`);
-      console.log("  Edit the spec to define data shape, then run `ark generate`.\n");
+      console.log("  Edit the spec to define data shape, then run `noche generate`.\n");
     });
 
   spec
@@ -181,7 +181,7 @@ export function registerSpecCommand(program: Command, engine: ArkEngine) {
 
       const specs = await engine.registry.getAllSpecs();
       if (specs.length === 0) {
-        console.log("\n  No specs found. Create one with `ark spec component <name>`.\n");
+        console.log("\n  No specs found. Create one with `noche spec component <name>`.\n");
         return;
       }
 

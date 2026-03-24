@@ -1,11 +1,11 @@
 /**
  * IA Command — Information Architecture extraction, visualization, and validation.
  *
- * `ark ia extract <name>` — Extract IA from connected Figma file
- * `ark ia create <name>`  — Create an empty IA spec manually
- * `ark ia show [name]`    — Print IA tree to terminal
- * `ark ia validate [name]`— Validate IA cross-references
- * `ark ia list`           — List all IA specs
+ * `noche ia extract <name>` — Extract IA from connected Figma file
+ * `noche ia create <name>`  — Create an empty IA spec manually
+ * `noche ia show [name]`    — Print IA tree to terminal
+ * `noche ia validate [name]`— Validate IA cross-references
+ * `noche ia list`           — List all IA specs
  */
 
 import type { Command } from "commander";
@@ -60,7 +60,7 @@ export function registerIACommand(program: Command, engine: ArkEngine) {
       await engine.init();
 
       if (!engine.figma.isConnected) {
-        console.error("\n  Not connected to Figma. Run `ark connect` first.\n");
+        console.error("\n  Not connected to Figma. Run `noche connect` first.\n");
         process.exit(1);
       }
 
@@ -93,7 +93,7 @@ export function registerIACommand(program: Command, engine: ArkEngine) {
 
       console.log(`\n  Created: specs/ia/${name}.json`);
       console.log(`  ${iaSpec.root.children.length} pages, ${nodeCount} total nodes`);
-      console.log(`  Run \`ark ia show ${name}\` to visualize.\n`);
+      console.log(`  Run \`noche ia show ${name}\` to visualize.\n`);
     });
 
   // ── ark ia create <name> ───────────────────────────────
@@ -140,7 +140,7 @@ export function registerIACommand(program: Command, engine: ArkEngine) {
       const iaSpecs = specs.filter((s) => s.type === "ia") as IASpec[];
 
       if (iaSpecs.length === 0) {
-        console.log("\n  No IA specs found. Run `ark ia extract <name>` or `ark ia create <name>`.\n");
+        console.log("\n  No IA specs found. Run `noche ia extract <name>` or `noche ia create <name>`.\n");
         return;
       }
 
@@ -242,7 +242,7 @@ export function registerIACommand(program: Command, engine: ArkEngine) {
       const iaSpecs = specs.filter((s) => s.type === "ia") as IASpec[];
 
       if (iaSpecs.length === 0) {
-        console.log("\n  No IA specs. Run `ark ia extract <name>` to create one from Figma.\n");
+        console.log("\n  No IA specs. Run `noche ia extract <name>` to create one from Figma.\n");
         return;
       }
 

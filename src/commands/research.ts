@@ -16,7 +16,7 @@ export function registerResearchCommand(program: Command, engine: ArkEngine) {
       await engine.research.fromFile(filePath);
       console.log("\n  Done. Insights saved to research/insights.json");
       console.log("  Markdown notes written to research/notes/");
-      console.log("  Run `ark preview` to view the research dashboard\n");
+      console.log("  Run `noche preview` to view the research dashboard\n");
     });
 
   research
@@ -38,7 +38,7 @@ export function registerResearchCommand(program: Command, engine: ArkEngine) {
       console.log(`\n  ${result.summary}`);
       console.log("  Insights saved to research/insights.json");
       console.log("  Markdown notes written to research/notes/");
-      console.log("  Run `ark preview` to view the research dashboard\n");
+      console.log("  Run `noche preview` to view the research dashboard\n");
     });
 
   research
@@ -63,6 +63,6 @@ export function registerResearchCommand(program: Command, engine: ArkEngine) {
       console.log("\n  Generating report...\n");
       await engine.research.generateReport();
       console.log("  Report saved to research/reports/report.md");
-      console.log("  Run `ark preview` to view the research dashboard\n");
+      console.log("  Run `noche preview` to view the research dashboard\n");
     });
 }

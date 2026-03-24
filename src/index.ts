@@ -4,19 +4,19 @@
  * Noche CLI — AI-Native Design Intelligence Engine
  *
  * Commands:
- *   ark connect           Connect to Figma Desktop Bridge
- *   ark pull              Pull design system from Figma
- *   ark research <sub>    Run research pipeline
- *   ark spec <type> <n>   Create or edit a spec
- *   ark generate <spec>   Generate code from spec
- *   ark preview           Start HTML preview server
- *   ark status            Show project status
- *   ark sync              Full sync: Figma → specs → code → preview
- *   ark ia <sub>           Information architecture (extract, show, validate)
- *   ark stickies <url>    Convert FigJam stickies to research
- *   ark dataviz <name>    Create a dataviz spec
- *   ark page <name>       Create a page spec
- *   ark tokens            Export design tokens
+ * *   noche connect           Connect to Figma Desktop Bridge
+ * *   noche pull              Pull design system from Figma
+ * *   noche research <sub>    Run research pipeline
+ *   noche spec <type> <n>   Create or edit a spec
+ *   noche generate <spec>   Generate code from spec
+ *   noche preview           Start HTML preview server
+ *   noche status            Show project status
+ *   noche sync              Full sync: Figma → specs → code → preview
+ * *   noche ia <sub>           Information architecture (extract, show, validate)
+ * *   noche stickies <url>    Convert FigJam stickies to research
+ * *   noche dataviz <name>    Create a dataviz spec
+ * *   noche page <name>       Create a page spec
+ * *   noche tokens            Export design tokens
  */
 
 import { Command } from "commander";
