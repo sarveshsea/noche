@@ -1,17 +1,14 @@
-# /multi-agent — Run Parallel Agent Workflows in Figma
+# /multi-agent — Parallel Agent Workflows in Figma
 
-> Orchestrate multiple Claude instances working simultaneously on the Figma canvas with full transparency via box widgets.
+> Orchestrate multiple Claude instances on the Figma canvas with full transparency via box widgets, coordinated handoffs, and error recovery. Requires /figma-use.
 
-## When to Use
-- Large design system creation (50+ components)
-- Full product design (multiple pages in parallel)
-- Research → Design → Code pipeline
-- Any task that benefits from parallel execution
+## Freedom Level: High
+
+Each agent operates autonomously within its scope. The orchestrator coordinates handoffs and resolves conflicts.
 
 ## Architecture
 
 ### Port Allocation
-Each Claude instance connects on its own port:
 ```
 Port 9223 → Primary agent (orchestrator)
 Port 9224 → Token engineer
@@ -20,24 +17,22 @@ Port 9226 → Layout designer
 Port 9227 → Code generator
 Port 9228-9232 → Additional specialists
 ```
-
 The Noche plugin auto-discovers all instances via port scanning (9223-9232) every 5 seconds.
 
 ### Instance Identification
-Each agent must identify itself on connect:
+Each agent MUST identify itself on connect:
 ```
 noche connect --role token-engineer --name "Token Agent"
 noche connect --role component-architect --name "Component Agent"
 noche connect --role layout-designer --name "Layout Agent"
 ```
 
-### Box Widget Protocol
+## Box Widget Protocol
 
-Every agent creates a status box on the Figma canvas for human visibility:
+Every agent creates a status box on the Figma canvas for human visibility.
 
-#### Creating a Box
+### Creating a Box
 ```javascript
-// Create status section at top of current page
 let agentSection = figma.currentPage.findOne(
   n => n.type === 'SECTION' && n.name === 'Active Agents'
 );
@@ -53,7 +48,7 @@ box.name = `[${role}] ${task}`;
 box.layoutMode = 'VERTICAL';
 box.primaryAxisSizingMode = 'AUTO';
 box.counterAxisSizingMode = 'FIXED';
-box.resize(300, 1); // Fixed width, auto height
+box.resize(300, 1);
 box.paddingLeft = box.paddingRight = 12;
 box.paddingTop = box.paddingBottom = 10;
 box.itemSpacing = 4;
@@ -61,31 +56,7 @@ box.cornerRadius = 8;
 box.fills = [{ type: 'SOLID', color: { r: 0.06, g: 0.06, b: 0.12 }, opacity: 0.95 }];
 box.strokes = [{ type: 'SOLID', color: statusBorderColor }];
 box.strokeWeight = 1.5;
-
 agentSection.appendChild(box);
-```
-
-#### Updating Status
-```javascript
-// Find this agent's box and update
-const myBox = agentSection.findOne(n => n.name.startsWith(`[${role}]`));
-if (myBox) {
-  myBox.name = `[${role}] ${newTask}`;
-  // Update status text inside
-  const statusText = myBox.findOne(n => n.name === 'status-text');
-  if (statusText) statusText.characters = `${status}: ${task}`;
-  // Update border color
-  myBox.strokes = [{ type: 'SOLID', color: statusColors[status] }];
-}
-```
-
-#### Collapsing on Completion
-```javascript
-// Collapse to single line when done
-myBox.resize(300, 28);
-myBox.name = `✓ [${role}] Complete`;
-myBox.fills = [{ type: 'SOLID', color: { r: 0.04, g: 0.45, b: 0.34 }, opacity: 0.3 }];
-// Remove child detail nodes, keep only summary text
 ```
 
 ### Status Colors
@@ -96,6 +67,18 @@ const statusColors = {
   error: { r: 0.94, g: 0.27, b: 0.27 }, // Red
   done:  { r: 0.06, g: 0.73, b: 0.51 }, // Green
 };
+```
+
+### Updating & Collapsing
+```javascript
+// Update status
+myBox.name = `[${role}] ${newTask}`;
+myBox.strokes = [{ type: 'SOLID', color: statusColors[status] }];
+
+// Collapse on completion
+myBox.resize(300, 28);
+myBox.name = `✓ [${role}] Complete`;
+myBox.fills = [{ type: 'SOLID', color: { r: 0.04, g: 0.45, b: 0.34 }, opacity: 0.3 }];
 ```
 
 ## Coordination Patterns
@@ -134,6 +117,20 @@ Code Agent: generating code as designs stabilize
 All three work simultaneously, communicating via agent-broadcast
 ```
 
+## Error Recovery Protocol
+
+When an agent encounters an error:
+```
+1. Update box widget: status → "error", show error message
+2. Broadcast: agent-status { role, task, status: "error", error: "..." }
+3. Attempt self-fix (max 2 retries)
+4. If unrecoverable:
+   a. Broadcast failure to orchestrator
+   b. Orchestrator reassigns task or adjusts plan
+   c. Box widget stays red until resolved
+5. Never silently fail — always visible in Figma
+```
+
 ## Message Protocol
 ```typescript
 // Agent announcing status
@@ -153,3 +150,4 @@ All three work simultaneously, communicating via agent-broadcast
 - Skipping box widgets (humans lose visibility)
 - Not collapsing boxes on completion (visual clutter)
 - Agents working without checking what others have built
+- Silently failing without updating box widget status

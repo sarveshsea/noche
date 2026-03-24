@@ -1,101 +1,56 @@
 # /figma-generate-library — Create Component Library from Codebase
 
-> Generate Figma components from your codebase's existing React/shadcn components, maintaining perfect design-code parity.
+> Generate Figma components from your React/shadcn codebase, establishing Code Connect for perfect design-code parity. Requires /figma-use.
+
+## Freedom Level: High
+
+Full creative freedom for visual representation, but component structure must mirror the codebase exactly.
 
 ## Prerequisites
-- Load `/figma-use` foundational skill first
-- Codebase must have shadcn/ui or similar component library
-- `noche connect` must be active
-
-## When to Use
-- Initial design system setup in Figma from existing code
-- Syncing new code components back to Figma
-- Creating a Figma component library that mirrors your codebase
-- Establishing Code Connect mappings
+- `/figma-use` foundational skill loaded
+- Codebase has shadcn/ui or similar component library
+- `noche connect` active
+- `figma_search_components` called this session
 
 ## Workflow
 
-### Step 1: Scan Codebase Components
+### Step 1: Check Existing Mappings
+```
+get_code_connect_map → what's already mapped?
+```
+**Skip components that already have Code Connect mappings.** Only create what's missing.
+
+### Step 2: Scan Codebase Components
 ```
 Read generated/ and src/components/ directories
-Identify all React components with their:
+Identify all React components with:
   - Props interface (variants, sizes, states)
   - shadcn/ui base components used
   - Tailwind classes → map to Figma properties
   - Atomic level (atom/molecule/organism)
 ```
 
-### Step 2: Map to Figma Structure
-
-#### Atoms (shadcn/ui primitives)
-Each atom becomes a **Component Set** with variant properties:
-```javascript
-// Button component set
-ComponentSet "Button"
-├── variant=default, size=default → "Button"
-├── variant=destructive, size=default → "Button"
-├── variant=outline, size=sm → "Button"
-├── variant=ghost, size=lg → "Button"
-└── ... all combinations
-
-// Properties:
-// - variant: default | destructive | outline | secondary | ghost | link
-// - size: default | sm | lg | icon
-// - state: default | hover | active | disabled | focused
-// - hasIcon: boolean
-// - label: text property
-```
-
-#### Molecules (composed atoms)
-```javascript
-// FormField molecule
-Component "FormField"
-├── Label (instance of Atom/Label)
-├── Input (instance of Atom/Input)
-└── HelpText (instance of Atom/HelpText, optional)
-
-// Properties:
-// - state: default | error | success | disabled
-// - hasHelpText: boolean
-// - label: text
-// - placeholder: text
-```
-
-#### Organisms (composed molecules + atoms)
-```javascript
-// LoginForm organism
-Component "LoginForm"
-├── FormField (email)
-├── FormField (password)
-├── Checkbox (remember me)
-├── Button (submit, fill width)
-└── Links row
-
-// Properties:
-// - hasSocialLogin: boolean
-// - hasRememberMe: boolean
-```
-
-### Step 3: Create Variables First
+### Step 3: Create Variables First (Batch)
 Before components, ensure design tokens exist:
 ```
-figma_batch_create_variables for:
+figma_batch_create_variables (up to 100 per call):
   colors/ → all color tokens (primary, secondary, destructive, etc.)
   spacing/ → 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64
   radius/ → none, sm, default, md, lg, xl, 2xl, full
   typography/ → font sizes, weights, line heights
 ```
+**Always use batch tools** — 10-50x faster than individual calls.
 
 ### Step 4: Build Components Bottom-Up
 ```
-1. Create "Design System" page (or find existing)
+1. Create or find "Design System" page
 2. Create Section per atomic level:
    ├── Section "Atoms"
    ├── Section "Molecules"
    ├── Section "Organisms"
    └── Section "Templates"
 3. For each component:
-   a. Create frame with Auto Layout
+   a. Use use_figma (preferred) or figma_execute for creation
    b. Add variant properties matching React props
    c. Bind all visual properties to variables
    d. Apply correct sizing (hug/fill)
@@ -103,22 +58,66 @@ figma_batch_create_variables for:
 4. Arrange with figma_arrange_component_set
 ```
 
-### Step 5: Self-Healing Loop
-For each component created:
+#### Atoms (shadcn/ui primitives)
+Each atom becomes a **Component Set** with variant properties:
 ```
-figma_take_screenshot → analyze
+ComponentSet "Button"
+├── variant=default, size=default
+├── variant=destructive, size=default
+├── variant=outline, size=sm
+└── variant=ghost, size=lg
+
+Properties:
+  variant: default | destructive | outline | secondary | ghost | link
+  size: default | sm | lg | icon
+  state: default | hover | active | disabled | focused
+  hasIcon: boolean
+  label: text property
+```
+
+#### Molecules (composed atoms)
+```
+Component "FormField"
+├── Label (instance of Atom/Label)
+├── Input (instance of Atom/Input)
+└── HelpText (instance of Atom/HelpText, optional)
+
+Properties:
+  state: default | error | success | disabled
+  hasHelpText: boolean
+  label: text
+  placeholder: text
+```
+
+#### Organisms (composed molecules + atoms)
+```
+Component "LoginForm"
+├── FormField (email)
+├── FormField (password)
+├── Checkbox (remember me)
+├── Button (submit, fill width)
+└── Links row
+
+Properties:
+  hasSocialLogin: boolean
+  hasRememberMe: boolean
+```
+
+### Step 5: Self-Healing Loop (per component)
+```
+figma_take_screenshot → analyze → fix → verify
+
 Check:
   ✓ Matches codebase component visually
   ✓ All variants render correctly
   ✓ Auto Layout applied (no absolute positioning)
   ✓ Variables bound (no raw values)
   ✓ Properties documented
-  ✓ Naming follows PascalCase convention
-Fix → Re-screenshot → Verify
+  ✓ PascalCase naming
 ```
 
-### Step 6: Establish Code Connect
-Map each Figma component to its codebase counterpart:
+### Step 6: Establish Code Connect (PRIMARY OUTPUT)
+This is the most important step. Map every Figma component to code:
 ```
 add_code_connect_map:
   Button → src/components/ui/button.tsx
@@ -129,7 +128,7 @@ add_code_connect_map:
 ```
 
 ### Step 7: Generate Noche Specs
-For each component created, generate a matching spec:
+For each component created:
 ```
 noche spec component Button
 noche spec component FormField
@@ -155,18 +154,12 @@ noche spec component LoginForm
 | Tooltip | Component | Atom | position |
 | Avatar | Component Set | Atom | size, hasImage |
 
-## Variant Generation Strategy
-For component sets with many variants:
-1. Create the **default variant** first with full structure
-2. Duplicate for each variant combination
-3. Override only the changed properties
-4. Use `figma_arrange_component_set` to organize the grid
-5. Total variants = product of all property values
-
 ## Anti-Patterns
 - Creating components without variables (hardcoded colors/spacing)
 - Skipping Auto Layout (absolute positioning breaks responsiveness)
 - Not documenting component properties
 - Missing hover/active/disabled states
 - Forgetting to create the component set (just loose frames)
-- Not establishing Code Connect after creation
+- **Not establishing Code Connect after creation** — this is the whole point
+- Using individual variable creation instead of batch operations
+- Using `figma_execute` for design-system-aware creation when `use_figma` works

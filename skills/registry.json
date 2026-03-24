@@ -1,62 +1,87 @@
 {
-  "version": "1.0.0",
-  "description": "Noche skill registry — defines available skills and their activation context",
+  "version": "2.0.0",
+  "description": "Noche skill registry — defines available skills, activation contexts, and dependencies",
   "defaultSkill": "SUPERPOWER",
   "skills": [
     {
       "id": "superpower",
       "name": "SUPERPOWER",
       "file": "skills/SUPERPOWER.md",
-      "description": "Autonomous superagent — default operating mode for all sessions",
+      "description": "Autonomous superagent — default mode. Drives canvas, orchestrates agents, generates specs and production code.",
       "activateOn": "always",
-      "chains": ["figma-use", "figma-generate-library", "figma-generate-design"]
+      "freedomLevel": "maximum",
+      "chains": ["figma-use", "figma-generate-library", "figma-generate-design", "figma-audit"]
     },
     {
       "id": "figma-use",
       "name": "/figma-use",
       "file": "skills/FIGMA_USE.md",
-      "description": "Foundational Figma canvas skill — structure, principles, operations",
+      "description": "Foundational Figma canvas skill — MCP tool decision tree, Auto Layout, variables, self-healing loop, Code Connect. Load before any /figma-* skill.",
       "activateOn": "figma-canvas-operation",
+      "freedomLevel": "high",
       "prerequisite": null
     },
     {
       "id": "figma-generate-design",
       "name": "/figma-generate-design",
       "file": "skills/FIGMA_GENERATE_DESIGN.md",
-      "description": "Create new designs using existing components and variables",
+      "description": "Create new screens and pages using existing components and design tokens. Prefers use_figma for design-aware writes.",
       "activateOn": "design-creation",
+      "freedomLevel": "high",
       "prerequisite": "figma-use"
     },
     {
       "id": "figma-generate-library",
       "name": "/figma-generate-library",
       "file": "skills/FIGMA_GENERATE_LIBRARY.md",
-      "description": "Create Figma component library from codebase",
+      "description": "Create Figma component library from codebase with Code Connect parity. Uses batch operations for speed.",
       "activateOn": "library-creation",
+      "freedomLevel": "high",
+      "prerequisite": "figma-use"
+    },
+    {
+      "id": "figma-audit",
+      "name": "/figma-audit",
+      "file": "skills/FIGMA_AUDIT.md",
+      "description": "Audit design system for consistency, accessibility, token adoption, and Code Connect coverage. Read-only analysis with scored report.",
+      "activateOn": "design-review",
+      "freedomLevel": "read-only",
+      "prerequisite": "figma-use"
+    },
+    {
+      "id": "figma-prototype",
+      "name": "/figma-prototype",
+      "file": "skills/FIGMA_PROTOTYPE.md",
+      "description": "Create interactive prototypes with flows, transitions, and user journey mapping. Generates standalone HTML prototype.",
+      "activateOn": "prototype-creation",
+      "freedomLevel": "high",
       "prerequisite": "figma-use"
     },
     {
       "id": "multi-agent",
       "name": "/multi-agent",
       "file": "skills/MULTI_AGENT.md",
-      "description": "Parallel agent workflows with box widgets and coordination",
+      "description": "Parallel agent orchestration with box widgets, coordinated handoffs, and error recovery across ports 9223-9232.",
       "activateOn": "multi-instance",
+      "freedomLevel": "high",
       "prerequisite": "figma-use"
     },
     {
       "id": "atomic-design",
       "name": "Atomic Design",
       "file": "skills/ATOMIC_DESIGN.md",
-      "description": "Complete reference for Atomic Design methodology with shadcn/ui mappings",
+      "description": "Complete Atomic Design methodology reference — atoms through pages, token architecture, component API design, shadcn/ui mappings.",
       "activateOn": "component-creation",
+      "freedomLevel": "reference",
       "prerequisite": null
     },
     {
       "id": "dashboard-from-research",
       "name": "Dashboard from Research",
       "file": "skills/DASHBOARD_FROM_RESEARCH.md",
-      "description": "Generate interactive dashboards from research data",
+      "description": "Transform research data (Excel, CSV, stickies) into interactive dashboards with dataviz specs and generated code.",
       "activateOn": "research-to-dashboard",
+      "freedomLevel": "high",
       "prerequisite": null
     }
   ],
@@ -65,6 +90,8 @@
     "figma-canvas-operation": "Any Figma canvas read/write operation",
     "design-creation": "Creating new screens, pages, or layouts",
     "library-creation": "Building or syncing component libraries",
+    "design-review": "Auditing design quality, consistency, or accessibility",
+    "prototype-creation": "Creating interactive prototypes or user flows",
     "multi-instance": "Multiple Claude agents operating simultaneously",
     "component-creation": "Creating or modifying component specs",
     "research-to-dashboard": "Transforming research data into visual dashboards"

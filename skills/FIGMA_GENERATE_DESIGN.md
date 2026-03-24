@@ -1,25 +1,26 @@
 # /figma-generate-design — Create Designs Using Existing Components
 
-> Generate new designs in Figma using your existing components, variables, and design system. Produces structured, spec-compliant layouts.
+> Generate new screens and pages in Figma using your existing components, variables, and design system. Produces structured, spec-compliant layouts with full self-healing validation. Requires /figma-use.
+
+## Freedom Level: High
+
+Full creative freedom within the design system. Must use existing components and variables, never raw values.
 
 ## Prerequisites
-- Load `/figma-use` foundational skill first
-- Design system must be pulled (`noche pull`) or variables must exist in file
-
-## When to Use
-- Creating new screens/pages from specs or descriptions
-- Laying out dashboards, forms, auth flows, landing pages
-- Composing existing components into new arrangements
-- Prototyping from research insights
+- `/figma-use` foundational skill loaded
+- Design system pulled (`noche pull`) or variables exist in file
+- `figma_search_components` called this session (nodeIds are session-scoped)
 
 ## Workflow
 
-### Step 1: Inventory Available Assets
+### Step 1: Check Code Connect & Inventory
 ```
-figma_search_components → list all available components
-figma_get_variables → list all design tokens
-figma_get_design_system_summary → overview of what exists
+get_code_connect_map          → what's already mapped code ↔ Figma?
+figma_search_components       → what components exist?
+figma_get_variables           → what tokens are available?
 ```
+
+**If Code Connect mappings exist**: use those components. Don't recreate.
 
 ### Step 2: Plan the Layout (Atomic Design)
 Map the design to atomic levels:
@@ -41,42 +42,47 @@ Page: AuthLogin
 ```
 
 ### Step 3: Build Bottom-Up
-1. **Atoms** — instantiate existing components or create base elements
+1. **Atoms** — instantiate existing or create with `use_figma`
 2. **Molecules** — compose atoms with Auto Layout
 3. **Organisms** — compose molecules with state considerations
-4. **Template** — create page frame with responsive constraints
+4. **Template** — page frame with responsive constraints
 5. **Page** — fill template with real content
 
-### Step 4: Apply Design Tokens
-```javascript
-// Bind to variables, never hardcode
-node.fills = [{ type: 'SOLID', color: figma.variables.getVariableById(colorVarId) }]
-// Use semantic tokens
-// background → colors/surface/primary
-// text → colors/text/primary
-// border → colors/border/default
-// spacing → spacing/4, spacing/8, spacing/16
-```
+**Prefer `use_figma`** for design-aware writes. It understands your design system and returns structured output.
 
-### Step 5: Self-Healing Validation
+### Step 4: Apply Design Tokens
 ```
-figma_take_screenshot → capture result
-Analyze:
+All visual properties MUST bind to variables:
+  background → colors/surface/primary
+  text       → colors/text/primary
+  border     → colors/border/default
+  spacing    → spacing/4, spacing/8, spacing/16
+  radius     → radius/default, radius/lg
+```
+Never hardcode. If a token doesn't exist, create it with `figma_batch_create_variables` first.
+
+### Step 5: Self-Healing Validation (MANDATORY)
+```
+figma_take_screenshot → analyze → fix → re-screenshot → verify (max 3 rounds)
+
+Check:
   ✓ Elements using "fill container" not "hug contents"
   ✓ Consistent padding and spacing
   ✓ Text/inputs filling available width
   ✓ Items centered in containers
   ✓ No floating elements outside frames
-  ✓ Variables bound (no raw hex values)
+  ✓ Variables bound (no raw hex)
   ✓ Auto Layout on all containers
-Fix → Re-screenshot → Verify (max 3 rounds)
+  ✓ DROP_SHADOW has blendMode: "NORMAL"
 ```
 
-### Step 6: Generate Spec
-After the design is validated, create a Noche spec:
+### Step 6: Generate Spec & Code
+After the design is validated:
 ```
-noche spec component LoginForm → creates specs/components/LoginForm.json
-noche spec page AuthLogin → creates specs/pages/AuthLogin.json
+noche spec component LoginForm → specs/components/LoginForm.json
+noche spec page AuthLogin → specs/pages/AuthLogin.json
+noche generate LoginForm → generated/components/LoginForm/
+add_code_connect_map → establish Figma ↔ code mapping
 ```
 
 ## Layout Patterns
@@ -128,10 +134,7 @@ Frame (VERTICAL, fill, gap=0)
 | Tablet | 768px | 2 | Side-by-side where sensible |
 | Desktop | 1280px | 3-4 | Full grid, sidebar visible |
 
-Create separate frames per breakpoint or use constraints:
-- `MIN_WIDTH` + `MAX_WIDTH` on content containers
-- `FILL` on flexible elements
-- `FIXED` only on sidebar, icons, avatars
+Use `MIN_WIDTH` + `MAX_WIDTH` on content containers. `FILL` on flexible elements. `FIXED` only on sidebar, icons, avatars.
 
 ## Anti-Patterns
 - Elements using "hug contents" when they should "fill container"
@@ -141,3 +144,5 @@ Create separate frames per breakpoint or use constraints:
 - Raw hex colors instead of variable bindings
 - Fixed widths on elements that should be responsive
 - Skipping the self-healing screenshot loop
+- Using `figma_execute` when `use_figma` would work better
+- Creating components that already exist in Code Connect

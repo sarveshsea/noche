@@ -27,9 +27,11 @@ Skills are markdown files in `skills/` that define how agents operate. **Always 
 | **/figma-use** | `skills/FIGMA_USE.md` | Foundational Figma canvas skill (all others build on this) |
 | **/figma-generate-design** | `skills/FIGMA_GENERATE_DESIGN.md` | Create designs using existing components |
 | **/figma-generate-library** | `skills/FIGMA_GENERATE_LIBRARY.md` | Create component library from codebase |
+| **/figma-audit** | `skills/FIGMA_AUDIT.md` | Design system audit — consistency, a11y, tokens, Code Connect |
+| **/figma-prototype** | `skills/FIGMA_PROTOTYPE.md` | Interactive prototypes with flows and transitions |
 | **/multi-agent** | `skills/MULTI_AGENT.md` | Parallel agent orchestration with box widgets |
 | **Atomic Design** | `skills/ATOMIC_DESIGN.md` | Atomic Design reference (atoms → pages) |
-| **Dashboard from Research** | `skills/DASHBOARD_FROM_RESEARCH.md` | Generate dashboards from research data |
+| **Dashboard from Research** | `skills/DASHBOARD_FROM_RESEARCH.md` | Research data → interactive dashboards |
 
 ## Atomic Design (MANDATORY)
 All components must specify an atomic level. This is enforced in specs and code generation:
