@@ -40,7 +40,12 @@ export class PreviewApiServer {
           res.setHeader("Access-Control-Allow-Origin", "*");
 
           if (url.pathname === "/api/specs") {
-            res.end(JSON.stringify([]));
+            try {
+              const specs = await this.engine.registry.getAllSpecs();
+              res.end(JSON.stringify(specs));
+            } catch {
+              res.end(JSON.stringify([]));
+            }
             return;
           }
 

@@ -5,27 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M25.5 15.5A9.5 9.5 0 0 1 12 25 9.5 9.5 0 0 1 9.5 6.5 12 12 0 1 0 25.5 15.5z' fill='%23e2e8f0'/%3E%3C/svg%3E">
 <title>Noche Preview</title>
-<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --bg: #0a0a0a;
   --bg-card: #111111;
-  --bg-hover: #1a1a1a;
   --fg: #e0e0e0;
   --fg-muted: #666666;
   --border: #1e1e1e;
   --accent: #9D833E;
   --accent-bright: #C4A35A;
   --accent-dim: #3D3520;
-  --chart-1: #9D833E;
-  --chart-2: #888888;
-  --warn: #ffaa00;
-  --error: #ff4444;
-  --success: #22C55E;
   --mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
-  --radius: 2px;
 }
 
 body {
@@ -55,936 +47,126 @@ body {
 .hdr-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
 .hdr-title span { color: var(--accent-bright); }
 
-.hdr-stats {
-  display: flex; gap: 16px; font-size: 10px; color: var(--fg-muted);
-  letter-spacing: 1px; text-transform: uppercase; align-items: center;
-}
-
-.hdr-stats .n { color: var(--accent-bright); font-weight: 700; margin-right: 3px; }
+.hdr-nav { display: flex; gap: 8px; }
 
 .nav-link {
   color: #d4d4d4; text-decoration: none; border: 1px solid #444;
   padding: 2px 10px; border-radius: 2px; font-size: 10px; letter-spacing: 1px; transition: all 0.15s;
 }
 .nav-link:hover { border-color: #d4d4d4; }
-.nav-link.highlight { color: var(--accent-bright); border-color: var(--accent-bright); font-weight: 700; }
-.nav-link.highlight:hover { background: var(--accent); color: #0a0a0a; }
+.nav-link.active { color: var(--accent-bright); border-color: var(--accent-bright); font-weight: 700; }
 
-.project-banner {
-  padding: 20px 24px; border-bottom: 1px solid var(--border);
-  background: var(--accent-dim); display: flex; align-items: center; justify-content: space-between;
-}
-.project-info h2 { font-size: 16px; font-weight: 700; color: var(--accent-bright); letter-spacing: 1px; margin-bottom: 4px; }
-.project-info p { font-size: 11px; color: var(--fg-muted); }
-.project-stats { display: flex; gap: 24px; }
-.project-stat { text-align: center; }
-.project-stat .val { font-size: 20px; font-weight: 700; color: var(--accent-bright); }
-.project-stat .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--fg-muted); }
-
-.color-bar {
-  display: flex; gap: 2px; padding: 16px 24px; border-bottom: 1px solid var(--border);
-  flex-wrap: wrap; align-items: center;
-}
-.color-bar-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--fg-muted); margin-right: 12px; }
-.swatch {
-  width: 32px; height: 32px; border-radius: 2px; border: 1px solid var(--border);
-  cursor: pointer; transition: transform 0.1s; position: relative;
-}
-.swatch:hover { transform: scale(1.3); z-index: 1; }
-.swatch::after {
-  content: attr(data-name); position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
-  font-size: 8px; color: var(--fg-muted); white-space: nowrap; opacity: 0; transition: opacity 0.15s;
-}
-.swatch:hover::after { opacity: 1; }
-
-.filters {
-  display: flex; gap: 4px; padding: 12px 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
-}
-.filter-btn {
-  padding: 5px 14px; border: 1px solid var(--border); background: none;
-  color: var(--fg-muted); font-family: var(--mono); font-size: 10px;
-  text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-radius: 2px; transition: all 0.15s;
-}
-.filter-btn:hover { border-color: var(--accent); color: var(--fg); }
-.filter-btn.active { background: var(--accent-dim); color: var(--accent-bright); border-color: var(--accent); font-weight: 700; }
-
-.grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 12px; padding: 20px;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  text-align: center;
+  padding: 40px;
 }
 
-.card {
-  border: 1px solid var(--border); border-radius: 2px; background: var(--bg-card);
-  overflow: hidden; transition: all 0.2s ease;
-}
-.card:hover { border-color: var(--accent-dim); transform: translateY(-1px); box-shadow: 0 2px 12px rgba(157,131,62,0.06); }
-
-.card-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-bottom: 1px solid var(--border);
-}
-.card-name { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
-.card-type {
-  font-size: 9px; padding: 2px 8px; border: 1px solid var(--border);
-  border-radius: 2px; text-transform: uppercase; letter-spacing: 1px; color: var(--fg-muted);
+.moon-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 32px;
+  opacity: 0.3;
 }
 
-.card-type.atom { border-color: var(--accent); color: var(--accent); }
-.card-type.molecule { border-color: #5A8C7B; color: #5A8C7B; }
-.card-type.organism { border-color: #5A7B8C; color: #5A7B8C; }
-.card-type.page { border-color: var(--accent-bright); color: var(--accent-bright); }
-.card-type.dataviz { border-color: var(--chart-2); color: var(--chart-2); }
-.card-type.design { border-color: var(--fg-muted); color: var(--fg-muted); }
+.empty-state h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  color: var(--accent-bright);
+}
 
-.card-body { padding: 16px; }
-.card-purpose { font-size: 11px; color: var(--fg-muted); margin-bottom: 12px; line-height: 1.5; }
-.card-section { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--fg-muted); margin-top: 12px; margin-bottom: 6px; }
-.card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
-.tag { font-size: 9px; padding: 1px 7px; border: 1px solid var(--border); border-radius: 2px; color: var(--fg-muted); letter-spacing: 0.5px; }
+.empty-state p {
+  font-size: 12px;
+  color: var(--fg-muted);
+  max-width: 480px;
+  margin-bottom: 8px;
+}
 
-.comp-preview { border: 1px solid var(--border); border-radius: 2px; padding: 12px; background: var(--bg); }
-.comp-variants { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-.variant { font-size: 10px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 2px; color: var(--accent); }
-.comp-props { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 10px; }
-.comp-props .k { color: var(--accent); }
-.comp-props .v { color: var(--fg-muted); }
-.shadcn-base { display: flex; gap: 4px; flex-wrap: wrap; }
-.shadcn-chip { font-size: 9px; padding: 2px 8px; background: var(--accent-dim); border-radius: 2px; color: var(--accent); letter-spacing: 0.5px; }
+.empty-state code {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 8px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--accent-bright);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
 
-/* ── Live Preview ─────────────────────── */
-.live-preview {
-  border: 1px solid #E2DCD5; border-radius: 2px; padding: 16px;
-  background: #F7F3EE; margin-bottom: 12px; display: flex; align-items: center;
-  justify-content: center; gap: 8px; flex-wrap: wrap; min-height: 52px;
-  position: relative;
+.steps {
+  margin-top: 40px;
+  text-align: left;
+  max-width: 400px;
 }
-.live-preview::before {
-  content: 'PREVIEW'; position: absolute; top: 4px; right: 6px;
-  font-size: 7px; letter-spacing: 1.5px; color: #B5ADA5; font-family: var(--mono);
-}
-.lp-btn {
-  padding: 7px 18px; border-radius: 2px; font-family: 'Inter', sans-serif; font-size: 12px;
-  font-weight: 500; cursor: default; border: none; letter-spacing: 0;
-}
-.lp-btn.primary { background: #9D833E; color: #fff; }
-.lp-btn.secondary { background: #fff; color: #4A4540; border: 1px solid #E2DCD5; }
-.lp-btn.ghost { background: none; color: #9D833E; border: 1px solid transparent; }
-.lp-btn.destructive { background: #C45A5A; color: #fff; }
-.lp-input {
-  padding: 7px 12px; border: 1px solid #E2DCD5; border-radius: 2px; background: #FAF8F5;
-  font-family: 'Inter', sans-serif; font-size: 12px; color: #212129; width: 180px;
-}
-.lp-input:focus { outline: none; border-color: #9D833E; box-shadow: 0 0 0 2px #EDE3CF; }
-.lp-input-currency {
-  padding: 7px 12px 7px 26px; border: 1px solid #E2DCD5; border-radius: 2px; background: #FAF8F5;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #212129; width: 120px;
-  position: relative;
-}
-.lp-currency-wrap { position: relative; display: inline-block; }
-.lp-currency-wrap::before { content: '$'; position: absolute; left: 10px; top: 8px; color: #8C8279; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-.lp-badge {
-  padding: 2px 8px; border-radius: 2px; font-family: 'Inter', sans-serif;
-  font-size: 10px; font-weight: 500; display: inline-block; letter-spacing: 0.3px;
-}
-.lp-badge.success { background: #EFF5EF; color: #5B8C5A; }
-.lp-badge.warning { background: #FDF6E9; color: #C4943A; }
-.lp-badge.error { background: #FCEFEF; color: #C45A5A; }
-.lp-badge.neutral { background: #F0ECE6; color: #8C8279; }
-.lp-progress-track {
-  width: 100%; height: 4px; background: #E2DCD5; border-radius: 1px; overflow: hidden;
-}
-.lp-progress-fill { height: 100%; background: #9D833E; border-radius: 1px; }
-.lp-step {
-  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
-}
-.lp-step.active { background: #9D833E; color: #fff; }
-.lp-step.completed { background: #5B8C5A; color: #fff; }
-.lp-step.pending { background: #E2DCD5; color: #8C8279; }
-.lp-step-connector { width: 20px; height: 2px; background: #E2DCD5; }
-.lp-amount {
-  font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #212129;
-}
-.lp-amount.lg { font-size: 22px; }
-.lp-amount.md { font-size: 16px; }
-.lp-amount.sm { font-size: 13px; }
-.lp-chip {
-  padding: 4px 12px; border: 1px solid #E2DCD5; border-radius: 2px;
-  font-family: 'Inter', sans-serif; font-size: 11px; color: #4A4540; background: #fff; cursor: default;
-}
-.lp-chip.active { background: #F5F0E4; border-color: #9D833E; color: #9D833E; font-weight: 500; }
-.lp-metric { text-align: center; background: #fff; border-radius: 2px; padding: 12px 16px; border: 1px solid #EDE8E2; }
-.lp-metric .val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: #212129; }
-.lp-metric .lbl { font-family: 'Inter', sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #8C8279; margin-top: 2px; }
-.lp-tooltip {
-  position: relative; background: #212129; color: #fff; padding: 6px 10px; border-radius: 2px;
-  font-family: 'Inter', sans-serif; font-size: 11px; max-width: 200px;
-}
-.lp-tooltip::after {
-  content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
-  width: 8px; height: 8px; background: #212129; transform: translateX(-50%) rotate(45deg);
-}
-/* line item row preview */
-.lp-lineitem {
-  display: flex; align-items: center; width: 100%; gap: 12px; padding: 8px 0;
-  border-bottom: 1px solid #EDE8E2;
-}
-.lp-lineitem-name { flex: 1; font-family: 'Inter', sans-serif; font-size: 12px; color: #4A4540; }
-.lp-lineitem-hint { font-size: 10px; color: #B5ADA5; font-style: italic; }
-/* search preview */
-.lp-search-wrap {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 8px 12px; background: #fff; border: 1px solid #E2DCD5; border-radius: 2px;
-}
-.lp-search-wrap input {
-  flex: 1; border: none; background: none; font-family: 'Inter', sans-serif;
-  font-size: 13px; color: #212129; outline: none;
-}
-.lp-search-icon { color: #B5ADA5; font-size: 14px; }
-/* ai suggestion bar preview */
-.lp-ai-bar {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 9px 12px; background: #F5F0E4; border-radius: 2px;
-}
-.lp-ai-icon {
-  width: 22px; height: 22px; background: #9D833E; border-radius: 50%; color: #fff;
-  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0;
-}
-.lp-ai-text { font-family: 'Inter', sans-serif; font-size: 11px; color: #4A4540; }
-/* comparison bar preview */
-.lp-comp-row { display: flex; align-items: center; gap: 8px; width: 100%; margin: 4px 0; }
-.lp-comp-label { font-family: 'Inter', sans-serif; font-size: 10px; color: #8C8279; width: 60px; }
-.lp-comp-track { flex: 1; height: 6px; background: #E2DCD5; border-radius: 1px; overflow: hidden; }
-.lp-comp-fill { height: 100%; border-radius: 1px; }
-.lp-comp-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #212129; width: 50px; text-align: right; }
-/* category card preview */
-.lp-catcard {
-  width: 100%; background: #fff; border: 1px solid #EDE8E2; border-radius: 2px; padding: 14px;
-}
-.lp-catcard-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
-.lp-catcard-icon { width: 28px; height: 28px; background: #F5F0E4; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-/* running total preview */
-.lp-banner {
-  width: 100%; background: #EDE6DD; border-radius: 2px; padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.lp-banner-left { }
-.lp-banner-label { font-family: 'Inter', sans-serif; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #8C8279; }
-.lp-banner-right { display: flex; gap: 16px; }
-.lp-banner-stat { text-align: right; }
-.lp-banner-stat .v { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #4A4540; }
-.lp-banner-stat .l { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #B5ADA5; }
-/* timeline phase preview */
-.lp-phases { display: flex; width: 100%; gap: 0; }
-.lp-phase {
-  flex: 1; text-align: center; padding: 10px 6px; position: relative;
-  font-family: 'Inter', sans-serif;
-}
-.lp-phase::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-  background: #E2DCD5; border-radius: 2px;
-}
-.lp-phase.active::after { background: #9D833E; }
-.lp-phase.done::after { background: #5B8C5A; }
-.lp-phase-name { font-size: 10px; font-weight: 600; color: #212129; }
-.lp-phase-date { font-size: 9px; color: #8C8279; }
-.lp-phase-cost { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #9D833E; }
 
-.chart-wrap { border: 1px solid var(--border); border-radius: 2px; background: var(--bg); padding: 12px; }
-.chart-wrap svg { width: 100%; height: 120px; display: block; }
-.chart-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 10px; margin-top: 10px; }
-.chart-meta .k { color: var(--fg-muted); }
-.chart-meta .v { color: var(--fg); }
-
-.page-layout { border: 1px solid var(--border); border-radius: 2px; background: var(--bg); padding: 6px; min-height: 40px; }
-.page-section {
-  border: 1px dashed #252525; border-radius: 1px; padding: 4px 8px; margin-bottom: 3px;
-  display: flex; align-items: center; justify-content: space-between; font-size: 9px;
+.steps h3 {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fg-muted);
+  margin-bottom: 16px;
 }
-.page-section .sec-name { color: var(--accent); font-weight: 600; }
-.page-section .sec-meta { color: var(--fg-muted); }
+
+.step {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.step-num {
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 16px;
+}
+
+.step code {
+  color: var(--accent-bright);
+  background: var(--bg-card);
+  padding: 1px 6px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
 </style>
 </head>
 <body>
 
 <div class="hdr">
   <div class="hdr-title"><span>NOCHE</span> PREVIEW</div>
-  <div class="hdr-stats">
-    <span><span class="n">18</span>SPECS</span>
-    <span><span class="n">9</span>ATOMS</span>
-    <span><span class="n">4</span>MOLECULES</span>
-    <span><span class="n">3</span>ORGANISMS</span>
-    <span><span class="n">3</span>DATAVIZ</span>
-    <span><span class="n">12</span>TOKENS</span>
+  <div class="hdr-nav">
+    <a href="index.html" class="nav-link active">PREVIEW</a>
     <a href="design-system.html" class="nav-link">DESIGN SYSTEM</a>
     <a href="changelog.html" class="nav-link">CHANGELOG</a>
-    <a href="research.html" class="nav-link">RESEARCH</a>
-    <a href="dibs.html" class="nav-link highlight">DIBS</a>
   </div>
 </div>
 
-<div class="project-banner">
-  <div class="project-info">
-    <h2>dibs &mdash; Commercial Production Estimator</h2>
-    <p>AICP bid form reimagined as a guided desktop estimator &middot; Publicis-inspired beige UI &middot; Atomic Design</p>
-  </div>
-  <div class="project-stats">
-    <div class="project-stat"><div class="val">9</div><div class="lbl">Atoms</div></div>
-    <div class="project-stat"><div class="val">4</div><div class="lbl">Molecules</div></div>
-    <div class="project-stat"><div class="val">3</div><div class="lbl">Organisms</div></div>
-    <div class="project-stat"><div class="val">4</div><div class="lbl">Pages</div></div>
-  </div>
-</div>
+<div class="empty-state">
+  <svg class="moon-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M25.5 15.5A9.5 9.5 0 0 1 12 25 9.5 9.5 0 0 1 9.5 6.5 12 12 0 1 0 25.5 15.5z" fill="#e2e8f0"/>
+  </svg>
+  <h1>No specs yet</h1>
+  <p>Connect to Figma, pull your design system, create specs, and generate code. This page will populate automatically.</p>
+  <code>npx noche preview</code>
 
-<div class="color-bar">
-  <span class="color-bar-label">Publicis Tokens</span>
-  <div class="swatch" style="background:#F7F3EE" data-name="bg"></div>
-  <div class="swatch" style="background:#EDE6DD" data-name="bg-warm"></div>
-  <div class="swatch" style="background:#FFFFFF" data-name="bg-card"></div>
-  <div class="swatch" style="background:#212129" data-name="fg"></div>
-  <div class="swatch" style="background:#4A4540" data-name="fg-sec"></div>
-  <div class="swatch" style="background:#8C8279" data-name="fg-muted"></div>
-  <div class="swatch" style="background:#9D833E" data-name="gold"></div>
-  <div class="swatch" style="background:#5B8C5A" data-name="success"></div>
-  <div class="swatch" style="background:#C4943A" data-name="warn"></div>
-  <div class="swatch" style="background:#C45A5A" data-name="error"></div>
-  <div class="swatch" style="background:#E2DCD5" data-name="border"></div>
-  <div class="swatch" style="background:#F5F0E4" data-name="accent-bg"></div>
-</div>
-
-<div class="filters">
-  <button class="filter-btn active" onclick="filter('all',this)">ALL (18)</button>
-  <button class="filter-btn" onclick="filter('component',this)">ATOMS (9)</button>
-  <button class="filter-btn" onclick="filter('molecule',this)">MOLECULES (4)</button>
-  <button class="filter-btn" onclick="filter('organism',this)">ORGANISMS (3)</button>
-  <button class="filter-btn" onclick="filter('dataviz',this)">DATAVIZ (3)</button>
-  <button class="filter-btn" onclick="filter('page',this)">PAGES (4)</button>
-  <button class="filter-btn" onclick="filter('design',this)">DESIGN (2)</button>
-</div>
-
-<div class="grid" id="grid">
-
-<!-- ═══ ATOMS ═══ -->
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">Button</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Primary action trigger with Publicis gold accent. Loading and disabled states.</div>
-    <div class="live-preview">
-      <span class="lp-btn primary">Export AICP</span>
-      <span class="lp-btn secondary">Save Draft</span>
-      <span class="lp-btn ghost">Cancel</span>
-      <span class="lp-btn destructive">Delete</span>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">VARIANTS</div>
-      <div class="comp-variants"><span class="variant">primary</span><span class="variant">secondary</span><span class="variant">ghost</span><span class="variant">destructive</span></div>
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">variant</span><span class="v">primary | secondary | ghost | destructive</span><span class="k">size</span><span class="v">sm | md | lg</span><span class="k">loading</span><span class="v">boolean?</span></div>
-      <div class="card-section">SHADCN BASE</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Button</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">action</span></div>
+  <div class="steps">
+    <h3>Quick Start</h3>
+    <div class="step"><span class="step-num">1</span> <span>Run <code>npx noche connect</code> to link Figma</span></div>
+    <div class="step"><span class="step-num">2</span> <span>Run <code>npx noche pull</code> to extract your design system</span></div>
+    <div class="step"><span class="step-num">3</span> <span>Run <code>npx noche spec component Button</code> to create a spec</span></div>
+    <div class="step"><span class="step-num">4</span> <span>Run <code>npx noche generate --all</code> to generate code</span></div>
+    <div class="step"><span class="step-num">5</span> <span>Run <code>npx noche preview</code> to see everything here</span></div>
   </div>
 </div>
 
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">Input</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Text input with warm beige bg, gold focus ring. Currency variant for dollar amounts.</div>
-    <div class="live-preview" style="flex-direction:column;gap:10px;align-items:stretch">
-      <input class="lp-input" placeholder="Project name..." value="Nike &quot;Just Do It&quot; 60s TV" style="width:100%">
-      <div class="lp-currency-wrap" style="width:100%"><input class="lp-input-currency" value="25,000" style="width:100%"></div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">VARIANTS</div>
-      <div class="comp-variants"><span class="variant">default</span><span class="variant">currency</span><span class="variant">search</span></div>
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">type</span><span class="v">text | number | currency</span><span class="k">prefix</span><span class="v">string? ("$")</span><span class="k">error</span><span class="v">string?</span></div>
-      <div class="card-section">SHADCN BASE</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Input</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">form</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">Badge</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Status indicator pill for confidence levels and completion states.</div>
-    <div class="live-preview">
-      <span class="lp-badge success">High confidence</span>
-      <span class="lp-badge warning">Needs review</span>
-      <span class="lp-badge error">Missing data</span>
-      <span class="lp-badge neutral">Draft</span>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">VARIANTS</div>
-      <div class="comp-variants"><span class="variant">success</span><span class="variant">warning</span><span class="variant">error</span><span class="variant">neutral</span></div>
-      <div class="card-section">SHADCN BASE</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Badge</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">status</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">ProgressBar</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Thin fill bar showing category completion %. Gold fill on beige track.</div>
-    <div class="live-preview" style="flex-direction:column;gap:8px;align-items:stretch">
-      <div class="lp-progress-track"><div class="lp-progress-fill" style="width:73%"></div></div>
-      <div class="lp-progress-track"><div class="lp-progress-fill" style="width:45%;background:#C4943A"></div></div>
-      <div class="lp-progress-track"><div class="lp-progress-fill" style="width:95%;background:#5B8C5A"></div></div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">value</span><span class="v">number (0-100)</span><span class="k">color</span><span class="v">gold | success | warn</span></div>
-      <div class="card-section">SHADCN BASE</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Progress</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">indicator</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">StepIndicator</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Numbered circle for wizard step nav. Active, completed, pending states.</div>
-    <div class="live-preview">
-      <span class="lp-step completed"><i data-lucide="check" style="width:10px;height:10px"></i></span>
-      <span class="lp-step-connector"></span>
-      <span class="lp-step active">2</span>
-      <span class="lp-step-connector"></span>
-      <span class="lp-step pending">3</span>
-      <span class="lp-step-connector"></span>
-      <span class="lp-step pending">4</span>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">number</span><span class="v">number</span><span class="k">state</span><span class="v">active | completed | pending</span><span class="k">label</span><span class="v">string</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">navigation</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">CurrencyDisplay</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Formatted dollar amount in JetBrains Mono. Running total, subtotals, line items.</div>
-    <div class="live-preview" style="gap:20px">
-      <span class="lp-amount lg">$487,250</span>
-      <span class="lp-amount md">$142,800</span>
-      <span class="lp-amount sm">$5,400</span>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">amount</span><span class="v">number</span><span class="k">size</span><span class="v">sm | md | lg | xl</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">financial</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">Chip</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Selectable pill for templates, tags, filters. Gold active state.</div>
-    <div class="live-preview">
-      <span class="lp-chip active">Performance Spot</span>
-      <span class="lp-chip">Lifestyle</span>
-      <span class="lp-chip">VFX Heavy</span>
-      <span class="lp-chip">Tabletop</span>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">label</span><span class="v">string</span><span class="k">active</span><span class="v">boolean</span><span class="k">onClick</span><span class="v">() =&gt; void</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">selection</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">MetricTile</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">KPI display with large value + small label. Summary and running total.</div>
-    <div class="live-preview" style="gap:12px">
-      <div class="lp-metric"><div class="val">$487,250</div><div class="lbl">Total Budget</div></div>
-      <div class="lp-metric"><div class="val">3</div><div class="lbl">Shoot Days</div></div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">value</span><span class="v">string</span><span class="k">label</span><span class="v">string</span><span class="k">trend</span><span class="v">up | down | flat?</span></div>
-      <div class="card-section">SHADCN BASE</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Card</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">kpi</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="component">
-  <div class="card-head"><span class="card-name">Tooltip</span><span class="card-type atom">ATOM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Contextual help explaining AICP line items on hover.</div>
-    <div class="live-preview">
-      <div class="lp-tooltip">Equipment rental: cameras, lighting, grip, sound gear</div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">content</span><span class="v">string | ReactNode</span><span class="k">side</span><span class="v">top | bottom | left | right</span></div>
-      <div class="card-section">SHADCN BASE</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Tooltip</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">help</span></div>
-  </div>
-</div>
-
-<!-- ═══ MOLECULES ═══ -->
-<div class="card" data-type="molecule">
-  <div class="card-head"><span class="card-name">LineItemRow</span><span class="card-type molecule">MOLECULE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Single AICP line item: name, AI hint, currency input, tooltip. Core estimator unit.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch">
-      <div class="lp-lineitem">
-        <div><div class="lp-lineitem-name">Director of Photography</div><div class="lp-lineitem-hint">3 shoot days @ $4,500/day</div></div>
-        <div class="lp-currency-wrap"><input class="lp-input-currency" value="13,500" style="width:110px"></div>
-      </div>
-      <div class="lp-lineitem" style="border-bottom:none">
-        <div><div class="lp-lineitem-name">Gaffer</div><div class="lp-lineitem-hint">3 shoot days @ $1,800/day</div></div>
-        <div class="lp-currency-wrap"><input class="lp-input-currency" value="5,400" style="width:110px"></div>
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Input (currency)</span><span class="shadcn-chip">Tooltip</span><span class="shadcn-chip">CurrencyDisplay</span></div>
-      <div class="card-section">PROPS</div>
-      <div class="comp-props"><span class="k">name</span><span class="v">string</span><span class="k">hint</span><span class="v">string? (AI suggestion)</span><span class="k">value</span><span class="v">number</span><span class="k">aicpRef</span><span class="v">string? ("Section E")</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">estimator</span><span class="tag">core</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="molecule">
-  <div class="card-head"><span class="card-name">QuickSearch</span><span class="card-type molecule">MOLECULE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Search bar for quick-adding line items. Type "gaffer" to find the right AICP row.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch">
-      <div class="lp-search-wrap">
-        <span class="lp-search-icon"><i data-lucide="search" style="width:12px;height:12px"></i></span>
-        <input placeholder="Quick add — type 'gaffer', 'crane', 'colorist'...">
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Input (search)</span><span class="shadcn-chip">Badge</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">search</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="molecule">
-  <div class="card-head"><span class="card-name">AISuggestionBar</span><span class="card-type molecule">MOLECULE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Inline AI insight banner with icon and benchmark data from similar bids.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch">
-      <div class="lp-ai-bar">
-        <div class="lp-ai-icon">AI</div>
-        <div class="lp-ai-text">Based on "Performance Spot" template, <strong>similar bids averaged $420K-$510K.</strong></div>
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">Badge</span><span class="shadcn-chip">CurrencyDisplay</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">ai</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="molecule">
-  <div class="card-head"><span class="card-name">ComparisonBar</span><span class="card-type molecule">MOLECULE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Horizontal bar comparing this bid vs benchmarks. Label, track fill, value.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch">
-      <div class="lp-comp-row"><span class="lp-comp-label">This bid</span><div class="lp-comp-track"><div class="lp-comp-fill" style="width:72%;background:#9D833E"></div></div><span class="lp-comp-val">$487K</span></div>
-      <div class="lp-comp-row"><span class="lp-comp-label">Avg bids</span><div class="lp-comp-track"><div class="lp-comp-fill" style="width:68%;background:#5B8C5A"></div></div><span class="lp-comp-val">$465K</span></div>
-      <div class="lp-comp-row"><span class="lp-comp-label">Industry hi</span><div class="lp-comp-track"><div class="lp-comp-fill" style="width:95%;background:#C45A5A"></div></div><span class="lp-comp-val">$650K</span></div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">ProgressBar</span><span class="shadcn-chip">CurrencyDisplay</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">comparison</span></div>
-  </div>
-</div>
-
-<!-- ═══ ORGANISMS ═══ -->
-<div class="card" data-type="organism">
-  <div class="card-head"><span class="card-name">CategoryCard</span><span class="card-type organism">ORGANISM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Expandable cost category grouping 30-50 AICP line items. Icon, subtotal, progress, confidence. Expands to show LineItemRows.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch">
-      <div class="lp-catcard">
-        <div class="lp-catcard-head">
-          <div class="lp-catcard-icon"><i data-lucide="users" style="width:16px;height:16px;color:var(--chart-1)"></i></div>
-          <span class="lp-amount md">$142,800</span>
-        </div>
-        <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#212129;margin-bottom:2px">Crew &amp; Labor</div>
-        <div style="font-family:'Inter',sans-serif;font-size:11px;color:#8C8279;margin-bottom:8px">38 of 52 items filled</div>
-        <div class="lp-progress-track"><div class="lp-progress-fill" style="width:73%"></div></div>
-        <div style="margin-top:6px"><span class="lp-badge success">High confidence</span></div>
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">CurrencyDisplay</span><span class="shadcn-chip">ProgressBar</span><span class="shadcn-chip">Badge</span><span class="shadcn-chip">LineItemRow &times;N</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">estimator</span><span class="tag">core</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="organism">
-  <div class="card-head"><span class="card-name">RunningTotalBanner</span><span class="card-type organism">ORGANISM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Sticky banner: total budget, per-deliverable cost, contingency, markup, confidence. Always visible.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;padding:0">
-      <div class="lp-banner">
-        <div class="lp-banner-left">
-          <div class="lp-banner-label">Estimated Total</div>
-          <div class="lp-amount lg" style="color:#212129">$487,250</div>
-        </div>
-        <div class="lp-banner-right">
-          <div class="lp-banner-stat"><div class="v">$162,417</div><div class="l">Per Deliverable</div></div>
-          <div class="lp-banner-stat"><div class="v">10%</div><div class="l">Contingency</div></div>
-          <div class="lp-banner-stat"><div class="v" style="color:#5B8C5A">High</div><div class="l">Confidence</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">CurrencyDisplay &times;3</span><span class="shadcn-chip">MetricTile &times;4</span><span class="shadcn-chip">Badge</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">financial</span><span class="tag">sticky</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="organism">
-  <div class="card-head"><span class="card-name">TimelinePhaseBar</span><span class="card-type organism">ORGANISM</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Horizontal phase bar: Pre-Prod, Production, Post, Delivery. Dates, cost, active/done state.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;padding:12px">
-      <div class="lp-phases">
-        <div class="lp-phase done"><div class="lp-phase-name">Pre-Prod</div><div class="lp-phase-date">Mar 28 — Apr 11</div><div class="lp-phase-cost">$38K</div></div>
-        <div class="lp-phase active"><div class="lp-phase-name">Production</div><div class="lp-phase-date">Apr 14 — Apr 16</div><div class="lp-phase-cost">$313K</div></div>
-        <div class="lp-phase"><div class="lp-phase-name">Post</div><div class="lp-phase-date">Apr 17 — May 9</div><div class="lp-phase-cost">$73K</div></div>
-        <div class="lp-phase"><div class="lp-phase-name">Delivery</div><div class="lp-phase-date">May 12</div><div class="lp-phase-cost">$16K</div></div>
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COMPOSES</div>
-      <div class="shadcn-base"><span class="shadcn-chip">StepIndicator &times;4</span><span class="shadcn-chip">CurrencyDisplay</span><span class="shadcn-chip">Badge</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">timeline</span></div>
-  </div>
-</div>
-
-<!-- ═══ DATAVIZ ═══ -->
-<div class="card" data-type="dataviz">
-  <div class="card-head"><span class="card-name">BudgetDonut</span><span class="card-type dataviz">DONUT</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Budget breakdown by category. Earthy palette, center total, legend beside.</div>
-    <div class="chart-wrap">
-      <svg viewBox="0 0 180 120" preserveAspectRatio="xMidYMid meet">
-        <circle cx="60" cy="60" r="45" fill="none" stroke="#2a2a2a" stroke-width="14"/>
-        <circle cx="60" cy="60" r="45" fill="none" stroke="#9D833E" stroke-width="14" stroke-dasharray="83 200" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
-        <circle cx="60" cy="60" r="45" fill="none" stroke="#5B8C5A" stroke-width="14" stroke-dasharray="52 231" stroke-dashoffset="-83" transform="rotate(-90 60 60)"/>
-        <circle cx="60" cy="60" r="45" fill="none" stroke="#5A7B8C" stroke-width="14" stroke-dasharray="40 243" stroke-dashoffset="-135" transform="rotate(-90 60 60)"/>
-        <circle cx="60" cy="60" r="45" fill="none" stroke="#7B5A8C" stroke-width="14" stroke-dasharray="30 253" stroke-dashoffset="-175" transform="rotate(-90 60 60)"/>
-        <text x="60" y="57" text-anchor="middle" fill="#e0e0e0" font-size="12" font-weight="700" font-family="monospace">$487K</text>
-        <text x="60" y="70" text-anchor="middle" fill="#666" font-size="7" font-family="monospace">TOTAL</text>
-      </svg>
-    </div>
-    <div class="chart-meta"><span class="k">Type</span><span class="v">Donut</span><span class="k">Segments</span><span class="v">6 categories</span></div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">summary</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="dataviz">
-  <div class="card-head"><span class="card-name">BenchmarkComparison</span><span class="card-type dataviz">BAR</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Horizontal bars: this bid vs avg similar bids, last bid, industry high.</div>
-    <div class="chart-wrap">
-      <svg viewBox="0 0 300 100" preserveAspectRatio="none">
-        <rect x="80" y="8" width="156" height="14" rx="2" fill="#9D833E" opacity="0.8"/>
-        <text x="76" y="19" text-anchor="end" fill="#666" font-size="8" font-family="monospace">This bid</text>
-        <text x="240" y="19" fill="#e0e0e0" font-size="8" font-family="monospace">$487K</text>
-        <rect x="80" y="30" width="147" height="14" rx="2" fill="#5B8C5A" opacity="0.8"/>
-        <text x="76" y="41" text-anchor="end" fill="#666" font-size="8" font-family="monospace">Avg bids</text>
-        <text x="231" y="41" fill="#e0e0e0" font-size="8" font-family="monospace">$465K</text>
-        <rect x="80" y="52" width="124" height="14" rx="2" fill="#555" opacity="0.8"/>
-        <text x="76" y="63" text-anchor="end" fill="#666" font-size="8" font-family="monospace">Last bid</text>
-        <text x="208" y="63" fill="#e0e0e0" font-size="8" font-family="monospace">$392K</text>
-        <rect x="80" y="74" width="206" height="14" rx="2" fill="#C45A5A" opacity="0.5"/>
-        <text x="76" y="85" text-anchor="end" fill="#666" font-size="8" font-family="monospace">Ind. high</text>
-        <text x="290" y="85" fill="#e0e0e0" font-size="8" font-family="monospace">$650K</text>
-      </svg>
-    </div>
-    <div class="chart-meta"><span class="k">Type</span><span class="v">Horizontal bar</span><span class="k">Data</span><span class="v">4 comparisons</span></div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">benchmark</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="dataviz">
-  <div class="card-head"><span class="card-name">CostByPhaseTimeline</span><span class="card-type dataviz">TIMELINE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Gantt-style timeline: cost distribution across production phases.</div>
-    <div class="chart-wrap">
-      <svg viewBox="0 0 300 80" preserveAspectRatio="none">
-        <rect x="4" y="10" width="60" height="20" rx="2" fill="#5A7B8C" opacity="0.6"/>
-        <text x="34" y="24" text-anchor="middle" fill="#e0e0e0" font-size="7" font-family="monospace">Pre-Prod</text>
-        <rect x="68" y="10" width="40" height="20" rx="2" fill="#9D833E"/>
-        <text x="88" y="24" text-anchor="middle" fill="#fff" font-size="7" font-family="monospace">Shoot</text>
-        <rect x="112" y="10" width="80" height="20" rx="2" fill="#5B8C5A" opacity="0.6"/>
-        <text x="152" y="24" text-anchor="middle" fill="#e0e0e0" font-size="7" font-family="monospace">Post-Prod</text>
-        <rect x="196" y="10" width="30" height="20" rx="2" fill="#7B5A8C" opacity="0.6"/>
-        <text x="211" y="24" text-anchor="middle" fill="#e0e0e0" font-size="7" font-family="monospace">Del</text>
-        <text x="34" y="48" text-anchor="middle" fill="#9D833E" font-size="8" font-family="monospace" font-weight="700">$38K</text>
-        <text x="88" y="48" text-anchor="middle" fill="#9D833E" font-size="8" font-family="monospace" font-weight="700">$313K</text>
-        <text x="152" y="48" text-anchor="middle" fill="#9D833E" font-size="8" font-family="monospace" font-weight="700">$73K</text>
-        <text x="211" y="48" text-anchor="middle" fill="#9D833E" font-size="8" font-family="monospace" font-weight="700">$16K</text>
-      </svg>
-    </div>
-    <div class="chart-meta"><span class="k">Phases</span><span class="v">4</span><span class="k">Total Days</span><span class="v">45</span></div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">timeline</span></div>
-  </div>
-</div>
-
-<!-- ═══ PAGES ═══ -->
-<div class="card" data-type="page">
-  <div class="card-head"><span class="card-name">ProjectSetup</span><span class="card-type page">PAGE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Step 1 &mdash; "What are you bidding on?" Type cards, brief, template selector.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;gap:10px">
-      <div style="display:flex;gap:8px">
-        <div style="flex:1;background:#fff;border:1px solid #E2DCD5;border-radius:2px;padding:10px;text-align:center">
-          <div style="margin-bottom:4px"><i data-lucide="tv" style="width:18px;height:18px;color:var(--chart-1)"></i></div>
-          <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#212129">TV Commercial</div>
-          <div style="font-family:'Inter',sans-serif;font-size:9px;color:#8C8279">30s / 60s spot</div>
-        </div>
-        <div style="flex:1;background:#F5F0E4;border:2px solid #9D833E;border-radius:2px;padding:10px;text-align:center">
-          <div style="margin-bottom:4px"><i data-lucide="smartphone" style="width:18px;height:18px;color:var(--chart-1)"></i></div>
-          <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#9D833E">Digital Content</div>
-          <div style="font-family:'Inter',sans-serif;font-size:9px;color:#8C8279">Social / web</div>
-        </div>
-        <div style="flex:1;background:#fff;border:1px solid #E2DCD5;border-radius:2px;padding:10px;text-align:center">
-          <div style="margin-bottom:4px"><i data-lucide="camera" style="width:18px;height:18px;color:var(--chart-1)"></i></div>
-          <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#212129">Photo Shoot</div>
-          <div style="font-family:'Inter',sans-serif;font-size:9px;color:#8C8279">Stills only</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <input class="lp-input" placeholder="Client name" style="flex:1;width:auto">
-        <input class="lp-input" placeholder="Project title" style="flex:1;width:auto">
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="lp-chip active">Performance Spot</span>
-        <span class="lp-chip">Lifestyle</span>
-        <span class="lp-chip">VFX Heavy</span>
-        <span class="lp-chip">Tabletop</span>
-        <span class="lp-chip">Multi-Day</span>
-      </div>
-    </div>
-    <div class="page-layout">
-      <div class="page-section"><span class="sec-name">type-cards</span><span class="sec-meta">TypeCard &times;3 &middot; grid-3</span></div>
-      <div class="page-section"><span class="sec-name">project-details</span><span class="sec-meta">Input &times;2 &middot; grid-2</span></div>
-      <div class="page-section"><span class="sec-name">creative-brief</span><span class="sec-meta">Textarea &middot; full-width</span></div>
-      <div class="page-section"><span class="sec-name">template-picker</span><span class="sec-meta">Chip &times;7 &middot; flex-wrap</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">step-1</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="page">
-  <div class="card-head"><span class="card-name">SmartEstimator</span><span class="card-type page">PAGE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Step 2 &mdash; Category cards replacing 399+ AICP line items. AI pre-fill, click-to-expand.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;gap:8px">
-      <div class="lp-ai-bar" style="margin-bottom:0">
-        <div class="lp-ai-icon">AI</div>
-        <div class="lp-ai-text">Template loaded — <strong>73% pre-filled</strong> from similar bids</div>
-      </div>
-      <div class="lp-search-wrap">
-        <span class="lp-search-icon"><i data-lucide="search" style="width:12px;height:12px"></i></span>
-        <input placeholder="Quick add — gaffer, crane, colorist..." style="flex:1;border:none;background:none;font-family:'Inter',sans-serif;font-size:11px;outline:none">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <div style="background:#fff;border:1px solid #EDE8E2;border-radius:2px;padding:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span><i data-lucide="users" style="width:12px;height:12px;color:var(--chart-1)"></i></span><span class="lp-amount sm">$142K</span></div>
-          <div style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:#212129">Crew</div>
-          <div class="lp-progress-track" style="margin-top:4px"><div class="lp-progress-fill" style="width:73%"></div></div>
-        </div>
-        <div style="background:#fff;border:1px solid #EDE8E2;border-radius:2px;padding:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span><i data-lucide="camera" style="width:12px;height:12px;color:var(--chart-1)"></i></span><span class="lp-amount sm">$89K</span></div>
-          <div style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:#212129">Equipment</div>
-          <div class="lp-progress-track" style="margin-top:4px"><div class="lp-progress-fill" style="width:45%;background:#C4943A"></div></div>
-        </div>
-        <div style="background:#fff;border:1px solid #EDE8E2;border-radius:2px;padding:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span><i data-lucide="map-pin" style="width:12px;height:12px;color:var(--chart-1)"></i></span><span class="lp-amount sm">$67K</span></div>
-          <div style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:#212129">Location</div>
-          <div class="lp-progress-track" style="margin-top:4px"><div class="lp-progress-fill" style="width:92%;background:#5B8C5A"></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="page-layout">
-      <div class="page-section"><span class="sec-name">ai-suggestion</span><span class="sec-meta">AISuggestionBar &middot; full-width</span></div>
-      <div class="page-section"><span class="sec-name">quick-search</span><span class="sec-meta">QuickSearch &middot; full-width</span></div>
-      <div class="page-section"><span class="sec-name">category-grid</span><span class="sec-meta">CategoryCard &times;9 &middot; grid-3</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">step-2</span><span class="tag">core</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="page">
-  <div class="card-head"><span class="card-name">Timeline</span><span class="card-type page">PAGE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Step 3 &mdash; Phase bars, shoot day breakdown, cost impact warnings.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;gap:8px;padding:12px">
-      <div class="lp-phases">
-        <div class="lp-phase done"><div class="lp-phase-name">Pre-Prod</div><div class="lp-phase-cost">$38K</div></div>
-        <div class="lp-phase active"><div class="lp-phase-name">Production</div><div class="lp-phase-cost">$313K</div></div>
-        <div class="lp-phase"><div class="lp-phase-name">Post</div><div class="lp-phase-cost">$73K</div></div>
-        <div class="lp-phase"><div class="lp-phase-name">Delivery</div><div class="lp-phase-cost">$16K</div></div>
-      </div>
-      <div class="lp-lineitem">
-        <div><div class="lp-lineitem-name">Day 1 — Studio A (Interior)</div><div class="lp-lineitem-hint">12hr call, 42 crew</div></div>
-        <div class="lp-amount sm">$104,500</div>
-      </div>
-      <div class="lp-lineitem" style="border-bottom:none">
-        <div><div class="lp-lineitem-name">Day 2 — Location (Exterior)</div><div class="lp-lineitem-hint">14hr call, 38 crew</div></div>
-        <div class="lp-amount sm">$118,200</div>
-      </div>
-    </div>
-    <div class="page-layout">
-      <div class="page-section"><span class="sec-name">phase-bar</span><span class="sec-meta">TimelinePhaseBar &middot; full-width</span></div>
-      <div class="page-section"><span class="sec-name">shoot-breakdown</span><span class="sec-meta">LineItemRow &times;3 &middot; card</span></div>
-      <div class="page-section"><span class="sec-name">milestones</span><span class="sec-meta">LineItemRow &times;6 &middot; card</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">step-3</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="page">
-  <div class="card-head"><span class="card-name">BidSummary</span><span class="card-type page">PAGE</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Step 4 &mdash; Donut, metrics, benchmarks, export (AICP PDF, Excel, share).</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;gap:10px">
-      <div style="display:flex;gap:12px;align-items:center">
-        <svg viewBox="0 0 80 80" style="width:64px;height:64px;flex-shrink:0">
-          <circle cx="40" cy="40" r="30" fill="none" stroke="#E2DCD5" stroke-width="8"/>
-          <circle cx="40" cy="40" r="30" fill="none" stroke="#9D833E" stroke-width="8" stroke-dasharray="55 133" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
-          <circle cx="40" cy="40" r="30" fill="none" stroke="#5B8C5A" stroke-width="8" stroke-dasharray="35 153" stroke-dashoffset="-55" transform="rotate(-90 40 40)"/>
-          <circle cx="40" cy="40" r="30" fill="none" stroke="#5A7B8C" stroke-width="8" stroke-dasharray="25 163" stroke-dashoffset="-90" transform="rotate(-90 40 40)"/>
-          <text x="40" y="42" text-anchor="middle" fill="#212129" font-size="9" font-weight="700" font-family="'JetBrains Mono',monospace">$487K</text>
-        </svg>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
-          <div class="lp-metric" style="padding:8px 10px"><div class="val" style="font-size:14px">$487,250</div><div class="lbl" style="font-size:8px">Total</div></div>
-          <div class="lp-metric" style="padding:8px 10px"><div class="val" style="font-size:14px">$162,417</div><div class="lbl" style="font-size:8px">Per Deliverable</div></div>
-          <div class="lp-metric" style="padding:8px 10px"><div class="val" style="font-size:14px;color:#5B8C5A">High</div><div class="lbl" style="font-size:8px">Confidence</div></div>
-          <div class="lp-metric" style="padding:8px 10px"><div class="val" style="font-size:14px">10%</div><div class="lbl" style="font-size:8px">Contingency</div></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <span class="lp-btn primary" style="font-size:10px;padding:6px 14px">Export AICP PDF</span>
-        <span class="lp-btn secondary" style="font-size:10px;padding:6px 14px">Excel</span>
-        <span class="lp-btn ghost" style="font-size:10px;padding:6px 14px">Share Link</span>
-      </div>
-    </div>
-    <div class="page-layout">
-      <div class="page-section"><span class="sec-name">budget-donut</span><span class="sec-meta">BudgetDonut &middot; half</span></div>
-      <div class="page-section"><span class="sec-name">key-metrics</span><span class="sec-meta">MetricTile &times;4 &middot; grid-2</span></div>
-      <div class="page-section"><span class="sec-name">benchmark</span><span class="sec-meta">BenchmarkComparison &middot; full-width</span></div>
-      <div class="page-section"><span class="sec-name">export</span><span class="sec-meta">ExportOption &times;4 &middot; grid-4</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">step-4</span></div>
-  </div>
-</div>
-
-<!-- ═══ DESIGN SPECS ═══ -->
-<div class="card" data-type="design">
-  <div class="card-head"><span class="card-name">PublicisTokenSystem</span><span class="card-type design">DESIGN</span></div>
-  <div class="card-body">
-    <div class="card-purpose">Design tokens based on Publicis Groupe brand. Gold #9D833E, warm beige, Inter + JetBrains Mono.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;gap:8px">
-      <div style="display:flex;gap:3px;height:28px">
-        <div style="flex:3;background:#F7F3EE;border-radius:1px" title="bg"></div>
-        <div style="flex:2;background:#EDE6DD;border-radius:1px" title="bg-warm"></div>
-        <div style="flex:2;background:#FFFFFF;border:1px solid #E2DCD5;border-radius:1px" title="card"></div>
-        <div style="flex:2;background:#9D833E;border-radius:1px" title="gold"></div>
-        <div style="flex:1;background:#5B8C5A;border-radius:1px" title="success"></div>
-        <div style="flex:1;background:#C4943A;border-radius:1px" title="warn"></div>
-        <div style="flex:1;background:#C45A5A;border-radius:1px" title="error"></div>
-        <div style="flex:2;background:#212129;border-radius:1px" title="fg"></div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:baseline">
-        <span style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#212129">Inter 600</span>
-        <span style="font-family:'Inter',sans-serif;font-size:12px;color:#4A4540">Inter 400</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#9D833E">$487,250</span>
-      </div>
-      <div style="display:flex;gap:4px;align-items:center">
-        <div style="width:20px;height:20px;background:#F7F3EE;border:1px solid #E2DCD5;border-radius:2px"></div>
-        <span style="font-family:var(--mono);font-size:9px;color:var(--fg-muted)">radius: 2px</span>
-        <div style="width:1px;height:14px;background:var(--border);margin:0 6px"></div>
-        <div style="width:40px;height:4px;background:#9D833E;border-radius:1px"></div>
-        <span style="font-family:var(--mono);font-size:9px;color:var(--fg-muted)">track: 4px</span>
-      </div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">COLORS</div>
-      <div class="comp-props"><span class="k">bg</span><span class="v">#F7F3EE</span><span class="k">bg-warm</span><span class="v">#EDE6DD</span><span class="k">fg</span><span class="v">#212129</span><span class="k">gold</span><span class="v">#9D833E (Publicis Gold)</span></div>
-      <div class="card-section">TYPOGRAPHY</div>
-      <div class="comp-props"><span class="k">sans</span><span class="v">Inter (body)</span><span class="k">mono</span><span class="v">JetBrains Mono (numbers)</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">publicis</span><span class="tag">tokens</span></div>
-  </div>
-</div>
-
-<div class="card" data-type="design">
-  <div class="card-head"><span class="card-name">WizardFlowIA</span><span class="card-type design">DESIGN</span></div>
-  <div class="card-body">
-    <div class="card-purpose">4-step wizard replacing 399 AICP line items with progressive disclosure.</div>
-    <div class="live-preview" style="flex-direction:column;align-items:stretch;gap:0">
-      <div style="display:flex;align-items:center;justify-content:center;gap:0;padding:8px 0">
-        <span class="lp-step completed"><i data-lucide="check" style="width:10px;height:10px"></i></span><span class="lp-step-connector"></span>
-        <span class="lp-step active">2</span><span class="lp-step-connector"></span>
-        <span class="lp-step pending">3</span><span class="lp-step-connector"></span>
-        <span class="lp-step pending">4</span>
-      </div>
-      <div style="display:flex;gap:4px;margin-top:6px">
-        <div style="flex:1;text-align:center;padding:6px 4px;background:#5B8C5A;border-radius:2px;font-family:'Inter',sans-serif;font-size:8px;color:#fff;font-weight:500">Setup</div>
-        <div style="flex:1;text-align:center;padding:6px 4px;background:#9D833E;border-radius:2px;font-family:'Inter',sans-serif;font-size:8px;color:#fff;font-weight:600">Estimator</div>
-        <div style="flex:1;text-align:center;padding:6px 4px;background:#E2DCD5;border-radius:2px;font-family:'Inter',sans-serif;font-size:8px;color:#8C8279">Timeline</div>
-        <div style="flex:1;text-align:center;padding:6px 4px;background:#E2DCD5;border-radius:2px;font-family:'Inter',sans-serif;font-size:8px;color:#8C8279">Summary</div>
-      </div>
-      <div style="font-family:'Inter',sans-serif;font-size:9px;color:#8C8279;text-align:center;margin-top:6px">399 items &rarr; 9 categories &rarr; 4 steps</div>
-    </div>
-    <div class="comp-preview">
-      <div class="card-section">FLOW</div>
-      <div class="comp-props"><span class="k">Step 1</span><span class="v">Project Setup (What?)</span><span class="k">Step 2</span><span class="v">Smart Estimator (Who?)</span><span class="k">Step 3</span><span class="v">Timeline (When?)</span><span class="k">Step 4</span><span class="v">Bid Summary (Export)</span></div>
-      <div class="card-section">PRINCIPLES</div>
-      <div class="comp-props"><span class="k">disclosure</span><span class="v">Progressive &mdash; never show 399 items</span><span class="k">defaults</span><span class="v">AI pre-fills 73% from template</span></div>
-    </div>
-    <div class="card-tags"><span class="tag">dibs</span><span class="tag">ia</span></div>
-  </div>
-</div>
-
-</div>
-
-<script>
-function filter(type, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.card').forEach(card => {
-    card.style.display = (type === 'all' || card.dataset.type === type) ? '' : 'none';
-  });
-}
-lucide.createIcons();
-</script>
 </body>
 </html>
