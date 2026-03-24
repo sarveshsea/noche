@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect } from "react";
 import { render, Box, Text } from "ink";
-import type { ArkEngine, ArkEvent } from "../engine/core.js";
+import type { NocheEngine, NocheEvent } from "../engine/core.js";
 
 interface TuiProps {
-  engine: ArkEngine;
+  engine: NocheEngine;
 }
 
 function StatusBar({ engine }: TuiProps) {
@@ -18,7 +18,7 @@ function StatusBar({ engine }: TuiProps) {
   return (
     <Box borderStyle="single" paddingX={1} flexDirection="row" justifyContent="space-between">
       <Text bold>
-        {" "}ark{" "}
+        {" "}noche{" "}
       </Text>
       <Text>
         {project?.framework ?? "unknown"}{" "}
@@ -32,7 +32,7 @@ function StatusBar({ engine }: TuiProps) {
   );
 }
 
-function ActivityFeed({ events }: { events: ArkEvent[] }) {
+function ActivityFeed({ events }: { events: NocheEvent[] }) {
   const recent = events.slice(-10);
 
   return (
@@ -117,11 +117,11 @@ function ResearchSummary({ engine }: TuiProps) {
   );
 }
 
-function ArkTui({ engine }: TuiProps) {
-  const [events, setEvents] = useState<ArkEvent[]>([]);
+function NocheTui({ engine }: TuiProps) {
+  const [events, setEvents] = useState<NocheEvent[]>([]);
 
   useEffect(() => {
-    const handler = (evt: ArkEvent) => {
+    const handler = (evt: NocheEvent) => {
       setEvents((prev) => [...prev.slice(-50), evt]);
     };
     engine.on("event", handler);
@@ -146,6 +146,6 @@ function ArkTui({ engine }: TuiProps) {
   );
 }
 
-export function startTui(engine: ArkEngine) {
-  render(<ArkTui engine={engine} />);
+export function startTui(engine: NocheEngine) {
+  render(<NocheTui engine={engine} />);
 }

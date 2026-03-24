@@ -1,6 +1,7 @@
 {
   "name": "MetricCard",
   "type": "component",
+  "level": "molecule",
   "purpose": "Display a single KPI metric with title, value, and optional trend indicator",
   "researchBacking": [],
   "designTokens": {

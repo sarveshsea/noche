@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .noche/
+.ark/
 *.tsbuildinfo
 preview/dist/
 .env*

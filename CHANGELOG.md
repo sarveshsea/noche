@@ -11,6 +11,8 @@ This changelog tracks Noche itself: every version, commit, and architectural dec
 ### Commits
 | Hash | Message |
 |------|---------|
+| `d9f4eef` | Rename BidCraft → Dibs, swap emojis for Lucide icons, update nav across preview |
+| `1673d3c` | Fix CHANGELOG.md: track Noche the product, not user projects |
 | `59bc247` | Add CHANGELOG.md as project decision log, update CLAUDE.md convention |
 | `bdad1cc` | Replace Labor Budgeting design system with Noche DS, add changelog page |
 | `a20c747` | Finalize ark → noche rename across entire codebase |
