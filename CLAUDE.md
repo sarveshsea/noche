@@ -117,6 +117,18 @@ When Figma MCP returns Code Connect snippets, use the mapped component directly.
 - `noche status` — Show project status
 - `noche sync` — Full sync pipeline
 - `noche preview` — Start preview server (localhost with moon favicon)
+- `noche compose "<intent>"` — Agent orchestrator: classify intent → build plan → execute sub-tasks → report
+- `noche dashboard` — Launch the Noche dashboard on localhost (specs, tokens, research, Figma status)
+- `noche ia extract|create|show|validate|list` — Information architecture tools
+
+## Agent Orchestrator (`noche compose`)
+The compose command is the autonomous agent entry point. It takes natural language and routes through:
+1. **Intent Classifier** — Regex patterns map to 16 categories (token-update, component-create, page-layout, etc.)
+2. **Plan Builder** — Decomposes intent into SubTasks with dependency DAG
+3. **Sub-Agent Router** — Dispatches to 10 specialized agent types (token-engineer, component-architect, layout-designer, etc.)
+4. **Self-Healing Loop** — After Figma operations: screenshot → analyze → fix → verify (max 3 rounds)
+
+Dry run with `--dry-run` to see the plan without executing. Use `--verbose` for task-level progress.
 
 ## Stack
 - Node.js 20+, TypeScript 5.x, ESM modules

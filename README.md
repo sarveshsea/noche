@@ -278,6 +278,11 @@ This gives `figma_execute`, `figma_take_screenshot`, `figma_search_components`, 
 | `noche research from-stickies` | Import research from Figma stickies |
 | `noche research synthesize` | AI-synthesize research insights |
 | `noche research report` | Generate research report |
+| `noche compose "<intent>"` | Agent orchestrator — natural language → plan → execute |
+| `noche dashboard` | Launch the Noche dashboard on localhost |
+| `noche ia extract <name>` | Extract information architecture from Figma |
+| `noche ia show [name]` | Print IA tree to terminal |
+| `noche ia validate [name]` | Cross-reference validate IA specs |
 
 ---
 

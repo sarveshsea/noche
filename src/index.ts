@@ -34,6 +34,7 @@ import { registerPrototypeCommand } from "./commands/prototype.js";
 import { registerInitCommand } from "./commands/init.js";
 import { registerDashboardCommand } from "./commands/dashboard.js";
 import { registerIACommand } from "./commands/ia.js";
+import { registerComposeCommand } from "./commands/compose.js";
 
 const program = new Command();
 
@@ -71,6 +72,7 @@ registerPrototypeCommand(program, engine);
 registerInitCommand(program, engine);
 registerDashboardCommand(program, engine);
 registerIACommand(program, engine);
+registerComposeCommand(program, engine);
 
 // Parse and execute
 program.parse();

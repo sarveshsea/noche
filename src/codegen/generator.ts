@@ -54,6 +54,14 @@ export class CodeGenerator {
       case "dataviz":
         result = await this.generateDataVizFiles(spec, ctx);
         break;
+      case "design":
+      case "ia":
+        this.emitEvent("info", `Skipping "${spec.name}" — ${spec.type} specs are reference-only, no code generated`);
+        return {
+          entryFile: "",
+          files: [],
+          spec,
+        };
       default:
         throw new Error(`Unknown spec type: ${(spec as { type: string }).type}`);
     }
