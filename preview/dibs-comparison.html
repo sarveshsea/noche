@@ -13,7 +13,7 @@
 :root {
   --bg: #F7F3EE; --bg-warm: #EDE6DD; --bg-card: #FFFFFF; --bg-card-hover: #FDFBF9;
   --bg-input: #FAF8F5; --fg: #212129; --fg-secondary: #4A4540; --fg-muted: #8C8279;
-  --fg-hint: #B5ADA5; --border: #E2DCD5; --border-light: #EDE8E2;
+  --fg-hint: #8a8480; --border: #E2DCD5; --border-light: #EDE8E2;
   --accent: #9D833E; --accent-hover: #876F2E; --accent-light: #EDE3CF; --accent-subtle: #F5F0E4;
   --success: #5B8C5A; --success-bg: #EFF5EF; --warn: #C4943A; --warn-bg: #FDF6E9;
   --error: #C45A5A; --error-bg: #FCEFEF;
@@ -34,7 +34,7 @@ body { font-family: var(--sans); font-size: 14px; background: var(--bg); color: 
 .global-nav-tabs { display: flex; align-items: center; gap: 2px; flex: 1; }
 .global-nav-sep { width: 1px; height: 20px; background: #333; margin: 0 12px; }
 .global-nav-actions { display: flex; align-items: center; gap: 4px; }
-.global-nav-action { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 3px; color: #777; cursor: pointer; transition: all 0.15s; border: none; background: none; position: relative; }
+.global-nav-action { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 3px; color: #a0a0a0; cursor: pointer; transition: all 0.15s; border: none; background: none; position: relative; }
 .global-nav-action:hover { color: #ccc; background: rgba(255,255,255,0.06); }
 .global-nav-action svg { width: 16px; height: 16px; }
 .global-nav-action .notif-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; background: var(--error); border-radius: 50%; border: 1.5px solid #1a1a1a; }
@@ -97,7 +97,7 @@ body { font-family: var(--sans); font-size: 14px; background: var(--bg); color: 
 }
 .nav-divider { height: 1px; background: var(--border-light); margin: 8px 8px; }
 .nav-section-label {
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: var(--fg-hint, #bbbbbb);
@@ -646,6 +646,31 @@ body.sidebar-collapsed .content { margin-left: 56px; }
 .ds-dropdown-option.selected { background: var(--accent-subtle); color: var(--accent); font-weight: 600; }
 .ds-dropdown-option .check-icon { width: 14px; height: 14px; opacity: 0; color: var(--accent); flex-shrink: 0; }
 .ds-dropdown-option.selected .check-icon { opacity: 1; }
+
+/* ── WCAG Focus Indicators ────────────── */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.global-nav-tab:focus-visible,
+.global-nav-action:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.6);
+  outline-offset: 2px;
+}
+.nav-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ── WCAG Reduced Motion ─────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>

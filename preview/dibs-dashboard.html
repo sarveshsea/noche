@@ -19,7 +19,7 @@
   --fg: #212129;
   --fg-secondary: #4A4540;
   --fg-muted: #8C8279;
-  --fg-hint: #B5ADA5;
+  --fg-hint: #8a8480;
   --border: #E2DCD5;
   --border-light: #EDE8E2;
   --accent: #9D833E;
@@ -106,7 +106,7 @@ body {
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 500;
-  color: #888;
+  color: #a0a0a0;
   text-decoration: none;
   border-radius: 3px;
   transition: all 0.15s;
@@ -146,7 +146,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 3px;
-  color: #777;
+  color: #a0a0a0;
   cursor: pointer;
   transition: all 0.15s;
   border: none;
@@ -477,7 +477,7 @@ body {
   margin: 8px 8px;
 }
 .nav-section-label {
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: var(--fg-hint, #bbbbbb);
@@ -1258,6 +1258,31 @@ body.sidebar-collapsed .content {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .noche-return:hover { background: #ffffff; border-color: rgba(255,255,255,0.5); color: #000000; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+
+/* ── WCAG Focus Indicators ────────────── */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.global-nav-tab:focus-visible,
+.global-nav-action:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.6);
+  outline-offset: 2px;
+}
+.nav-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ── WCAG Reduced Motion ─────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
