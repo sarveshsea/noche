@@ -792,7 +792,7 @@ export function createLogger(name: string) {
 
   return pino({
     name,
-    level: process.env.ARK_LOG_LEVEL ?? (isProduction ? "info" : "debug"),
+    level: process.env.MEMOIRE_LOG_LEVEL ?? (isProduction ? "info" : "debug"),
     transport: {
       target: "pino-pretty",
       options: {

@@ -446,7 +446,7 @@ body {
 
 <div class="hdr">
   <div class="hdr-left">
-    <div class="hdr-title"><span>ARK</span> AGENT PORTAL</div>
+    <div class="hdr-title"><span>MEMOIRE</span> AGENT PORTAL</div>
     <div class="conn-badge" id="connBadge">
       <span class="dot"></span>
       <span id="connLabel">CONNECTING</span>

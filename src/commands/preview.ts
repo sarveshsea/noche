@@ -69,11 +69,12 @@ export function registerPreviewCommand(program: Command, engine: MemoireEngine) 
       const projectName = basename(engine.config.projectRoot);
       const data: PreviewData = { projectName, specs, tokens, research, generatedAt: new Date().toISOString() };
 
-      // Generate all 5 pages
+      // Generate all 6 pages
       await writeFile(join(previewDir, "index.html"), generateHomePage(data));
       await writeFile(join(previewDir, "research.html"), generateResearchPage(data));
       await writeFile(join(previewDir, "specs.html"), generateSpecsPage(data));
       await writeFile(join(previewDir, "design-system.html"), generateSystemsPage(data));
+      await writeFile(join(previewDir, "portal.html"), generatePortalPage(data));
       await writeFile(join(previewDir, "changelog.html"), generateChangelogPage(data));
 
       const components = specs.filter((s: AnySpec) => s.type === "component");
@@ -230,6 +231,7 @@ function pageShell(title: string, activeNav: string, body: string): string {
     { label: "Research", href: "research.html", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>` },
     { label: "Specs", href: "specs.html", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h8M8 11h8M8 15h4"/></svg>` },
     { label: "Systems", href: "design-system.html", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>` },
+    { label: "Portal", href: "portal.html", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>` },
     { label: "Changelog", href: "changelog.html", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>` },
   ];
   const nav = navItems.map(n =>
@@ -807,6 +809,40 @@ function generateSystemsPage(data: PreviewData): string {
   </script>`;
 
   return pageShell("memoire / systems", "Systems", body);
+}
+
+// ── PORTAL PAGE (embeds agent portal) ───────────────────────
+
+function generatePortalPage(_data: PreviewData): string {
+  const body = `
+  <style>
+    .portal-frame { width: 100%; height: calc(100vh - 52px); border: none; background: #0a0a0a; }
+    .portal-offline { display: none; text-align: center; padding: 80px 24px; color: var(--fg-muted); }
+    .portal-offline code { background: var(--bg-hover); padding: 2px 6px; border-radius: var(--radius); color: var(--fg); }
+  </style>
+  <iframe class="portal-frame" id="portalFrame" src="http://localhost:3336"></iframe>
+  <div class="portal-offline" id="portalOffline">
+    <div style="font-size: 14px; margin-bottom: 16px;">Agent Portal Offline</div>
+    <div style="margin-bottom: 24px;">The portal requires a running Figma bridge connection.</div>
+    <div style="margin-bottom: 8px;">Start the bridge:</div>
+    <div><code>memi connect</code></div>
+    <div style="margin-top: 24px; font-size: 11px;">The portal will appear here automatically when the bridge is running.</div>
+  </div>
+  <script>
+  const frame = document.getElementById('portalFrame');
+  const offline = document.getElementById('portalOffline');
+  let checkTimer;
+  function checkPortal() {
+    fetch('http://localhost:3336/api/status', { mode: 'cors' })
+      .then(r => { if (r.ok) { frame.style.display='block'; offline.style.display='none'; clearInterval(checkTimer); } else { throw 0; }})
+      .catch(() => { frame.style.display='none'; offline.style.display='block'; });
+  }
+  frame.onerror = () => { frame.style.display='none'; offline.style.display='block'; };
+  checkTimer = setInterval(checkPortal, 3000);
+  setTimeout(checkPortal, 500);
+  </script>`;
+
+  return pageShell("memoire / portal", "Portal", body);
 }
 
 // ── CHANGELOG PAGE ─────────────────────────────────────────

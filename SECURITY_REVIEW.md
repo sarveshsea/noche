@@ -629,7 +629,7 @@ private startOnPort(port: number): Promise<void> {
 The engine is initialized with environment variables:
 
 ```typescript
-const engine = new ArkEngine({
+const engine = new MemoireEngine({
   projectRoot: process.cwd(),
   figmaToken: process.env.FIGMA_TOKEN,
   figmaFileKey: process.env.FIGMA_FILE_KEY,
