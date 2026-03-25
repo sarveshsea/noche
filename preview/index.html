@@ -224,13 +224,13 @@ body {
 .home-feature-icon svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
 .home-feature-name { font-family: var(--mono); font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--fg); }
 .home-feature-desc { font-family: var(--sans); font-size: 14px; color: var(--fg-muted); line-height: 1.7; margin-bottom: 14px; max-width: 680px; }
-.home-feature-cites { display: flex; flex-wrap: wrap; gap: 4px; }
+.home-feature-cites { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .home-feature-cite {
-  font-family: var(--mono); font-size: 9px; padding: 2px 7px;
-  background: rgba(157,131,62,0.12); border-radius: 2px; color: var(--accent-bright);
-  cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block;
+  font-family: var(--mono); font-size: 9px; padding: 4px 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 3px; color: #ffffff;
+  cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block; line-height: 1.4;
 }
-.home-feature-cite:hover { background: rgba(157,131,62,0.3); color: var(--fg); }
+.home-feature-cite:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); color: #ffffff; }
 @media (max-width: 1024px) { .home-hero-thumb { height: 400px; } }
 @media (max-width: 640px) { .home-hero-thumb { height: 280px; } .home-feature-body { padding: 16px 20px 20px; } }
 
@@ -809,9 +809,9 @@ body {
   <!-- Product Description -->
   <div class="home-about">
     <div class="home-about-label">About Dibs</div>
-    <div class="home-about-title">100% AICP-accurate production bidding without the spreadsheet</div>
+    <div class="home-about-title"><span style="color: var(--accent);">100% AICP-accurate</span> production bidding without the spreadsheet</div>
     <div class="home-about-desc">
-      Dibs breaks the AICP bid form into guided sections with prefilled entry points for every category. Crew rates, equipment, locations, talent, post-production, insurance, and markup all live in structured views instead of raw cells. Every line item maps 1:1 to the official AICP format, every calculation is validated against union and industry rates, and every revision is tracked. The result is a bid that passes review the first time.
+      Dibs breaks the AICP bid form into <span style="color: var(--fg); font-weight: 500;">guided sections</span> with <span style="color: var(--fg); font-weight: 500;">prefilled entry points</span> for every category. Crew rates, equipment, locations, talent, post-production, insurance, and markup all live in <span style="color: var(--fg); font-weight: 500;">structured views</span> instead of raw cells. Every line item maps <span style="color: var(--fg); font-weight: 500;">1:1 to the official AICP format</span>, every calculation is validated against union and industry rates, and every revision is tracked. The result is a bid that <span style="color: var(--fg); font-weight: 500;">passes review the first time</span>.
     </div>
   </div>
 
@@ -826,9 +826,9 @@ body {
           <div class="home-feature-name">New Bid Setup</div>
           <div class="home-feature-desc">4-step guided wizard: select production type and template, fill project details, set shoot parameters, usage rights, and union rules &mdash; then let AI pre-fill every line item.</div>
           <div class="home-feature-cites">
-            <a class="home-feature-cite" onclick="goToInsight('ri-1')">[1] 311-399+ line items cause errors</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-4')">[2] 300+ rows create cognitive overload</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-5')">[3] Manual rate lookups</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-1')">[1] 311-399+ line items manually populated — formula breakage is routine</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-4')">[2] 300+ rows of cognitive overload — producers lose context mid-form</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-5')">[3] Rate lookups require cross-referencing 3+ union contracts manually</a>
           </div>
         </div>
       </div>
@@ -839,9 +839,9 @@ body {
           <div class="home-feature-name">Dashboard</div>
           <div class="home-feature-desc">At-a-glance view of bids out, revenue won, average budget, and deadlines. Win rate trend over 6 months with industry comparison. Recent bids table with status tracking.</div>
           <div class="home-feature-cites">
-            <a class="home-feature-cite" onclick="goToInsight('ri-15')">[4] System doesn't externalize complexity</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-11')">[5] 17-25% win rate, 4-6 bids per win</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-7')">[6] No tool covers end-to-end workflow</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-15')">[4] System forces producers to be the computation engine — no externalized logic</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-11')">[5] 17-25% win rate means 4-6 full bids per awarded project — massive waste</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-7')">[6] No existing tool covers estimate-to-wrap workflow end-to-end</a>
           </div>
         </div>
       </div>
@@ -852,8 +852,8 @@ body {
           <div class="home-feature-name">Bid Board</div>
           <div class="home-feature-desc">Kanban pipeline across Draft, Submitted, Revision, and Won stages. Drag bids between columns, see totals per stage, and track your full pipeline at a glance.</div>
           <div class="home-feature-cites">
-            <a class="home-feature-cite" onclick="goToInsight('ri-2')">[7] Version chaos across email attachments</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-3')">[8] Triple bid comparison is manual</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-2')">[7] Version chaos — bids scattered across email attachments with no single source of truth</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-3')">[8] Triple bid comparison done manually in side-by-side spreadsheets</a>
           </div>
         </div>
       </div>
@@ -864,9 +864,9 @@ body {
           <div class="home-feature-name">AI Assistant</div>
           <div class="home-feature-desc">Conversational budget intelligence. Ask for totals, biggest cost drivers, savings opportunities, market benchmarks, or bid validation &mdash; get answers with inline action buttons.</div>
           <div class="home-feature-cites">
-            <a class="home-feature-cite" onclick="goToInsight('ri-14')">[9] Bid form is a hidden calculation graph</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-15')">[10] Users forced to be the computation engine</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-12')">[11] Estimation relies on producer experience</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-14')">[9] AICP form hides a calculation graph — markups, fringes, and cross-category dependencies</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-15')">[10] Producers forced to mentally compute what software should handle</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-12')">[11] Estimation accuracy depends entirely on individual producer experience — no institutional knowledge</a>
           </div>
         </div>
       </div>
@@ -877,9 +877,9 @@ body {
           <div class="home-feature-name">Active Bid Line Items</div>
           <div class="home-feature-desc">Full AICP-structured line item editor with 9 category tabs. Borderless inline editing, collapsible sections, running totals, and data-driven rendering from a single source of truth.</div>
           <div class="home-feature-cites">
-            <a class="home-feature-cite" onclick="goToInsight('ri-13')">[12] 4-level hierarchy flattened into rows</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-16')">[13] Form is rules engine + calc graph + report</a>
-            <a class="home-feature-cite" onclick="goToInsight('ri-1')">[14] 311+ line items with formula breakage</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-13')">[12] 4-level cost hierarchy flattened into rows — structure lost in the spreadsheet</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-16')">[13] One form serving as rules engine, calc graph, and client report simultaneously</a>
+            <a class="home-feature-cite" onclick="goToInsight('ri-1')">[14] 311+ line items with fragile formulas — one bad edit breaks the chain</a>
           </div>
         </div>
       </div>
