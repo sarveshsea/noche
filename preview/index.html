@@ -187,21 +187,21 @@ body {
   font-family: var(--sans); font-size: 15px; color: var(--fg-muted); line-height: 1.7;
   max-width: 720px;
 }
-.home-features { }
+.home-features { margin-bottom: 64px; }
 .home-features-label {
   font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent);
   text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 16px;
 }
 .home-features-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.home-features-grid { display: flex; flex-direction: column; gap: 32px; }
+.home-features-grid { display: flex; flex-direction: column; gap: 48px; }
 .home-feature-card {
   padding: 0; border: 1px solid var(--border); border-radius: 8px;
   background: var(--bg-card); transition: all 0.2s; overflow: hidden;
 }
-.home-feature-body { padding: 24px 32px 28px; position: relative; z-index: 1; background: var(--bg-card); }
+.home-feature-body { padding: 24px 32px 32px; position: relative; z-index: 1; background: var(--bg-card); }
 .home-feature-card:hover { border-color: var(--accent-dim); }
 .home-feature-thumb {
-  width: 100%; aspect-ratio: 16/9; overflow: hidden; position: relative;
+  width: 100%; aspect-ratio: 16/10; overflow: hidden; position: relative;
   background: #F7F3EE; border-bottom: 1px solid var(--border); border-radius: 7px 7px 0 0;
   z-index: 0;
 }
@@ -211,282 +211,9 @@ body {
 }
 .home-feature-thumb::after {
   content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background: linear-gradient(180deg, transparent 85%, rgba(17,17,19,0.15) 100%);
-}
-/* ── Shared Animation Base ── */
-.ft-base { position: absolute; inset: 0; background: #F7F3EE; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; font-size: 13px; color: #212129; pointer-events: none; will-change: transform; }
-.ft-topnav { height: 32px; background: #2c2c2e; display: flex; align-items: center; padding: 0 12px; }
-.ft-topnav-text { font-size: 10px; font-weight: 600; color: #fff; letter-spacing: -0.2px; }
-.ft-sidebar { position: absolute; left: 0; top: 32px; bottom: 0; width: 18%; background: #fff; border-right: 1px solid #E2DCD5; padding: 10px 6px; display: flex; flex-direction: column; gap: 1px; }
-.ft-sidebar-item { padding: 5px 8px; font-size: 9px; font-weight: 500; color: #8C8279; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
-.ft-sidebar-item.active { background: rgba(157,131,62,0.08); color: #9D833E; font-weight: 600; }
-.ft-sidebar-icon { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-.ft-sidebar-dot { width: 5px; height: 5px; border-radius: 50%; background: #9D833E; flex-shrink: 0; }
-.ft-sidebar-divider { height: 1px; background: #EDE8E2; margin: 4px 6px; }
-.ft-sidebar-label { font-size: 7px; letter-spacing: 1px; text-transform: uppercase; color: #B5ADA5; font-weight: 600; padding: 4px 8px 2px; }
-.ft-sidebar-footer { margin-top: auto; padding: 6px 8px; border-top: 1px solid #EDE8E2; display: flex; align-items: center; gap: 6px; }
-.ft-sidebar-avatar { width: 18px; height: 18px; border-radius: 50%; background: rgba(157,131,62,0.1); display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 600; color: #9D833E; }
-.ft-sidebar-name { font-size: 8px; font-weight: 500; color: #212129; }
-
-/* ── New Bid Setup Animation ── */
-.ft-setup .ft-sidebar-item.active { background: rgba(157,131,62,0.08); color: #9D833E; }
-.ft-setup-main { position: absolute; left: 18%; top: 32px; right: 0; bottom: 0; display: flex; }
-.ft-setup-stepper { width: 30%; padding: 12px 10px; background: #F7F3EE; display: flex; flex-direction: column; gap: 8px; }
-.ft-setup-stepper-card { background: #fff; border: 1px solid #EDE8E2; border-radius: 12px; padding: 16px 14px; box-shadow: 0 1px 3px rgba(26,26,26,0.04); }
-.ft-setup-stepper-label { font-size: 7px; letter-spacing: 1.5px; text-transform: uppercase; color: #B5ADA5; font-weight: 700; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
-.ft-setup-step { display: flex; align-items: flex-start; gap: 8px; padding: 5px 6px; border-radius: 6px; margin-bottom: 1px; }
-.ft-setup-step.active { background: rgba(0,0,0,0.02); }
-.ft-setup-step-num { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #E2DCD5; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: #B5ADA5; font-family: 'JetBrains Mono', monospace; background: #fff; flex-shrink: 0; }
-.ft-setup-step.active .ft-setup-step-num { background: #2c2c2e; border-color: #2c2c2e; color: #fff; }
-.ft-setup-step.done .ft-setup-step-num { background: #9D833E; border-color: #9D833E; color: #fff; }
-.ft-setup-step-text { padding-top: 1px; }
-.ft-setup-step-name { font-size: 9px; font-weight: 600; color: #B5ADA5; }
-.ft-setup-step.active .ft-setup-step-name { color: #212129; }
-.ft-setup-step.done .ft-setup-step-name { color: #212129; }
-.ft-setup-step-desc { font-size: 7px; color: #B5ADA5; line-height: 1.3; margin-top: 1px; }
-.ft-setup-step.active .ft-setup-step-desc { color: #8C8279; }
-.ft-setup-connector { width: 1.5px; height: 10px; background: #EDE8E2; margin: 0 0 1px 15px; border-radius: 1px; }
-.ft-setup-connector.done { background: #9D833E; }
-.ft-setup-divider { height: 1px; background: #EDE8E2; margin: 8px 0; }
-.ft-setup-total-label { font-size: 7px; letter-spacing: 1px; text-transform: uppercase; color: #8C8279; font-weight: 600; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
-.ft-setup-total-val { font-size: 16px; font-weight: 700; color: #9D833E; font-family: 'JetBrains Mono', monospace; }
-.ft-setup-total-sub { font-size: 7px; color: #8C8279; margin-top: 1px; }
-.ft-setup-progress { margin-top: 6px; display: flex; align-items: center; gap: 6px; }
-.ft-setup-progress-bar { flex: 1; height: 2px; background: #EDE8E2; border-radius: 2px; overflow: hidden; }
-.ft-setup-progress-fill { height: 100%; width: 25%; background: #9D833E; border-radius: 2px; }
-.ft-setup-progress-pct { font-size: 7px; color: #8C8279; font-family: 'JetBrains Mono', monospace; }
-.ft-setup-content { flex: 1; padding: 16px 20px; overflow: hidden; background: #fff; border-left: 1px solid #EDE8E2; }
-.ft-setup-header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-.ft-setup-header-label { font-size: 7px; letter-spacing: 1px; color: #9D833E; text-transform: uppercase; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-.ft-setup-header-title { font-size: 14px; font-weight: 400; color: #212129; letter-spacing: -0.3px; }
-.ft-setup-header-badges { display: flex; gap: 6px; margin-left: auto; }
-.ft-setup-badge { font-size: 8px; padding: 3px 10px; border-radius: 100px; border: 1px solid #E2DCD5; background: #fff; color: #4A4540; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-.ft-setup-content-header { padding: 10px 0; border-bottom: 1px solid #EDE8E2; margin-bottom: 14px; }
-.ft-setup-sub { font-size: 8px; letter-spacing: 0.8px; color: #B5ADA5; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
-.ft-setup-cards { display: flex; flex-direction: column; gap: 6px; }
-.ft-setup-card { padding: 10px 12px; background: #fff; border: 1px solid #E2DCD5; border-radius: 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 2px rgba(26,26,26,0.04); }
-.ft-setup-card-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(157,131,62,0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.ft-setup-card-icon svg { width: 13px; height: 13px; stroke: #9D833E; fill: none; stroke-width: 1.5; }
-.ft-setup-card-name { font-size: 11px; font-weight: 600; color: #212129; }
-.ft-setup-card-desc { font-size: 9px; color: #8C8279; }
-.ft-setup-card:nth-child(2) { animation: ft-s-select 16s cubic-bezier(0.4,0,0.2,1) infinite; }
-@keyframes ft-s-select {
-  0%,28% { border-color: #E2DCD5; box-shadow: 0 1px 2px rgba(26,26,26,0.04); }
-  33%,62% { border-color: #9D833E; box-shadow: 0 0 0 3px rgba(157,131,62,0.1), 0 2px 8px rgba(26,26,26,0.06); }
-  67%,100% { border-color: #E2DCD5; box-shadow: 0 1px 2px rgba(26,26,26,0.04); }
-}
-.ft-setup-phase2 { position: absolute; left: calc(18% + 30%); top: 32px; right: 0; bottom: 0; padding: 16px 20px; opacity: 0; background: #fff; z-index: 2; animation: ft-s-phase2 16s ease-in-out infinite; }
-@keyframes ft-s-phase2 {
-  0%,62% { opacity: 0; }
-  70%,90% { opacity: 1; }
-  100% { opacity: 0; }
-}
-.ft-setup-field { margin-bottom: 10px; }
-.ft-setup-label { font-size: 8px; letter-spacing: 0.5px; color: #8C8279; margin-bottom: 3px; font-weight: 500; }
-.ft-setup-input { padding: 7px 10px; background: #FAF8F5; border: 1px solid #E2DCD5; border-radius: 8px; font-size: 11px; color: #212129; width: 80%; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-
-/* ── Dashboard Animation ── */
-.ft-dash { position: absolute; inset: 0; background: #F7F3EE; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
-.ft-dash-main { position: absolute; left: 18%; top: 32px; right: 0; bottom: 0; padding: 16px 20px; overflow: hidden; }
-.ft-dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.ft-dash-label { font-size: 8px; letter-spacing: 1.2px; color: #9D833E; text-transform: uppercase; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-.ft-dash-name { font-size: 16px; font-weight: 400; color: #212129; letter-spacing: -0.3px; }
-.ft-dash-actions { display: flex; gap: 5px; }
-.ft-dash-btn { padding: 4px 10px; font-size: 8px; font-weight: 500; border: 1px solid #E2DCD5; border-radius: 3px; background: #fff; color: #4A4540; }
-.ft-dash-btn.primary { background: #9D833E; border-color: #9D833E; color: #fff; }
-.ft-dash-stats { display: flex; gap: 10px; margin-bottom: 14px; }
-.ft-dash-stat { flex: 1; padding: 10px 12px; background: #fff; border: 1px solid #E2DCD5; border-radius: 3px; box-shadow: 0 1px 2px rgba(26,26,26,0.04); }
-.ft-dash-stat-label { font-size: 7px; letter-spacing: 0.8px; color: #8C8279; text-transform: uppercase; margin-bottom: 3px; font-weight: 500; }
-.ft-dash-stat-val { font-size: 18px; font-weight: 700; color: #212129; font-family: 'JetBrains Mono', monospace; }
-.ft-dash-stat-sub { font-size: 7px; color: #8C8279; margin-top: 2px; }
-.ft-dash-stat:nth-child(1) .ft-dash-stat-val { animation: ft-d-count1 15s ease-out infinite; }
-.ft-dash-stat:nth-child(2) .ft-dash-stat-val { animation: ft-d-count2 15s ease-out infinite; }
-.ft-dash-stat:nth-child(3) .ft-dash-stat-val { animation: ft-d-count3 15s ease-out infinite; }
-.ft-dash-stat:nth-child(4) .ft-dash-stat-val { animation: ft-d-count4 15s ease-out infinite; }
-@keyframes ft-d-count1 { 0%,10% { opacity: 0; transform: translateY(4px); } 18%,100% { opacity: 1; transform: translateY(0); } }
-@keyframes ft-d-count2 { 0%,14% { opacity: 0; transform: translateY(4px); } 22%,100% { opacity: 1; transform: translateY(0); } }
-@keyframes ft-d-count3 { 0%,18% { opacity: 0; transform: translateY(4px); } 26%,100% { opacity: 1; transform: translateY(0); } }
-@keyframes ft-d-count4 { 0%,22% { opacity: 0; transform: translateY(4px); } 30%,100% { opacity: 1; transform: translateY(0); } }
-.ft-dash-widget { background: #fff; border: 1px solid #E2DCD5; border-radius: 3px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(26,26,26,0.04); overflow: hidden; }
-.ft-dash-widget-hdr { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #EDE8E2; }
-.ft-dash-widget-title { font-size: 10px; font-weight: 600; color: #212129; }
-.ft-dash-widget-meta { font-size: 9px; color: #5B8C5A; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-.ft-dash-chart { padding: 10px 14px; height: 70px; position: relative; overflow: hidden; }
-.ft-dash-chart svg { width: 100%; height: 100%; }
-.ft-dash-chart path.line { stroke-dasharray: 500; stroke-dashoffset: 500; animation: ft-d-draw 15s ease-out infinite; }
-@keyframes ft-d-draw { 0%,18% { stroke-dashoffset: 500; } 40%,100% { stroke-dashoffset: 0; } }
-.ft-dash-table { }
-.ft-dash-row { display: flex; padding: 7px 14px; border-bottom: 1px solid #EDE8E2; align-items: center; font-size: 10px; }
-.ft-dash-row.hdr { font-size: 8px; letter-spacing: 0.8px; color: #8C8279; text-transform: uppercase; font-weight: 500; background: #FAF8F5; }
-.ft-dash-row > span { flex: 1; }
-.ft-dash-row > span:nth-child(2) { font-weight: 600; color: #212129; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
-.ft-dash-status { padding: 2px 8px; border-radius: 100px; font-size: 7px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-.ft-dash-status.won { background: #EFF5EF; color: #5B8C5A; }
-.ft-dash-status.draft { background: rgba(157,131,62,0.08); color: #9D833E; }
-.ft-dash-status.submitted { background: rgba(90,123,140,0.08); color: #5A7B8C; }
-.ft-dash-row:nth-child(2) { animation: ft-d-row1 15s ease-out infinite; }
-.ft-dash-row:nth-child(3) { animation: ft-d-row2 15s ease-out infinite; }
-.ft-dash-row:nth-child(4) { animation: ft-d-row3 15s ease-out infinite; }
-@keyframes ft-d-row1 { 0%,30% { opacity: 0; transform: translateY(4px); } 36%,100% { opacity: 1; transform: translateY(0); } }
-@keyframes ft-d-row2 { 0%,34% { opacity: 0; transform: translateY(4px); } 40%,100% { opacity: 1; transform: translateY(0); } }
-@keyframes ft-d-row3 { 0%,38% { opacity: 0; transform: translateY(4px); } 44%,100% { opacity: 1; transform: translateY(0); } }
-
-/* ── Bid Board Animation ── */
-.ft-board { position: absolute; inset: 0; background: #F7F3EE; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
-.ft-board-main { position: absolute; left: 18%; top: 32px; right: 0; bottom: 0; padding: 14px 16px; }
-.ft-board-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.ft-board-title { font-size: 14px; font-weight: 600; color: #212129; }
-.ft-board-cols { display: flex; gap: 10px; height: calc(100% - 36px); }
-.ft-board-col { flex: 1; background: #fff; border: 1px solid #E2DCD5; border-radius: 3px; padding: 10px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(26,26,26,0.04); }
-.ft-board-col-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #EDE8E2; }
-.ft-board-col-title { font-size: 9px; letter-spacing: 0.5px; color: #8C8279; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-.ft-board-col-dot { width: 6px; height: 6px; border-radius: 50%; }
-.ft-board-col-dot.draft { background: #B5ADA5; }
-.ft-board-col-dot.active { background: #9D833E; }
-.ft-board-col-dot.submitted { background: #5A7B8C; }
-.ft-board-col-dot.won { background: #5B8C5A; }
-.ft-board-col-count { background: #F5F0E4; padding: 1px 6px; border-radius: 100px; font-size: 8px; font-weight: 600; color: #8C8279; }
-.ft-board-col-total { font-size: 8px; color: #8C8279; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
-.ft-board-bid { padding: 8px 10px; background: #FAF8F5; border: 1px solid #EDE8E2; border-radius: 3px; margin-bottom: 6px; }
-.ft-board-bid-name { font-size: 9px; font-weight: 600; color: #212129; margin-bottom: 1px; }
-.ft-board-bid-client { font-size: 7px; color: #8C8279; margin-bottom: 3px; }
-.ft-board-bid-amount { font-size: 11px; font-weight: 700; color: #212129; font-family: 'JetBrains Mono', monospace; }
-.ft-board-bid-tag { display: inline-block; font-size: 7px; padding: 1px 5px; border-radius: 100px; font-weight: 600; margin-top: 3px; }
-.ft-board-bid-tag.tv { background: rgba(157,131,62,0.08); color: #9D833E; }
-.ft-board-bid-tag.social { background: rgba(90,123,140,0.08); color: #5A7B8C; }
-.ft-board-bid-tag.digital { background: rgba(91,140,90,0.08); color: #5B8C5A; }
-.ft-board-bid.moving {
-  animation: ft-b-move 16s ease-in-out infinite;
-  border-color: #9D833E;
-}
-@keyframes ft-b-move {
-  0%,30% { opacity: 1; transform: translateX(0); }
-  38% { opacity: 0; transform: translateX(20px); }
-  40%,100% { opacity: 0; max-height: 0; padding: 0; margin: 0; border: 0; overflow: hidden; }
-}
-.ft-board-bid.arriving {
-  animation: ft-b-arrive 16s ease-in-out infinite;
-}
-@keyframes ft-b-arrive {
-  0%,36% { opacity: 0; transform: translateY(-6px); max-height: 0; padding: 0; margin: 0; border-color: transparent; }
-  44% { opacity: 1; transform: translateY(0); max-height: 120px; padding: 8px 10px; margin-bottom: 6px; border-color: #9D833E; box-shadow: 0 0 0 2px rgba(157,131,62,0.1); }
-  100% { opacity: 1; transform: translateY(0); max-height: 120px; padding: 8px 10px; margin-bottom: 6px; border-color: #EDE8E2; box-shadow: none; }
-}
-.ft-board-bid.won-arrive {
-  animation: ft-b-won 16s ease-in-out infinite;
-}
-@keyframes ft-b-won {
-  0%,55% { opacity: 0; transform: translateY(-6px); max-height: 0; padding: 0; margin: 0; }
-  65% { opacity: 1; transform: translateY(0); max-height: 120px; padding: 8px 10px; margin-bottom: 6px; border-color: #5B8C5A; background: rgba(91,140,90,0.04); }
-  100% { opacity: 1; transform: translateY(0); max-height: 120px; padding: 8px 10px; margin-bottom: 6px; border-color: #EDE8E2; background: transparent; }
+  background: linear-gradient(180deg, transparent 90%, rgba(17,17,19,0.08) 100%);
 }
 
-/* ── AI Assistant Animation ── */
-.ft-ai { position: absolute; inset: 0; background: #F7F3EE; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
-.ft-ai-page { position: absolute; inset: 0; }
-.ft-ai-page-main { position: absolute; left: 18%; top: 32px; right: 0; bottom: 0; }
-.ft-ai-page-catnav { position: absolute; left: 0; top: 0; bottom: 0; width: 28%; background: #fff; border-right: 1px solid #E2DCD5; padding: 6px 0; }
-.ft-ai-page-catnav-item { padding: 7px 14px; font-size: 9px; font-weight: 500; color: #8C8279; display: flex; align-items: center; justify-content: space-between; border-left: 2px solid transparent; }
-.ft-ai-page-catnav-item.active { background: rgba(157,131,62,0.06); color: #9D833E; border-left-color: #9D833E; font-weight: 600; }
-.ft-ai-page-catnav-item svg { width: 11px; height: 11px; margin-right: 6px; }
-.ft-ai-page-catnav-amt { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 500; }
-.ft-ai-page-content { position: absolute; left: 28%; top: 0; right: 0; bottom: 0; padding: 14px 16px; overflow: hidden; }
-.ft-ai-page-section { background: #fff; border: 1px solid #EDE8E2; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(26,26,26,0.04); overflow: hidden; }
-.ft-ai-page-section-hdr { padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #EDE8E2; }
-.ft-ai-page-section-name { font-size: 10px; font-weight: 600; color: #212129; display: flex; align-items: center; gap: 6px; }
-.ft-ai-page-section-badge { width: 18px; height: 18px; border-radius: 4px; background: #9D833E; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-.ft-ai-page-section-total { font-size: 10px; font-weight: 700; color: #212129; font-family: 'JetBrains Mono', monospace; }
-.ft-ai-page-row { display: flex; padding: 5px 14px; border-bottom: 1px solid #FAF8F5; align-items: center; font-size: 9px; }
-.ft-ai-page-row span:first-child { flex: 2; color: #212129; font-weight: 500; }
-.ft-ai-page-row span:last-child { flex: 1; text-align: right; font-weight: 600; color: #212129; font-family: 'JetBrains Mono', monospace; }
-/* Scrim */
-.ft-ai-scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.15); opacity: 0; animation: ft-ai-scrim-anim 18s ease-in-out infinite; z-index: 2; pointer-events: none; }
-@keyframes ft-ai-scrim-anim {
-  0%,22% { opacity: 0; } 28%,78% { opacity: 1; } 85%,100% { opacity: 0; }
-}
-/* AI Drawer — WHITE, matches real dibs-lineitem.html */
-.ft-ai-panel { position: absolute; top: 32px; bottom: 0; right: 0; width: 240px; background: #fff; z-index: 3; transform: translateX(100%); animation: ft-ai-slide 18s cubic-bezier(0.4,0,0.2,1) infinite; display: flex; flex-direction: column; border-left: 1px solid #E2DCD5; box-shadow: -4px 0 24px rgba(0,0,0,0.08); }
-@keyframes ft-ai-slide {
-  0%,22% { transform: translateX(100%); } 28%,78% { transform: translateX(0); } 85%,100% { transform: translateX(100%); }
-}
-.ft-ai-panel-hdr { padding: 10px 12px; border-bottom: 1px solid #EDE8E2; display: flex; justify-content: space-between; align-items: center; }
-.ft-ai-panel-title { font-size: 10px; font-weight: 600; color: #212129; display: flex; align-items: center; gap: 5px; }
-.ft-ai-panel-dot { width: 5px; height: 5px; border-radius: 50%; background: #5B8C5A; }
-.ft-ai-panel-close { width: 18px; height: 18px; border-radius: 4px; border: none; background: none; color: #8C8279; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; }
-.ft-ai-panel-tabs { display: flex; gap: 2px; padding: 6px 10px; border-bottom: 1px solid #EDE8E2; }
-.ft-ai-panel-tab { flex: 1; padding: 4px 0; font-size: 8px; font-weight: 500; color: #8C8279; text-align: center; border-radius: 4px; }
-.ft-ai-panel-tab.active { background: rgba(157,131,62,0.08); color: #9D833E; font-weight: 600; }
-.ft-ai-chat { flex: 1; padding: 10px; overflow: hidden; display: flex; flex-direction: column; gap: 6px; }
-.ft-ai-chips { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 4px; }
-.ft-ai-chip { padding: 2px 7px; border-radius: 100px; font-size: 7px; font-weight: 500; border: 1px solid #E2DCD5; background: #fff; color: #8C8279; }
-.ft-ai-msg { max-width: 88%; border-radius: 8px; padding: 6px 10px; font-size: 9px; line-height: 1.5; }
-.ft-ai-msg.user { align-self: flex-end; background: #9D833E; color: #fff; border-bottom-right-radius: 2px; }
-.ft-ai-msg.bot { align-self: flex-start; background: #FAF8F5; border: 1px solid #EDE8E2; color: #4A4540; border-bottom-left-radius: 2px; }
-.ft-ai-msg.user { opacity: 0; animation: ft-ai-msg1 18s ease-out infinite; }
-@keyframes ft-ai-msg1 { 0%,32% { opacity: 0; transform: translateY(4px); } 38%,78% { opacity: 1; transform: translateY(0); } 85%,100% { opacity: 0; } }
-.ft-ai-msg.bot { opacity: 0; animation: ft-ai-msg2 18s ease-out infinite; }
-@keyframes ft-ai-msg2 { 0%,42% { opacity: 0; transform: translateY(4px); } 48%,78% { opacity: 1; transform: translateY(0); } 85%,100% { opacity: 0; } }
-.ft-ai-dots { display: flex; gap: 3px; padding: 6px 10px; opacity: 0; animation: ft-ai-dots-anim 18s ease-in-out infinite; align-self: flex-start; background: #FAF8F5; border-radius: 8px; border: 1px solid #EDE8E2; }
-@keyframes ft-ai-dots-anim { 0%,34% { opacity: 0; } 36%,44% { opacity: 1; } 46%,100% { opacity: 0; } }
-.ft-ai-dot { width: 4px; height: 4px; border-radius: 50%; background: #B5ADA5; }
-.ft-ai-dot:nth-child(1) { animation: ft-ai-bounce 0.6s ease-in-out infinite; }
-.ft-ai-dot:nth-child(2) { animation: ft-ai-bounce 0.6s ease-in-out 0.15s infinite; }
-.ft-ai-dot:nth-child(3) { animation: ft-ai-bounce 0.6s ease-in-out 0.3s infinite; }
-@keyframes ft-ai-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-.ft-ai-actions { display: flex; gap: 3px; margin-top: 4px; opacity: 0; animation: ft-ai-acts 18s ease-out infinite; }
-@keyframes ft-ai-acts { 0%,50% { opacity: 0; } 56%,78% { opacity: 1; } 85%,100% { opacity: 0; } }
-.ft-ai-action-btn { font-size: 7px; padding: 2px 7px; border-radius: 100px; border: 1px solid #E2DCD5; background: #fff; color: #4A4540; font-weight: 500; }
-.ft-ai-action-btn:hover { border-color: #9D833E; color: #9D833E; }
-.ft-ai-input-row { display: flex; gap: 4px; padding: 6px 10px; border-top: 1px solid #EDE8E2; opacity: 0; animation: ft-ai-input-anim 18s ease-out infinite; }
-@keyframes ft-ai-input-anim { 0%,28% { opacity: 0; } 34%,78% { opacity: 1; } 85%,100% { opacity: 0; } }
-.ft-ai-input { flex: 1; padding: 5px 8px; border: 1px solid #E2DCD5; border-radius: 8px; font-size: 8px; color: #B5ADA5; background: #fff; }
-.ft-ai-send { width: 24px; height: 24px; border-radius: 8px; background: #9D833E; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.ft-ai-send svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2; }
-
-/* ── Line Items Animation ── */
-.ft-li { position: absolute; inset: 0; background: #F7F3EE; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
-.ft-li-main { position: absolute; left: 18%; top: 32px; right: 0; bottom: 0; display: flex; flex-direction: column; }
-.ft-li-total-banner { padding: 10px 20px; background: #fff; border-bottom: 1px solid #EDE8E2; display: flex; align-items: center; justify-content: space-between; }
-.ft-li-total-label { font-size: 7px; letter-spacing: 1.2px; color: #9D833E; text-transform: uppercase; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-.ft-li-total-amount { font-size: 14px; font-weight: 400; color: #212129; letter-spacing: -0.3px; }
-.ft-li-total-meta { display: flex; gap: 16px; }
-.ft-li-total-meta-item { text-align: right; }
-.ft-li-total-meta-lbl { font-size: 7px; color: #B5ADA5; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
-.ft-li-total-meta-val { font-size: 9px; font-weight: 600; color: #4A4540; font-family: 'JetBrains Mono', monospace; }
-.ft-li-layout { display: flex; flex: 1; overflow: hidden; }
-.ft-li-catnav { width: 28%; background: #fff; border-right: 1px solid #E2DCD5; padding: 6px 0; overflow: hidden; }
-.ft-li-nav-item { padding: 7px 14px; font-size: 9px; font-weight: 500; color: #8C8279; display: flex; align-items: center; justify-content: space-between; border-left: 2px solid transparent; }
-.ft-li-nav-item.active { background: rgba(157,131,62,0.06); color: #9D833E; border-left-color: #9D833E; font-weight: 600; }
-.ft-li-nav-item svg { width: 11px; height: 11px; margin-right: 6px; }
-.ft-li-nav-amt { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 500; }
-.ft-li-nav-item.switch1 { animation: ft-li-tab1 18s ease-in-out infinite; }
-.ft-li-nav-item.switch2 { animation: ft-li-tab2 18s ease-in-out infinite; }
-@keyframes ft-li-tab1 { 0%,40% { color: #9D833E; background: rgba(157,131,62,0.06); border-left-color: #9D833E; font-weight: 600; } 45%,90% { color: #8C8279; background: none; border-left-color: transparent; font-weight: 500; } 95%,100% { color: #9D833E; background: rgba(157,131,62,0.06); border-left-color: #9D833E; } }
-@keyframes ft-li-tab2 { 0%,40% { color: #8C8279; background: none; border-left-color: transparent; } 45%,90% { color: #9D833E; background: rgba(157,131,62,0.06); border-left-color: #9D833E; font-weight: 600; } 95%,100% { color: #8C8279; background: none; border-left-color: transparent; } }
-.ft-li-content { flex: 1; padding: 14px 16px; overflow: hidden; }
-.ft-li-section { background: #fff; border: 1px solid #EDE8E2; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(26,26,26,0.04); overflow: hidden; }
-.ft-li-section-hdr { padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #EDE8E2; }
-.ft-li-section-name { font-size: 10px; font-weight: 600; color: #212129; display: flex; align-items: center; gap: 6px; }
-.ft-li-section-badge { width: 18px; height: 18px; border-radius: 4px; background: #9D833E; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-.ft-li-section-total { font-size: 10px; font-weight: 700; color: #212129; font-family: 'JetBrains Mono', monospace; }
-.ft-li-cols-hdr { display: flex; padding: 4px 14px; font-size: 7px; letter-spacing: 0.5px; color: #B5ADA5; text-transform: uppercase; font-weight: 500; border-bottom: 1px solid #EDE8E2; font-family: 'JetBrains Mono', monospace; }
-.ft-li-cols-hdr > span { flex: 1; }
-.ft-li-cols-hdr > span:first-child { flex: 2.5; }
-.ft-li-cols-hdr > span:last-child { text-align: right; }
-.ft-li-row { display: flex; padding: 5px 14px; border-bottom: 1px solid #FAF8F5; align-items: center; font-size: 9px; }
-.ft-li-row > span { flex: 1; color: #8C8279; }
-.ft-li-row > span:first-child { flex: 2.5; color: #212129; font-weight: 500; }
-.ft-li-row > span:last-child { text-align: right; font-weight: 600; color: #212129; font-family: 'JetBrains Mono', monospace; }
-.ft-li-row .ft-li-rate { font-family: 'JetBrains Mono', monospace; font-size: 9px; }
-/* Phase animations */
-.ft-li-phase1 { animation: ft-li-p1 18s ease-in-out infinite; }
-@keyframes ft-li-p1 { 0%,42% { opacity: 1; } 46%,90% { opacity: 0; max-height: 0; padding: 0; border: 0; overflow: hidden; } 96%,100% { opacity: 1; } }
-.ft-li-phase2 { animation: ft-li-p2 18s ease-in-out infinite; }
-@keyframes ft-li-p2 { 0%,44% { opacity: 0; max-height: 0; padding: 0; border: 0; overflow: hidden; } 50%,88% { opacity: 1; max-height: 40px; padding: 5px 14px; } 94%,100% { opacity: 0; max-height: 0; padding: 0; border: 0; overflow: hidden; } }
-.ft-li-grand-total { padding: 8px 20px; background: #fff; border-top: 2px solid #9D833E; display: flex; justify-content: space-between; align-items: center; }
-.ft-li-grand-label { font-size: 8px; letter-spacing: 1.5px; color: #8C8279; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-.ft-li-grand-val { font-size: 16px; font-weight: 400; color: #212129; letter-spacing: -0.3px; animation: ft-li-flash 18s ease-in-out infinite; }
-@keyframes ft-li-flash { 0%,44% { color: #212129; } 48%,52% { color: #9D833E; } 56%,100% { color: #212129; } }
 
 
 
@@ -1094,76 +821,8 @@ body {
     <div class="home-features-label">Features</div>
     <div class="home-features-grid">
       <div class="home-feature-card">
-        <div class="home-feature-thumb"><div class="ft-setup ft-base">
-  <div class="ft-topnav"><div class="ft-topnav-text">dibs</div></div>
-  <div class="ft-sidebar">
-    <div class="ft-sidebar-item active"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>New Bid</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Dashboard</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Bid Board</div>
-    <div class="ft-sidebar-divider"></div>
-    <div class="ft-sidebar-footer"><div class="ft-sidebar-avatar">MC</div><div class="ft-sidebar-name">Maria Chen</div></div>
-  </div>
-  <div class="ft-setup-main">
-    <div class="ft-setup-stepper">
-      <div class="ft-setup-stepper-card">
-        <div class="ft-setup-stepper-label">Setup</div>
-        <div class="ft-setup-step done">
-          <div class="ft-setup-step-num">01</div>
-          <div class="ft-setup-step-text"><div class="ft-setup-step-name">Type</div><div class="ft-setup-step-desc">Bid type or template</div></div>
-        </div>
-        <div class="ft-setup-connector done"></div>
-        <div class="ft-setup-step active">
-          <div class="ft-setup-step-num">02</div>
-          <div class="ft-setup-step-text"><div class="ft-setup-step-name">Inputs</div><div class="ft-setup-step-desc">Project details, shoot parameters</div></div>
-        </div>
-        <div class="ft-setup-connector"></div>
-        <div class="ft-setup-step">
-          <div class="ft-setup-step-num">03</div>
-          <div class="ft-setup-step-text"><div class="ft-setup-step-name">Budget</div><div class="ft-setup-step-desc">AICP sections A-E</div></div>
-        </div>
-        <div class="ft-setup-connector"></div>
-        <div class="ft-setup-step">
-          <div class="ft-setup-step-num">04</div>
-          <div class="ft-setup-step-text"><div class="ft-setup-step-name">Review</div><div class="ft-setup-step-desc">Totals, export</div></div>
-        </div>
-        <div class="ft-setup-divider"></div>
-        <div class="ft-setup-total-label">Grand Total</div>
-        <div class="ft-setup-total-val">$0</div>
-        <div class="ft-setup-total-sub">Fill inputs to estimate</div>
-        <div class="ft-setup-progress">
-          <div class="ft-setup-progress-bar"><div class="ft-setup-progress-fill"></div></div>
-          <div class="ft-setup-progress-pct">25%</div>
-        </div>
-      </div>
-    </div>
-    <div class="ft-setup-content">
-      <div class="ft-setup-content-header">
-        <div class="ft-setup-header-label">New Bid</div>
-        <div class="ft-setup-header">
-          <div class="ft-setup-header-title">Nike &ldquo;Just Do It&rdquo; 60s TV</div>
-          <div class="ft-setup-header-badges"><div class="ft-setup-badge">TV Commercial</div><div class="ft-setup-badge">v1</div></div>
-        </div>
-      </div>
-      <div class="ft-setup-sub">Select a template</div>
-      <div class="ft-setup-cards">
-        <div class="ft-setup-card"><div class="ft-setup-card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div><div class="ft-setup-card-name">Mid-size TV Shoot</div><div class="ft-setup-card-desc">2 shoot days, 35 crew, 3 locations</div></div></div>
-        <div class="ft-setup-card"><div class="ft-setup-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div><div class="ft-setup-card-name">Quick Social Package</div><div class="ft-setup-card-desc">1 day, 12 crew, studio</div></div></div>
-        <div class="ft-setup-card"><div class="ft-setup-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></div><div><div class="ft-setup-card-name">Large Integrated Campaign</div><div class="ft-setup-card-desc">5 days, 60+ crew, 8 locations</div></div></div>
-      </div>
-    </div>
-    <div class="ft-setup-phase2">
-      <div class="ft-setup-header-label">Step 2</div>
-      <div class="ft-setup-header-title">Project Details</div>
-      <div style="height:12px"></div>
-      <div class="ft-setup-field"><div class="ft-setup-label">Client</div><div class="ft-setup-input">Dove / Unilever</div></div>
-      <div class="ft-setup-field"><div class="ft-setup-label">Shoot Days</div><div class="ft-setup-input">2</div></div>
-      <div class="ft-setup-field"><div class="ft-setup-label">Usage Rights</div><div class="ft-setup-input">TV + Digital, US, 13 weeks</div></div>
-      <div class="ft-setup-field"><div class="ft-setup-label">Union</div><div class="ft-setup-input">SAG-AFTRA + IATSE</div></div>
-    </div>
-  </div>
-</div></div>
-</div></div>
-        <div class="home-feature-body">
+                <div class="home-feature-thumb"><iframe src="dibs-dashboard.html" tabindex="-1" scrolling="no"></iframe></div>
+<div class="home-feature-body">
           <div class="home-feature-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
           <div class="home-feature-name">New Bid Setup</div>
           <div class="home-feature-desc">4-step guided wizard: select production type and template, fill project details, set shoot parameters, usage rights, and union rules &mdash; then let AI pre-fill every line item.</div>
@@ -1175,42 +834,7 @@ body {
         </div>
       </div>
       <div class="home-feature-card">
-        <div class="home-feature-thumb"><div class="ft-dash ft-base">
-  <div class="ft-topnav"><div class="ft-topnav-text">dibs</div></div>
-  <div class="ft-sidebar">
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Dashboard</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>New Bid</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Bid Board</div>
-    <div class="ft-sidebar-divider"></div>
-    <div class="ft-sidebar-label">Active Bids</div>
-    <div class="ft-sidebar-item"><div class="ft-sidebar-dot"></div>Nike &ldquo;Just Do It&rdquo;</div>
-    <div class="ft-sidebar-item"><div class="ft-sidebar-dot"></div>Dove Q3 Spot</div>
-    <div class="ft-sidebar-divider"></div>
-    <div class="ft-sidebar-footer"><div class="ft-sidebar-avatar">MC</div><div class="ft-sidebar-name">Maria Chen</div></div>
-  </div>
-  <div class="ft-dash-main">
-    <div class="ft-dash-header">
-      <div><div class="ft-dash-label">Dashboard</div><div class="ft-dash-name">Maria Chen</div></div>
-      <div class="ft-dash-actions"><div class="ft-dash-btn">Export</div><div class="ft-dash-btn primary">+ New Bid</div></div>
-    </div>
-    <div class="ft-dash-stats">
-      <div class="ft-dash-stat"><div class="ft-dash-stat-label">Bids Out</div><div class="ft-dash-stat-val">5</div><div class="ft-dash-stat-sub">2 awaiting response</div></div>
-      <div class="ft-dash-stat"><div class="ft-dash-stat-label">Won This Quarter</div><div class="ft-dash-stat-val">$1.8M</div><div class="ft-dash-stat-sub">3 of 9 awarded</div></div>
-      <div class="ft-dash-stat"><div class="ft-dash-stat-label">Avg Budget</div><div class="ft-dash-stat-val">$340K</div><div class="ft-dash-stat-sub">Across 12 bids</div></div>
-      <div class="ft-dash-stat"><div class="ft-dash-stat-label">Due This Week</div><div class="ft-dash-stat-val">2</div><div class="ft-dash-stat-sub" style="color:#C4943A">1 due tomorrow</div></div>
-    </div>
-    <div class="ft-dash-widget">
-      <div class="ft-dash-widget-hdr"><div class="ft-dash-widget-title">Win Rate &mdash; Last 6 Months</div><div class="ft-dash-widget-meta">34% +12pts</div></div>
-      <div class="ft-dash-chart"><svg viewBox="0 0 400 50" preserveAspectRatio="none"><path class="line" d="M0 40 Q50 38 80 32 T160 26 T240 22 T320 16 T400 10" fill="none" stroke="#9D833E" stroke-width="2"/><path d="M0 35 L400 35" fill="none" stroke="#E2DCD5" stroke-width="1" stroke-dasharray="4 3"/></svg></div>
-    </div>
-    <div class="ft-dash-widget">
-      <div class="ft-dash-row hdr"><span>Project</span><span>Budget</span><span>Type</span><span>Status</span></div>
-      <div class="ft-dash-row"><span style="color:#212129;font-weight:500">Nike &ldquo;Just Do It&rdquo; :60</span><span>$487,250</span><span style="color:#8C8279">TV</span><span><span class="ft-dash-status draft">Draft</span></span></div>
-      <div class="ft-dash-row"><span style="color:#212129;font-weight:500">BMW i5 Launch Film</span><span>$1,240,000</span><span style="color:#8C8279">TV</span><span><span class="ft-dash-status won">Won</span></span></div>
-      <div class="ft-dash-row"><span style="color:#212129;font-weight:500">Adidas &ldquo;Impossible&rdquo;</span><span>$678,500</span><span style="color:#8C8279">TV</span><span><span class="ft-dash-status submitted">Submitted</span></span></div>
-    </div>
-  </div>
-</div></div>
+                <div class="home-feature-thumb"><iframe src="dibs-dashboard.html" tabindex="-1" scrolling="no"></iframe></div>
 <div class="home-feature-body">
           <div class="home-feature-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
           <div class="home-feature-name">Dashboard</div>
@@ -1223,44 +847,7 @@ body {
         </div>
       </div>
       <div class="home-feature-card">
-        <div class="home-feature-thumb"><div class="ft-board ft-base">
-  <div class="ft-topnav"><div class="ft-topnav-text">dibs</div></div>
-  <div class="ft-sidebar">
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Dashboard</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>New Bid</div>
-    <div class="ft-sidebar-item active"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Bid Board</div>
-    <div class="ft-sidebar-divider"></div>
-    <div class="ft-sidebar-footer"><div class="ft-sidebar-avatar">MC</div><div class="ft-sidebar-name">Maria Chen</div></div>
-  </div>
-  <div class="ft-board-main">
-    <div class="ft-board-toolbar"><div class="ft-board-title">Bid Board</div></div>
-    <div class="ft-board-cols">
-      <div class="ft-board-col">
-        <div class="ft-board-col-hdr"><div class="ft-board-col-title"><span class="ft-board-col-dot draft"></span>Draft</div><span class="ft-board-col-count">2</span></div>
-        <div class="ft-board-col-total">$560,000</div>
-        <div class="ft-board-bid"><div class="ft-board-bid-name">Pepsi Summer</div><div class="ft-board-bid-client">Goodby Silverstein</div><div class="ft-board-bid-amount">$290,000</div><span class="ft-board-bid-tag tv">TV</span></div>
-        <div class="ft-board-bid moving"><div class="ft-board-bid-name">Nike &ldquo;Just Do It&rdquo;</div><div class="ft-board-bid-client">Wieden+Kennedy</div><div class="ft-board-bid-amount">$487,250</div><span class="ft-board-bid-tag tv">TV</span></div>
-      </div>
-      <div class="ft-board-col">
-        <div class="ft-board-col-hdr"><div class="ft-board-col-title"><span class="ft-board-col-dot submitted"></span>Submitted</div><span class="ft-board-col-count">2</span></div>
-        <div class="ft-board-col-total">$832,250</div>
-        <div class="ft-board-bid"><div class="ft-board-bid-name">Dove Q3 Spot</div><div class="ft-board-bid-client">Ogilvy</div><div class="ft-board-bid-amount">$345,000</div><span class="ft-board-bid-tag social">Social</span></div>
-        <div class="ft-board-bid arriving"><div class="ft-board-bid-name">Nike &ldquo;Just Do It&rdquo;</div><div class="ft-board-bid-client">Wieden+Kennedy</div><div class="ft-board-bid-amount">$487,250</div><span class="ft-board-bid-tag tv">TV</span></div>
-      </div>
-      <div class="ft-board-col">
-        <div class="ft-board-col-hdr"><div class="ft-board-col-title"><span class="ft-board-col-dot active"></span>Revision</div><span class="ft-board-col-count">1</span></div>
-        <div class="ft-board-col-total">$1,240,000</div>
-        <div class="ft-board-bid"><div class="ft-board-bid-name">BMW i5 Launch</div><div class="ft-board-bid-client">Serviceplan</div><div class="ft-board-bid-amount">$1,240,000</div><span class="ft-board-bid-tag tv">TV</span></div>
-      </div>
-      <div class="ft-board-col">
-        <div class="ft-board-col-hdr"><div class="ft-board-col-title"><span class="ft-board-col-dot won"></span>Won</div><span class="ft-board-col-count">1</span></div>
-        <div class="ft-board-col-total">$678,500</div>
-        <div class="ft-board-bid"><div class="ft-board-bid-name">Adidas &ldquo;Impossible&rdquo;</div><div class="ft-board-bid-client">72andSunny</div><div class="ft-board-bid-amount">$678,500</div><span class="ft-board-bid-tag digital">Digital</span></div>
-        <div class="ft-board-bid won-arrive"><div class="ft-board-bid-name">BMW i5 Launch</div><div class="ft-board-bid-client">Serviceplan</div><div class="ft-board-bid-amount">$1,240,000</div></div>
-      </div>
-    </div>
-  </div>
-</div></div>
+                <div class="home-feature-thumb"><iframe src="dibs-comparison.html" tabindex="-1" scrolling="no"></iframe></div>
 <div class="home-feature-body">
           <div class="home-feature-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
           <div class="home-feature-name">Bid Board</div>
@@ -1272,57 +859,7 @@ body {
         </div>
       </div>
       <div class="home-feature-card">
-        <div class="home-feature-thumb"><div class="ft-ai ft-base">
-  <div class="ft-ai-page">
-    <div class="ft-topnav"><div class="ft-topnav-text">dibs</div></div>
-    <div class="ft-sidebar">
-      <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Dashboard</div>
-      <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>New Bid</div>
-      <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Bid Board</div>
-      <div class="ft-sidebar-divider"></div>
-      <div class="ft-sidebar-label">Active Bids</div>
-      <div class="ft-sidebar-item active"><div class="ft-sidebar-dot"></div>Nike &ldquo;Just Do It&rdquo;</div>
-      <div class="ft-sidebar-divider"></div>
-      <div class="ft-sidebar-footer"><div class="ft-sidebar-avatar">MC</div><div class="ft-sidebar-name">Maria Chen</div></div>
-    </div>
-    <div class="ft-ai-page-main">
-      <div class="ft-ai-page-catnav">
-        <div class="ft-ai-page-catnav-item active"><span>Crew &amp; Labor</span><span class="ft-ai-page-catnav-amt">$142,800</span></div>
-        <div class="ft-ai-page-catnav-item"><span>Equipment</span><span class="ft-ai-page-catnav-amt">$67,500</span></div>
-        <div class="ft-ai-page-catnav-item"><span>Locations</span><span class="ft-ai-page-catnav-amt">$89,200</span></div>
-        <div class="ft-ai-page-catnav-item"><span>Talent</span><span class="ft-ai-page-catnav-amt">$78,000</span></div>
-        <div class="ft-ai-page-catnav-item"><span>Post</span><span class="ft-ai-page-catnav-amt">$45,500</span></div>
-      </div>
-      <div class="ft-ai-page-content">
-        <div class="ft-ai-page-section">
-          <div class="ft-ai-page-section-hdr"><div class="ft-ai-page-section-name"><span class="ft-ai-page-section-badge">A</span>Pre-Production</div><div class="ft-ai-page-section-total">$38,200</div></div>
-          <div class="ft-ai-page-row"><span>Director</span><span>$25,000</span></div>
-          <div class="ft-ai-page-row"><span>Executive Producer</span><span>$7,000</span></div>
-        </div>
-        <div class="ft-ai-page-section">
-          <div class="ft-ai-page-section-hdr"><div class="ft-ai-page-section-name"><span class="ft-ai-page-section-badge">B</span>Shooting Crew</div><div class="ft-ai-page-section-total">$104,600</div></div>
-          <div class="ft-ai-page-row"><span>Director of Photography</span><span>$13,500</span></div>
-          <div class="ft-ai-page-row"><span>Gaffer</span><span>$5,900</span></div>
-          <div class="ft-ai-page-row"><span>Key Grip</span><span>$5,250</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="ft-ai-scrim"></div>
-  <div class="ft-ai-panel">
-    <div class="ft-ai-panel-hdr"><div class="ft-ai-panel-title"><span class="ft-ai-panel-dot"></span>AI Assistant</div><div class="ft-ai-panel-close">&times;</div></div>
-    <div class="ft-ai-panel-tabs"><div class="ft-ai-panel-tab">Overview</div><div class="ft-ai-panel-tab">Insights</div><div class="ft-ai-panel-tab active">Chat</div></div>
-    <div class="ft-ai-chat">
-      <div class="ft-ai-chips"><span class="ft-ai-chip">Total</span><span class="ft-ai-chip">Savings</span><span class="ft-ai-chip">Benchmark</span><span class="ft-ai-chip">Validate</span></div>
-      <div class="ft-ai-msg user">What happens if I add a third shoot day?</div>
-      <div class="ft-ai-dots"><div class="ft-ai-dot"></div><div class="ft-ai-dot"></div><div class="ft-ai-dot"></div></div>
-      <div class="ft-ai-msg bot">Adding a 3rd shoot day increases the total by ~$38,200: crew (+$14,800), equipment (+$8,500), locations (+$6,200), catering (+$2,400), travel (+$6,300).
-        <div class="ft-ai-actions"><span class="ft-ai-action-btn">+1 Day</span><span class="ft-ai-action-btn">Show Breakdown</span><span class="ft-ai-action-btn">Find Savings</span></div>
-      </div>
-    </div>
-    <div class="ft-ai-input-row"><div class="ft-ai-input">Ask about your budget...</div><div class="ft-ai-send"><svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
-  </div>
-</div></div>
+                <div class="home-feature-thumb"><iframe src="dibs-lineitem.html" tabindex="-1" scrolling="no"></iframe></div>
 <div class="home-feature-body">
           <div class="home-feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
           <div class="home-feature-name">AI Assistant</div>
@@ -1335,61 +872,7 @@ body {
         </div>
       </div>
       <div class="home-feature-card">
-        <div class="home-feature-thumb"><div class="ft-li ft-base">
-  <div class="ft-topnav"><div class="ft-topnav-text">dibs</div></div>
-  <div class="ft-sidebar">
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Dashboard</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>New Bid</div>
-    <div class="ft-sidebar-item"><svg class="ft-sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Bid Board</div>
-    <div class="ft-sidebar-divider"></div>
-    <div class="ft-sidebar-label">Active Bids</div>
-    <div class="ft-sidebar-item active"><div class="ft-sidebar-dot"></div>Nike &ldquo;Just Do It&rdquo;</div>
-    <div class="ft-sidebar-divider"></div>
-    <div class="ft-sidebar-footer"><div class="ft-sidebar-avatar">MC</div><div class="ft-sidebar-name">Maria Chen</div></div>
-  </div>
-  <div class="ft-li-main">
-    <div class="ft-li-total-banner">
-      <div><div class="ft-li-total-label">Running Total</div><div class="ft-li-total-amount">$487,250</div></div>
-      <div class="ft-li-total-meta">
-        <div class="ft-li-total-meta-item"><div class="ft-li-total-meta-lbl">Items Filled</div><div class="ft-li-total-meta-val">142 / 186</div></div>
-        <div class="ft-li-total-meta-item"><div class="ft-li-total-meta-lbl">AI Confidence</div><div class="ft-li-total-meta-val">76%</div></div>
-      </div>
-    </div>
-    <div class="ft-li-layout">
-      <div class="ft-li-catnav">
-        <div class="ft-li-nav-item switch1"><span>Crew &amp; Labor</span><span class="ft-li-nav-amt">$142,800</span></div>
-        <div class="ft-li-nav-item switch2"><span>Equipment</span><span class="ft-li-nav-amt">$67,500</span></div>
-        <div class="ft-li-nav-item"><span>Locations</span><span class="ft-li-nav-amt">$89,200</span></div>
-        <div class="ft-li-nav-item"><span>Talent</span><span class="ft-li-nav-amt">$78,000</span></div>
-        <div class="ft-li-nav-item"><span>Art &amp; Props</span><span class="ft-li-nav-amt">$22,400</span></div>
-        <div class="ft-li-nav-item"><span>Post</span><span class="ft-li-nav-amt">$45,500</span></div>
-        <div class="ft-li-nav-item"><span>Music</span><span class="ft-li-nav-amt">$18,000</span></div>
-        <div class="ft-li-nav-item"><span>Insurance</span><span class="ft-li-nav-amt">$23,850</span></div>
-      </div>
-      <div class="ft-li-content">
-        <div class="ft-li-section">
-          <div class="ft-li-section-hdr"><div class="ft-li-section-name"><span class="ft-li-section-badge">A</span>Pre-Production &amp; Wrap</div><div class="ft-li-section-total">$38,200</div></div>
-          <div class="ft-li-cols-hdr"><span>Description</span><span>Rate</span><span>Days</span><span>Total</span></div>
-          <div class="ft-li-row ft-li-phase1"><span>Director of Photography</span><span class="ft-li-rate">$4,500</span><span>3</span><span>$13,500</span></div>
-          <div class="ft-li-row ft-li-phase1"><span>Gaffer</span><span class="ft-li-rate">$1,800</span><span>3</span><span>$5,400</span></div>
-          <div class="ft-li-row ft-li-phase1"><span>Key Grip</span><span class="ft-li-rate">$1,600</span><span>3</span><span>$4,800</span></div>
-          <div class="ft-li-row ft-li-phase2"><span>ARRI Alexa 35 Kit</span><span class="ft-li-rate">$3,500</span><span>3</span><span>$10,500</span></div>
-          <div class="ft-li-row ft-li-phase2"><span>Master Prime Lens Set</span><span class="ft-li-rate">$2,800</span><span>3</span><span>$8,400</span></div>
-          <div class="ft-li-row ft-li-phase2"><span>Lighting Package</span><span class="ft-li-rate">$1,200</span><span>3</span><span>$3,600</span></div>
-        </div>
-        <div class="ft-li-section">
-          <div class="ft-li-section-hdr"><div class="ft-li-section-name"><span class="ft-li-section-badge">B</span>Shooting Crew</div><div class="ft-li-section-total">$104,600</div></div>
-          <div class="ft-li-cols-hdr"><span>Description</span><span>Rate</span><span>Days</span><span>Total</span></div>
-          <div class="ft-li-row ft-li-phase1"><span>Steadicam Operator</span><span class="ft-li-rate">$2,500</span><span>2</span><span>$5,000</span></div>
-          <div class="ft-li-row ft-li-phase1"><span>Drone Operator + Pilot</span><span class="ft-li-rate">$3,500</span><span>2</span><span>$7,000</span></div>
-          <div class="ft-li-row ft-li-phase2"><span>Location Scout</span><span class="ft-li-rate">$2,200</span><span>5</span><span>$11,000</span></div>
-          <div class="ft-li-row ft-li-phase2"><span>Permits &amp; Police</span><span class="ft-li-rate">$3,500</span><span>3</span><span>$10,500</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="ft-li-grand-total"><div class="ft-li-grand-label">Grand Total</div><div class="ft-li-grand-val">$487,250</div></div>
-  </div>
-</div></div>
+                <div class="home-feature-thumb"><iframe src="dibs-rates.html" tabindex="-1" scrolling="no"></iframe></div>
 <div class="home-feature-body">
           <div class="home-feature-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
           <div class="home-feature-name">Active Bid Line Items</div>
