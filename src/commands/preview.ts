@@ -2969,6 +2969,10 @@ function handleWsMessage(msg) {
         showToast('Agent failed: ' + (msg.data.task.error || ''), 'error');
       }
       break;
+    case 'reload':
+      showToast('Code updated — reloading...', 'success');
+      setTimeout(() => location.reload(), 500);
+      break;
     case 'error':
       showToast(msg.data?.message || 'Error', 'error');
       break;

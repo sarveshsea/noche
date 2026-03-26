@@ -1,6 +1,6 @@
 {
   "name": "@sarveshsea/memoire",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AI-Native Design Intelligence Engine — Figma + Research + Spec-Driven Code Generation",
   "type": "module",
   "main": "dist/index.js",
@@ -12,15 +12,18 @@
     }
   },
   "bin": {
-    "memoire": "./dist/index.js"
+    "memoire": "./dist/index.js",
+    "memi": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "preview": "vite --config preview/vite.config.ts",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --strict",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build",
     "prepare": "npm run build"
   },
   "repository": {

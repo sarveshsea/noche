@@ -1,0 +1,16 @@
+{
+  "name": "figma-sync",
+  "version": "1.0.0",
+  "description": "Figma sync workflow patterns — bidirectional design-code sync, conflict resolution, incremental updates, multi-file orchestration",
+  "category": "connect",
+  "tags": ["figma", "sync", "design-system", "bidirectional", "incremental"],
+  "skills": [{
+    "file": "figma-sync.md",
+    "name": "Figma Sync Patterns",
+    "activateOn": "figma-canvas-operation",
+    "freedomLevel": "high"
+  }],
+  "dependencies": [],
+  "createdAt": "2026-03-26T00:00:00.000Z",
+  "updatedAt": "2026-03-26T00:00:00.000Z"
+}

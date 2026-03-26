@@ -47,6 +47,11 @@ export class MemoireEngine extends EventEmitter {
   private _initialized = false;
   private _soul = "";
 
+  /** Debounced auto-pull on Figma document changes */
+  private _docChangeTimer: ReturnType<typeof setTimeout> | null = null;
+  private _docChangePulling = false;
+  private static readonly DOC_CHANGE_DEBOUNCE_MS = 3000;
+
   constructor(config: MemoireConfig) {
     super();
     this.config = config;
@@ -70,6 +75,36 @@ export class MemoireEngine extends EventEmitter {
       this.figma,
       (evt) => this.emit("event", evt),
     );
+
+    // Auto-pull design system when Figma document changes (debounced)
+    this.figma.on("document-changed", () => this._onDocumentChanged());
+  }
+
+  private _onDocumentChanged(): void {
+    if (this._docChangeTimer) clearTimeout(this._docChangeTimer);
+    this._docChangeTimer = setTimeout(async () => {
+      if (this._docChangePulling || !this.figma.isConnected) return;
+      this._docChangePulling = true;
+      try {
+        this.emit("event", {
+          type: "info",
+          source: "engine",
+          message: "Figma document changed — auto-pulling design system...",
+          timestamp: new Date(),
+        } satisfies MemoireEvent);
+        await this.pullDesignSystem();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.emit("event", {
+          type: "warn",
+          source: "engine",
+          message: `Auto-pull failed: ${msg}`,
+          timestamp: new Date(),
+        } satisfies MemoireEvent);
+      } finally {
+        this._docChangePulling = false;
+      }
+    }, MemoireEngine.DOC_CHANGE_DEBOUNCE_MS);
   }
 
   get project(): ProjectContext | null {

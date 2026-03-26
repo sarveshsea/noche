@@ -1,0 +1,16 @@
+{
+  "name": "accessibility-audit",
+  "version": "1.0.0",
+  "description": "WCAG 2.2 compliance auditing — automated checks, manual test plans, screen reader validation, color contrast analysis",
+  "category": "research",
+  "tags": ["accessibility", "wcag", "a11y", "screen-reader", "color-contrast", "aria"],
+  "skills": [{
+    "file": "accessibility-audit.md",
+    "name": "Accessibility Audit",
+    "activateOn": "design-review",
+    "freedomLevel": "read-only"
+  }],
+  "dependencies": [],
+  "createdAt": "2026-03-26T00:00:00.000Z",
+  "updatedAt": "2026-03-26T00:00:00.000Z"
+}

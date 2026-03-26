@@ -1,0 +1,16 @@
+{
+  "name": "react-native-gen",
+  "version": "1.0.0",
+  "description": "React Native code generation from Memoire specs — NativeWind styling, Expo-compatible, platform-specific patterns",
+  "category": "generate",
+  "tags": ["react-native", "nativewind", "expo", "mobile", "ios", "android"],
+  "skills": [{
+    "file": "react-native-gen.md",
+    "name": "React Native Generator",
+    "activateOn": "component-creation",
+    "freedomLevel": "high"
+  }],
+  "dependencies": [],
+  "createdAt": "2026-03-26T00:00:00.000Z",
+  "updatedAt": "2026-03-26T00:00:00.000Z"
+}
