@@ -6,6 +6,30 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v0.2.0 — 2026-03-26
+
+### Commits
+| Hash | Message |
+|------|---------|
+| `358c9e3` | Add 4 powerhouse Notes — deep skill packs (4,400+ lines) |
+| `dbcb551` | Add Mémoire Notes — downloadable skill pack ecosystem |
+
+### Key Design Decisions
+- **Notes as First-Class Extension System** — Mémoire Notes are downloadable skill packs that extend what the engine can do. Each Note is a folder with `note.json` manifest + markdown skill files. Four categories: craft, research, connect, generate.
+- **Three-Source Loading** — NoteLoader discovers notes from legacy `skills/registry.json`, built-in `notes/*/note.json` packages, and user-installed `.memoire/notes/`. User-installed override built-in by name.
+- **Activation by Intent** — Notes are resolved per classified intent and injected into agent prompts. `activateOn` contexts map to IntentCategory with an 8K character limit for prompt injection.
+- **Deep Skill Files** — Four powerhouse Notes ship built-in: self-improving-agent (628 lines), mobile-craft (1,466 lines), design-systems (1,411 lines), competitive-intel (894 lines). Real expertise, not templates.
+
+### Notes System
+- Added `src/notes/` module: types (Zod schemas), loader, resolver, installer, index
+- Added `src/commands/notes.ts` with 5 CLI subcommands: install, list, remove, create, info
+- Integrated NoteLoader into MemoireEngine (`engine.notes`)
+- Agent orchestrator resolves and injects Notes per intent classification
+- Status command shows Notes count
+- Init command creates `.memoire/notes/` directory
+
+---
+
 ## v0.1.1 — 2026-03-25
 
 ### Commits
