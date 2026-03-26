@@ -132,7 +132,7 @@ a:hover { text-decoration: underline; }
     <nav class="hdr-nav"><a href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l9-8 9 8M5 11v8a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-8"/></svg>Home</a><a href="research.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Research</a><a href="specs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h8M8 11h8M8 15h4"/></svg>Specs</a><a href="design-system.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Systems</a><a href="changelog.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a></nav>
     <div class="hdr-stats">
       <span><span class="n">42</span> tokens</span>
-      <span><span class="n">18</span> components</span>
+      <span><span class="n">56</span> components</span>
       <span><span class="n">6</span> layouts</span>
     </div>
   </header>
@@ -324,46 +324,31 @@ a:hover { text-decoration: underline; }
       <!-- Buttons -->
       <div class="comp-section">
         <div class="section-label">Buttons</div>
-        <div class="comp-section-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sodales felis at sem gravida.</div>
+        <div class="comp-section-desc">Actions, triggers, and interactive controls.</div>
         <div class="comp-grid">
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;gap:8px;align-items:center">
-                <span class="preview-btn">Submit</span>
-                <span class="preview-btn-outline">Cancel</span>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">Button</div>
-              <div class="comp-desc">Lorem ipsum dolor sit amet, adipiscing elit. Praesent vel augue non libero.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">4 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;gap:8px;align-items:center"><span class="preview-btn">Submit</span><span class="preview-btn-outline">Cancel</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Button</div><div class="comp-desc">Triggers an action such as submitting a form or showing/hiding an interface component.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">6 variants</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;gap:8px;align-items:center">
-                <span class="preview-btn" style="padding:5px 10px;font-size:10px">Small</span>
-                <span class="preview-btn">Default</span>
-                <span class="preview-btn" style="padding:9px 24px;font-size:12px">Large</span>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">ButtonGroup</div>
-              <div class="comp-desc">Donec dignissim nulla vel lorem iaculis, nec tristique velit vulputate.</div>
-              <div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">3 sizes</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;gap:8px;align-items:center"><span class="preview-btn" style="padding:5px 10px;font-size:10px">Small</span><span class="preview-btn">Default</span><span class="preview-btn" style="padding:9px 24px;font-size:12px">Large</span></div></div>
+            <div class="comp-meta"><div class="comp-name">ButtonGroup</div><div class="comp-desc">A wrapper for multiple, related buttons. <em style="color:var(--fg-dim)">Toolbar</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;gap:8px;align-items:center">
-                <span class="preview-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Create</span>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">IconButton</div>
-              <div class="comp-desc">Pellentesque habitant morbi tristique senectus et netus et malesuada.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;gap:8px;align-items:center"><span class="preview-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Create</span></div></div>
+            <div class="comp-meta"><div class="comp-name">IconButton</div><div class="comp-desc">A button that displays an icon with optional label text.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:10px"><span class="preview-toggle"></span><span style="font-size:11px;color:#8a8a8a">Enabled</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Toggle</div><div class="comp-desc">A control used to switch between two states: on or off. <em style="color:var(--fg-dim)">Switch</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 sizes</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden"><span style="padding:6px 14px;font-size:10px;background:var(--fg);color:var(--bg)">Day</span><span style="padding:6px 14px;font-size:10px;border-left:1px solid var(--border)">Week</span><span style="padding:6px 14px;font-size:10px;border-left:1px solid var(--border)">Month</span></div></div>
+            <div class="comp-meta"><div class="comp-name">SegmentedControl</div><div class="comp-desc">A hybrid between a button group, radio buttons, and tabs for switching views.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;border:1px solid var(--border);border-radius:2px;overflow:hidden"><span style="padding:6px 10px;font-size:12px;border-right:1px solid var(--border);cursor:pointer">&minus;</span><span style="padding:6px 14px;font-size:11px;min-width:40px;text-align:center">3</span><span style="padding:6px 10px;font-size:12px;border-left:1px solid var(--border);cursor:pointer">+</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Stepper</div><div class="comp-desc">A control for editing a numeric value with increment/decrement buttons. <em style="color:var(--fg-dim)">Nudger, Counter</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
           </div>
         </div>
       </div>
@@ -371,62 +356,55 @@ a:hover { text-decoration: underline; }
       <!-- Inputs -->
       <div class="comp-section">
         <div class="section-label">Inputs</div>
-        <div class="comp-section-desc">Fusce vehicula sapien at nisi aliquam, vitae finibus orci tincidunt placerat.</div>
+        <div class="comp-section-desc">Form controls for collecting user data.</div>
         <div class="comp-grid">
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;flex-direction:column;gap:4px;width:100%;max-width:180px">
-                <span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a">Label</span>
-                <input class="preview-input" style="width:100%" placeholder="Lorem ipsum..." readonly>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">TextInput</div>
-              <div class="comp-desc">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 states</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;gap:4px;width:100%;max-width:180px"><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a">Label</span><input class="preview-input" style="width:100%" placeholder="Enter text..." readonly></div></div>
+            <div class="comp-meta"><div class="comp-name">TextInput</div><div class="comp-desc">A form control that accepts a single line of text.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 states</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;align-items:center;gap:8px;border:1px solid rgba(0,0,0,0.08);border-radius:2px;padding:7px 12px;width:100%;max-width:200px">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-                <span style="font-size:11px;color:#b0b0b0">Lorem ipsum...</span>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">SearchBar</div>
-              <div class="comp-desc">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit.</div>
-              <div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="width:100%;max-width:180px;border:1px solid var(--border);border-radius:2px;padding:8px 12px;font-size:11px;color:#b0b0b0;min-height:50px">Multi-line text...</div></div>
+            <div class="comp-meta"><div class="comp-name">Textarea</div><div class="comp-desc">A form control for editing multi-line text. <em style="color:var(--fg-dim)">Textbox</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 states</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:180px">
-                <span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a">Select</span>
-                <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(0,0,0,0.08);border-radius:2px;padding:7px 12px">
-                  <span style="font-size:11px;color:#8a8a8a">Lorem ipsum</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">Select</div>
-              <div class="comp-desc">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 states</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:8px;border:1px solid rgba(0,0,0,0.08);border-radius:2px;padding:7px 12px;width:100%;max-width:200px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><span style="font-size:11px;color:#b0b0b0">Search...</span></div></div>
+            <div class="comp-meta"><div class="comp-name">SearchInput</div><div class="comp-desc">Search inputs allow users to find content by entering a search term.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="preview-toggle"></span>
-                <span style="font-size:11px;color:#8a8a8a">Lorem ipsum</span>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">Toggle</div>
-              <div class="comp-desc">Temporibus autem quibusdam et aut officiis debitis rerum necessitatibus.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 states</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:180px"><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a">Select</span><div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(0,0,0,0.08);border-radius:2px;padding:7px 12px"><span style="font-size:11px;color:#8a8a8a">Choose option</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Select</div><div class="comp-desc">A form input for selecting a value from a scrollable list of options. <em style="color:var(--fg-dim)">Dropdown</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 states</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border:1.5px solid var(--fg);border-radius:2px;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span style="font-size:11px">Accept terms</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Checkbox</div><div class="comp-desc">An input for choosing from predefined options: binary when alone, multi-select in groups.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 states</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border-radius:50%;border:1.5px solid var(--fg);display:flex;align-items:center;justify-content:center"><div style="width:8px;height:8px;border-radius:50%;background:var(--fg)"></div></div><span style="font-size:11px">Option A</span></div><div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #b0b0b0"></div><span style="font-size:11px;color:#8a8a8a">Option B</span></div></div></div>
+            <div class="comp-meta"><div class="comp-name">RadioButton</div><div class="comp-desc">Allows a user to select a single option from a list. <em style="color:var(--fg-dim)">Radio group</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 states</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:100%;max-width:180px"><div style="height:4px;background:rgba(0,0,0,0.08);border-radius:2px;position:relative"><div style="height:100%;width:60%;background:var(--fg);border-radius:2px"></div><div style="width:12px;height:12px;border-radius:50%;background:var(--fg);position:absolute;top:-4px;left:calc(60% - 6px);border:2px solid var(--bg)"></div></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Slider</div><div class="comp-desc">A form control for choosing a value within a preset range. <em style="color:var(--fg-dim)">Range input</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:2px;padding:7px 12px;width:100%;max-width:180px"><span style="font-size:11px;color:#8a8a8a">Search + filter</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div></div>
+            <div class="comp-meta"><div class="comp-name">Combobox</div><div class="comp-desc">An input with free text filtering over a select list. <em style="color:var(--fg-dim)">Autocomplete</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:2px;padding:7px 12px;width:100%;max-width:180px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span style="font-size:11px;color:#8a8a8a">03 / 26 / 2026</span></div></div>
+            <div class="comp-meta"><div class="comp-name">DateInput</div><div class="comp-desc">A means of inputting a date, often separated into multiple fields.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 states</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:9px;text-align:center;width:100%;max-width:160px"><span style="color:#b0b0b0">S</span><span style="color:#b0b0b0">M</span><span style="color:#b0b0b0">T</span><span style="color:#b0b0b0">W</span><span style="color:#b0b0b0">T</span><span style="color:#b0b0b0">F</span><span style="color:#b0b0b0">S</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span style="background:var(--fg);color:var(--bg);border-radius:50%;padding:1px">14</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Datepicker</div><div class="comp-desc">A visual way to choose a date using a calendar view. <em style="color:var(--fg-dim)">Calendar</em></div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;border:2px dashed var(--border);border-radius:2px;padding:14px;width:100%;max-width:180px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span style="font-size:10px;color:#8a8a8a">Drop files here</span></div></div>
+            <div class="comp-meta"><div class="comp-name">FileUpload</div><div class="comp-desc">An input for uploading files from the user's device. <em style="color:var(--fg-dim)">Dropzone</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--fg)">Email</span><span style="font-size:9px;color:#dc2626">*</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Label</div><div class="comp-desc">A text label for form inputs. <em style="color:var(--fg-dim)">Form label</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 variants</span></div></div>
           </div>
         </div>
       </div>
@@ -434,88 +412,171 @@ a:hover { text-decoration: underline; }
       <!-- Data Display -->
       <div class="comp-section">
         <div class="section-label">Data Display</div>
-        <div class="comp-section-desc">Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam.</div>
+        <div class="comp-section-desc">Components for presenting information and content.</div>
         <div class="comp-grid">
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <span class="preview-badge-sm">Lorem</span>
-                <span class="preview-badge-sm" style="background:rgba(22,163,74,0.08);color:#16a34a">Ipsum</span>
-                <span class="preview-badge-sm" style="background:rgba(37,99,235,0.08);color:#2563eb">Dolor</span>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">Badge</div>
-              <div class="comp-desc">Itaque earum rerum hic tenetur a sapiente delectus ut aut reiciendis.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">6 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="preview-badge-sm">Default</span><span class="preview-badge-sm" style="background:rgba(22,163,74,0.08);color:#16a34a">Success</span><span class="preview-badge-sm" style="background:rgba(37,99,235,0.08);color:#2563eb">Info</span><span class="preview-badge-sm" style="background:rgba(220,38,38,0.08);color:#dc2626">Error</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Badge</div><div class="comp-desc">A small label representing a status, property, or metadata. <em style="color:var(--fg-dim)">Tag, Chip</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">4 variants</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="width:100%;max-width:200px">
-                <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px">Lorem ipsum</span><span style="font-size:11px;color:#8a8a8a">68%</span></div>
-                <div class="preview-bar"><div class="preview-bar-fill" style="width:68%"></div></div>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">ProgressBar</div>
-              <div class="comp-desc">Excepturi sint occaecati cupiditate non provident similique sunt in culpa.</div>
-              <div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;gap:8px;align-items:center"><div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500">SC</div><div style="width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500">JD</div><div style="width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500">AB</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Avatar</div><div class="comp-desc">A graphical representation of a user: photo, illustration, or initial.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 sizes</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="background:var(--bg-card);border:1px solid rgba(0,0,0,0.08);border-radius:2px;padding:14px 16px;width:100%;max-width:180px">
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a;margin-bottom:6px">Lorem</div>
-                <div style="font-size:22px;font-weight:500">2,847</div>
-                <div style="font-size:10px;color:#16a34a;margin-top:4px">+12.4%</div>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">StatCard</div>
-              <div class="comp-desc">Nam libero tempore cum soluta nobis est eligendi optio cumque nihil.</div>
-              <div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="background:var(--bg-card);border:1px solid rgba(0,0,0,0.08);border-radius:2px;padding:14px 16px;width:100%;max-width:180px"><div style="font-size:11px;font-weight:500;margin-bottom:4px">Card Title</div><div style="font-size:10px;color:#8a8a8a;line-height:1.5">Content container for a single entity.</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Card</div><div class="comp-desc">A container for content representing a single entity. <em style="color:var(--fg-dim)">Tile</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">3 variants</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="width:100%;max-width:220px">
-                <div style="display:flex;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);justify-content:space-between"><span style="font-size:10px;color:#8a8a8a;text-transform:uppercase;letter-spacing:1px">Name</span><span style="font-size:10px;color:#8a8a8a;text-transform:uppercase;letter-spacing:1px">Status</span></div>
-                <div style="display:flex;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.08);justify-content:space-between;font-size:11px"><span>Lorem ipsum</span><span class="preview-badge-sm" style="font-size:9px;background:rgba(22,163,74,0.08);color:#16a34a">Active</span></div>
-                <div style="display:flex;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.08);justify-content:space-between;font-size:11px"><span>Dolor sit amet</span><span class="preview-badge-sm" style="font-size:9px">Draft</span></div>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">DataTable</div>
-              <div class="comp-desc">Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis.</div>
-              <div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">sortable</span></div>
-            </div>
+            <div class="comp-preview"><div style="width:100%;max-width:220px"><div style="display:flex;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.08);justify-content:space-between"><span style="font-size:10px;color:#8a8a8a;text-transform:uppercase;letter-spacing:1px">Name</span><span style="font-size:10px;color:#8a8a8a;text-transform:uppercase;letter-spacing:1px">Status</span></div><div style="display:flex;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.08);justify-content:space-between;font-size:11px"><span>Item one</span><span class="preview-badge-sm" style="font-size:9px;background:rgba(22,163,74,0.08);color:#16a34a">Active</span></div><div style="display:flex;padding:8px 0;justify-content:space-between;font-size:11px"><span>Item two</span><span class="preview-badge-sm" style="font-size:9px">Draft</span></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Table</div><div class="comp-desc">Displays data in rows and columns with optional sorting and filtering. <em style="color:var(--fg-dim)">Data Table</em></div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">3 variants</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid rgba(0,0,0,0.08);border-radius:2px;width:100%;max-width:220px">
-                <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.06);flex-shrink:0"></div>
-                <div><div style="font-size:11px;font-weight:500">Lorem Ipsum</div><div style="font-size:10px;color:#8a8a8a">Dolor sit amet</div></div>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">AvatarRow</div>
-              <div class="comp-desc">Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</div>
-              <div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 sizes</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;gap:2px;font-size:11px"><div style="display:flex;gap:6px"><span style="color:#8a8a8a">1.</span><span>First item</span></div><div style="display:flex;gap:6px"><span style="color:#8a8a8a">2.</span><span>Second item</span></div><div style="display:flex;gap:6px"><span style="color:#8a8a8a">3.</span><span>Third item</span></div></div></div>
+            <div class="comp-meta"><div class="comp-name">List</div><div class="comp-desc">Groups a collection of related items: unordered, ordered, or description list.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 types</span></div></div>
           </div>
           <div class="comp-card">
-            <div class="comp-preview">
-              <div style="padding:12px 16px;border-left:3px solid #0a0a0a;background:rgba(0,0,0,0.02);border-radius:0 2px 2px 0;font-size:11px;line-height:1.6;width:100%;max-width:220px">
-                <div style="font-weight:500;margin-bottom:4px">Lorem ipsum</div>
-                <div style="color:#8a8a8a">Consectetur adipiscing elit sed do eiusmod tempor.</div>
-              </div>
-            </div>
-            <div class="comp-meta">
-              <div class="comp-name">CalloutBanner</div>
-              <div class="comp-desc">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</div>
-              <div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">4 variants</span></div>
-            </div>
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:180px"><div style="height:10px;background:rgba(0,0,0,0.06);border-radius:2px;width:80%"></div><div style="height:10px;background:rgba(0,0,0,0.06);border-radius:2px;width:100%"></div><div style="height:10px;background:rgba(0,0,0,0.06);border-radius:2px;width:60%"></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Skeleton</div><div class="comp-desc">A placeholder for content that hasn't yet loaded. <em style="color:var(--fg-dim)">Skeleton loader</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 shapes</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:100%;max-width:180px"><hr style="border:none;border-top:1px solid rgba(0,0,0,0.12);margin:0"></div></div>
+            <div class="comp-meta"><div class="comp-name">Separator</div><div class="comp-desc">A separator between elements. <em style="color:var(--fg-dim)">Divider, Horizontal rule</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 orientations</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="comp-section">
+        <div class="section-label">Feedback</div>
+        <div class="comp-section-desc">Status indicators, loading states, and user notifications.</div>
+        <div class="comp-grid">
+          <div class="comp-card">
+            <div class="comp-preview"><div style="padding:10px 14px;border-left:3px solid var(--fg);background:rgba(0,0,0,0.02);border-radius:0 2px 2px 0;width:100%;max-width:200px"><div style="font-size:11px;font-weight:500;margin-bottom:2px">Heads up</div><div style="font-size:10px;color:#8a8a8a">Something important happened.</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Alert</div><div class="comp-desc">Informs the user of important changes in a prominent way. <em style="color:var(--fg-dim)">Banner, Callout</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">5 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="padding:10px 14px;background:var(--fg);color:var(--bg);border-radius:2px;font-size:11px;width:100%;max-width:200px"><div style="font-weight:500;margin-bottom:2px">Changes saved</div><div style="font-size:10px;opacity:0.7">Your edits were applied.</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Toast</div><div class="comp-desc">An alert appearing in a layer above content, like a push notification. <em style="color:var(--fg-dim)">Snackbar</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">3 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:100%;max-width:200px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px">Uploading</span><span style="font-size:11px;color:#8a8a8a">68%</span></div><div class="preview-bar"><div class="preview-bar-fill" style="width:68%"></div></div></div></div>
+            <div class="comp-meta"><div class="comp-name">ProgressBar</div><div class="comp-desc">A horizontal bar indicating the completion status of a long-running task.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:12px"><div style="width:20px;height:20px;border-radius:50%;background:var(--fg);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><div style="width:20px;height:2px;background:var(--fg)"></div><div style="width:20px;height:20px;border-radius:50%;background:var(--fg);display:flex;align-items:center;justify-content:center;font-size:9px;color:white">2</div><div style="width:20px;height:2px;background:#b0b0b0"></div><div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #b0b0b0;font-size:9px;display:flex;align-items:center;justify-content:center;color:#b0b0b0">3</div></div></div>
+            <div class="comp-meta"><div class="comp-name">ProgressIndicator</div><div class="comp-desc">User's progress through discrete steps. <em style="color:var(--fg-dim)">Stepper, Timeline</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:20px;height:20px;border:2px solid var(--fg);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></div>
+            <div class="comp-meta"><div class="comp-name">Spinner</div><div class="comp-desc">A visual indicator that a background process is running. <em style="color:var(--fg-dim)">Loader</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 sizes</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="text-align:center;padding:8px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b0b0b0" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg><div style="font-size:10px;color:#8a8a8a;margin-top:6px">No items yet</div></div></div>
+            <div class="comp-meta"><div class="comp-name">EmptyState</div><div class="comp-desc">A placeholder shown when a view has no content to display.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="comp-section">
+        <div class="section-label">Navigation</div>
+        <div class="comp-section-desc">Wayfinding, menus, and page structure.</div>
+        <div class="comp-grid">
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;gap:16px;font-size:11px"><span style="font-weight:500;text-decoration:underline;text-underline-offset:4px">Home</span><span style="color:#8a8a8a">Products</span><span style="color:#8a8a8a">About</span><span style="color:#8a8a8a">Contact</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Navigation</div><div class="comp-desc">A container for navigation links. <em style="color:var(--fg-dim)">Nav, Menu</em></div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">2 layouts</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="color:#8a8a8a">Home</span><span style="color:#b0b0b0">/</span><span style="color:#8a8a8a">Products</span><span style="color:#b0b0b0">/</span><span>Details</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Breadcrumbs</div><div class="comp-desc">Shows the current page location in the navigational hierarchy.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">1 variant</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;gap:0;border-bottom:1px solid var(--border)"><span style="padding:8px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--fg)">Overview</span><span style="padding:8px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a">Settings</span><span style="padding:8px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a8a8a">Logs</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Tabs</div><div class="comp-desc">Navigate between multiple panels, reducing clutter. <em style="color:var(--fg-dim)">Tabbed interface</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">3 styles</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:4px"><span style="padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:2px;color:#8a8a8a">&lt;</span><span style="padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:2px">1</span><span style="padding:4px 8px;font-size:10px;background:var(--fg);color:var(--bg);border-radius:2px">2</span><span style="padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:2px">3</span><span style="padding:4px 8px;font-size:10px;border:1px solid var(--border);border-radius:2px;color:#8a8a8a">&gt;</span></div></div>
+            <div class="comp-meta"><div class="comp-name">Pagination</div><div class="comp-desc">Splits information over multiple pages and provides navigation between them.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><span style="font-size:11px;color:var(--blue);text-decoration:underline;text-underline-offset:3px;cursor:pointer">View documentation</span></div>
+            <div class="comp-meta"><div class="comp-name">Link</div><div class="comp-desc">A reference to a resource, external or internal. <em style="color:var(--fg-dim)">Anchor, Hyperlink</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 styles</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;flex-direction:column;gap:2px;font-size:11px"><div style="display:flex;align-items:center;gap:6px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><span>Documents</span></div><div style="margin-left:16px;display:flex;flex-direction:column;gap:2px"><div style="display:flex;align-items:center;gap:6px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg><span>Specs</span></div><div style="margin-left:16px;font-size:10px;color:#8a8a8a">component.json</div></div></div></div>
+            <div class="comp-meta"><div class="comp-name">TreeView</div><div class="comp-desc">Displays nested hierarchical information like a directory structure.</div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overlays -->
+      <div class="comp-section">
+        <div class="section-label">Overlays</div>
+        <div class="comp-section-desc">Modals, popovers, drawers, and floating content.</div>
+        <div class="comp-grid">
+          <div class="comp-card">
+            <div class="comp-preview"><div style="background:rgba(0,0,0,0.04);border:1px solid var(--border);border-radius:2px;padding:12px;width:100%;max-width:180px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:500">Confirm</span><span style="font-size:11px;color:#8a8a8a;cursor:pointer">&times;</span></div><div style="font-size:10px;color:#8a8a8a;margin-bottom:10px">Are you sure?</div><div style="display:flex;gap:6px;justify-content:flex-end"><span class="preview-btn-outline" style="font-size:10px;padding:4px 10px">Cancel</span><span class="preview-btn" style="font-size:10px;padding:4px 10px">Confirm</span></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Modal</div><div class="comp-desc">Appears over other content, requiring interaction to dismiss. <em style="color:var(--fg-dim)">Dialog, Popup</em></div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">3 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;width:100%;max-width:200px;height:70px"><div style="flex:1;background:rgba(0,0,0,0.02)"></div><div style="width:80px;background:rgba(0,0,0,0.04);border-left:1px solid var(--border);padding:8px;font-size:9px"><div style="font-weight:500;margin-bottom:4px">Panel</div><div style="color:#8a8a8a">Side content</div></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Drawer</div><div class="comp-desc">A panel that slides from the edge of the screen. <em style="color:var(--fg-dim)">Sheet, Flyout</em></div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">4 sides</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="position:relative"><span class="preview-btn-outline" style="font-size:10px;padding:4px 10px">Click me</span><div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:6px 10px;font-size:10px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.06)">Popover content</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Popover</div><div class="comp-desc">Pops up from another element via click, containing interactive content.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">1 variant</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="position:relative"><div style="width:14px;height:14px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:#8a8a8a;cursor:help">?</div><div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);border-radius:2px;padding:4px 8px;font-size:9px;white-space:nowrap">Helpful tip</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Tooltip</div><div class="comp-desc">Shows extra information about an element on hover or focus.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">1 variant</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="position:relative"><span class="preview-btn" style="font-size:10px;padding:4px 10px">Actions <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="vertical-align:middle"><path d="M6 9l6 6 6-6"/></svg></span><div style="position:absolute;top:30px;left:0;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:4px 0;min-width:100px;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="padding:4px 12px;font-size:10px">Edit</div><div style="padding:4px 12px;font-size:10px">Duplicate</div><div style="padding:4px 12px;font-size:10px;color:#dc2626">Delete</div></div></div></div>
+            <div class="comp-meta"><div class="comp-name">DropdownMenu</div><div class="comp-desc">A menu showing actions or navigation options, triggered by button click.</div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">1 variant</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layout -->
+      <div class="comp-section">
+        <div class="section-label">Layout</div>
+        <div class="comp-section-desc">Structural components for page composition.</div>
+        <div class="comp-grid">
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:100%;max-width:200px"><div style="border:1px solid var(--border);border-radius:2px;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid var(--border);font-size:10px"><span>Section one</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div style="padding:6px 10px;font-size:9px;color:#8a8a8a;border-bottom:1px solid var(--border)">Expanded content here.</div><div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:10px"><span>Section two</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Accordion</div><div class="comp-desc">A stack of headings that toggle content visibility. <em style="color:var(--fg-dim)">Disclosure, Collapsible</em></div><div class="comp-footer"><span class="badge badge-molecule">molecule</span><span class="badge badge-variant">2 modes</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;align-items:center;gap:8px;width:100%;max-width:180px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg><div style="display:flex;gap:4px;flex:1"><div style="height:40px;flex:1;background:rgba(0,0,0,0.06);border-radius:2px"></div><div style="height:40px;flex:1;background:rgba(0,0,0,0.04);border-radius:2px"></div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a8a8a" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
+            <div class="comp-meta"><div class="comp-name">Carousel</div><div class="comp-desc">Displays multiple slides of content, navigable via swiping or buttons. <em style="color:var(--fg-dim)">Content slider</em></div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:100%;max-width:200px;background:rgba(0,0,0,0.04);border-radius:2px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:10px;font-weight:500">Brand</span><div style="display:flex;gap:10px"><span style="font-size:9px;color:#8a8a8a">Home</span><span style="font-size:9px;color:#8a8a8a">About</span></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Header</div><div class="comp-desc">Top of all pages, containing site name and main navigation.</div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">3 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:100%;max-width:200px;border-top:1px solid var(--border);padding:8px 0;display:flex;justify-content:space-between"><span style="font-size:9px;color:#8a8a8a">&copy; 2026</span><div style="display:flex;gap:8px"><span style="font-size:9px;color:#8a8a8a">Privacy</span><span style="font-size:9px;color:#8a8a8a">Terms</span></div></div></div>
+            <div class="comp-meta"><div class="comp-name">Footer</div><div class="comp-desc">Bottom of a page: copyright, legal information, or links.</div><div class="comp-footer"><span class="badge badge-organism">organism</span><span class="badge badge-variant">2 variants</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Media & Typography -->
+      <div class="comp-section">
+        <div class="section-label">Media & Typography</div>
+        <div class="comp-section-desc">Images, icons, video, and text elements.</div>
+        <div class="comp-grid">
+          <div class="comp-card">
+            <div class="comp-preview"><div style="width:60px;height:40px;background:rgba(0,0,0,0.04);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0b0b0" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div>
+            <div class="comp-meta"><div class="comp-name">Image</div><div class="comp-desc">An element for embedding images. <em style="color:var(--fg-dim)">Picture</em></div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">3 variants</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="display:flex;gap:10px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19V6l12-3v13M9 19c0 1.1-1.3 2-3 2s-3-.9-3-2 1.3-2 3-2 3 .9 3 2zM21 16c0 1.1-1.3 2-3 2s-3-.9-3-2 1.3-2 3-2 3 .9 3 2z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></div></div>
+            <div class="comp-meta"><div class="comp-name">Icon</div><div class="comp-desc">A graphic symbol indicating the purpose of an interface element.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">1 variant</span></div></div>
+          </div>
+          <div class="comp-card">
+            <div class="comp-preview"><div style="font-family:var(--serif)"><div style="font-size:16px;font-weight:400;margin-bottom:4px">Heading One</div><div style="font-size:13px;font-weight:300;color:#8a8a8a">Heading Two</div></div></div>
+            <div class="comp-meta"><div class="comp-name">Heading</div><div class="comp-desc">A title or caption used to introduce a new section.</div><div class="comp-footer"><span class="badge badge-atom">atom</span><span class="badge badge-variant">6 levels</span></div></div>
           </div>
         </div>
       </div>

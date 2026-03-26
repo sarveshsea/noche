@@ -70,6 +70,7 @@ AI-native design intelligence engine. Bridges Figma, user research, and code gen
 | /figma-prototype | `skills/FIGMA_PROTOTYPE.md` | Interactive prototypes with flows |
 | /multi-agent | `skills/MULTI_AGENT.md` | Parallel agent orchestration |
 | Atomic Design | `skills/ATOMIC_DESIGN.md` | Component classification reference |
+| Component Catalog | `skills/COMPONENT_CATALOG.md` | 56-component universal registry, spec scaffolding |
 | Dashboard from Research | `skills/DASHBOARD_FROM_RESEARCH.md` | Research data → dashboards |
 | /motion-video | `skills/MOTION_VIDEO_DESIGN.md` | Animation, motion, video production |
 

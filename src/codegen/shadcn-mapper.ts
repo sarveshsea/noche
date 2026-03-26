@@ -34,6 +34,19 @@ const SHADCN_IMPORTS: Record<string, string> = {
   Textarea: `import { Textarea } from "@/components/ui/textarea"`,
   Progress: `import { Progress } from "@/components/ui/progress"`,
   Sidebar: `import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar"`,
+  Slider: `import { Slider } from "@/components/ui/slider"`,
+  RadioGroup: `import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"`,
+  Popover: `import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"`,
+  Accordion: `import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"`,
+  Alert: `import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"`,
+  Calendar: `import { Calendar } from "@/components/ui/calendar"`,
+  Carousel: `import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"`,
+  Command: `import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"`,
+  Toggle: `import { Toggle } from "@/components/ui/toggle"`,
+  ToggleGroup: `import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"`,
+  NavigationMenu: `import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu"`,
+  Breadcrumb: `import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"`,
+  Pagination: `import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"`,
 };
 
 export function generateComponent(spec: ComponentSpec, ctx: CodegenContext): ComponentCode {
