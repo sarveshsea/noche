@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sarveshsea/dibs-memoire.git"
+    "url": "git+https://github.com/sarveshsea/m-moire.git"
   },
   "author": "Sarvesh Chidambaram",
   "license": "MIT",
@@ -40,9 +40,9 @@
     "README.md"
   ],
   "bugs": {
-    "url": "https://github.com/sarveshsea/dibs-memoire/issues"
+    "url": "https://github.com/sarveshsea/m-moire/issues"
   },
-  "homepage": "https://github.com/sarveshsea/dibs-memoire#readme",
+  "homepage": "https://memoire.cv",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
