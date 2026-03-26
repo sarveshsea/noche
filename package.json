@@ -4,7 +4,7 @@
   "description": "AI-Native Design Intelligence Engine — Figma + Research + Spec-Driven Code Generation",
   "type": "module",
   "bin": {
-    "memi": "./dist/index.js"
+    "memoire": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sarveshsea/memoire.git"
+    "url": "git+https://github.com/sarveshsea/dibs-memoire.git"
   },
   "author": "Sarvesh Chidambaram",
   "license": "MIT",
@@ -40,9 +40,9 @@
     "README.md"
   ],
   "bugs": {
-    "url": "https://github.com/sarveshsea/memoire/issues"
+    "url": "https://github.com/sarveshsea/dibs-memoire/issues"
   },
-  "homepage": "https://github.com/sarveshsea/memoire#readme",
+  "homepage": "https://github.com/sarveshsea/dibs-memoire#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
