@@ -55,6 +55,7 @@ const engine = new MemoireEngine({
   projectRoot: process.cwd(),
   figmaToken: process.env.FIGMA_TOKEN,
   figmaFileKey: process.env.FIGMA_FILE_KEY,
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 // Listen for engine events and print them

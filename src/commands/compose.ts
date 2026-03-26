@@ -18,6 +18,7 @@ import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import { AgentOrchestrator, classifyIntent } from "../agents/index.js";
 import type { AgentPlan, SubTask } from "../agents/index.js";
+import { hasAI, getTracker } from "../ai/index.js";
 
 export function registerComposeCommand(program: Command, engine: MemoireEngine) {
   program
@@ -35,6 +36,7 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
       const category = classifyIntent(intent);
       console.log(`\n  Intent: "${intent}"`);
       console.log(`  Category: ${category}`);
+      console.log(`  AI: ${hasAI() ? "enabled (API key set)" : "heuristic mode"}`);
 
       // Create orchestrator with live progress reporting
       const orchestrator = new AgentOrchestrator(engine, (plan: AgentPlan) => {
@@ -73,6 +75,12 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
         for (const m of result.mutations) {
           console.log(`    ${mutationIcon(m.type)} ${m.target}: ${m.detail}`);
         }
+      }
+
+      // AI token usage report
+      const tracker = getTracker();
+      if (tracker && tracker.callCount > 0) {
+        console.log(`\n  AI Usage: ${tracker.summary}`);
       }
 
       if (opts.dryRun) {

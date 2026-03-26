@@ -20,6 +20,7 @@ export interface MemoireConfig {
   figmaToken?: string;
   figmaFileKey?: string;
   previewPort?: number;
+  anthropicApiKey?: string;
 }
 
 export interface MemoireEvent {

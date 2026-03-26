@@ -18,12 +18,33 @@
     "type": "git",
     "url": "git+https://github.com/sarveshsea/memoire.git"
   },
+  "author": "Sarvesh Chidambaram",
   "license": "MIT",
+  "keywords": [
+    "design-system",
+    "figma",
+    "ai",
+    "code-generation",
+    "shadcn",
+    "atomic-design",
+    "claude",
+    "design-intelligence"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "skills",
+    "plugin",
+    "README.md"
+  ],
   "bugs": {
     "url": "https://github.com/sarveshsea/memoire/issues"
   },
   "homepage": "https://github.com/sarveshsea/memoire#readme",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "commander": "^12.1.0",
     "exceljs": "^4.4.0",

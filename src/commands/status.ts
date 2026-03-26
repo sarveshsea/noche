@@ -1,7 +1,8 @@
 import type { Command } from "commander";
-import type { MemoireEngine } from "../engine/core.js";
+import type { NocheEngine } from "../engine/core.js";
+import { hasAI, getTracker } from "../ai/index.js";
 
-export function registerStatusCommand(program: Command, engine: MemoireEngine) {
+export function registerStatusCommand(program: Command, engine: NocheEngine) {
   program
     .command("status")
     .description("Show project status")
@@ -15,7 +16,7 @@ export function registerStatusCommand(program: Command, engine: MemoireEngine) {
       const research = engine.research.getStore();
 
       console.log("\n  ┌─────────────────────────────────────────┐");
-      console.log("  │            Mémoire Project Status            │");
+      console.log("  │            Noche Project Status            │");
       console.log("  └─────────────────────────────────────────┘\n");
 
       // Project
@@ -54,6 +55,17 @@ export function registerStatusCommand(program: Command, engine: MemoireEngine) {
       const highConf = research.insights.filter((i) => i.confidence === "high").length;
       if (highConf > 0) {
         console.log(`    High conf:    ${highConf}`);
+      }
+
+      // AI
+      console.log("  AI");
+      console.log(`    API key:      ${hasAI() ? "set" : "not set"}`);
+      const tracker = getTracker();
+      if (tracker) {
+        console.log(`    Calls:        ${tracker.callCount}`);
+        console.log(`    Usage:        ${tracker.summary}`);
+      } else {
+        console.log(`    Status:       Claude Code mode (no direct API)`);
       }
 
       console.log();
