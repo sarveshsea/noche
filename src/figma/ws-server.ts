@@ -77,6 +77,7 @@ export class MemoireWsServer extends EventEmitter {
 
   constructor(config: MemoireWsServerConfig = {}) {
     super();
+    this.setMaxListeners(30);
     this.config = config;
   }
 

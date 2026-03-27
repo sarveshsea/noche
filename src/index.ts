@@ -42,6 +42,9 @@ import { registerExportCommand } from "./commands/export.js";
 import { registerNotesCommand } from "./commands/notes.js";
 import { registerWatchCommand } from "./commands/watch.js";
 
+// Prevent MaxListenersExceededWarning — commands attach cleanup handlers to process
+process.setMaxListeners(30);
+
 const program = new Command();
 
 program

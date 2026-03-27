@@ -54,6 +54,7 @@ export class MemoireEngine extends EventEmitter {
 
   constructor(config: MemoireConfig) {
     super();
+    this.setMaxListeners(30);
     this.config = config;
     this.registry = new Registry(join(config.projectRoot, ".memoire"));
     this.notes = new NoteLoader(config.projectRoot);

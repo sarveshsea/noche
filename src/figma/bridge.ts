@@ -98,6 +98,7 @@ export class FigmaBridge extends EventEmitter {
 
   constructor(config: FigmaBridgeConfig) {
     super();
+    this.setMaxListeners(30);
     this.config = config;
     this.server = new MemoireWsServer({
       port: config.port,
