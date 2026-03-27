@@ -7,7 +7,8 @@ import { existsSync } from "fs";
 export function registerDashboardCommand(program: Command, engine: MemoireEngine) {
   program
     .command("dashboard")
-    .description("Launch the Mémoire dashboard — view design systems, specs, prototypes, and research on localhost")
+    .description("Launch the Mémoire dashboard (serves preview/ directory)")
+    .alias("dash")
     .option("-p, --port <port>", "Dashboard port", "3333")
     .action(async (opts) => {
       const port = parseInt(opts.port, 10);
