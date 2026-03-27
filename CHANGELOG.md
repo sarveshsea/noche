@@ -69,6 +69,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `8af9a80` | Enhance operator console workflows |
 | `312bc4b` | Sync changelog for operator console workflows |
 | `813e481` | Add widget job state and sync summaries |
+| `4a40053` | Sync changelog for widget job state |
+| `5d13713` | Rewrite canvas agent box lifecycle |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
@@ -87,6 +89,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - **Bridge Compatibility Becomes an Explicit Adapter** — The plugin UI, plugin main thread, and bridge server now share typed bridge envelopes in code while preserving the existing legacy WebSocket wire format for `command`, `response`, and passive bridge events.
 - **Operator Console Optimizes for Triage** — The plugin panel now treats jobs and selected nodes as operational surfaces, with presenter-driven summaries, node quick actions, and richer selection diagnostics above raw logs.
 - **Jobs Become Persistent Widget State** — The plugin main thread now owns a real job store, bootstrap can restore existing job state, reconnect downgrades active work explicitly, and sync/healer summaries persist in the operator console instead of vanishing into transient logs.
+- **Canvas Agent Widgets Gain Stable Identity** — On-canvas agent boxes are now keyed by `{runId, taskId, role}`, seeded per plan, and updated through real idle/busy/done/error lifecycle transitions instead of overwriting a single role-based box.
 
 ### Changes
 - Added the Notes ecosystem release, including audit fixes, activation cleanup, recursive-copy handling, and dead-code removal
@@ -116,6 +119,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Enhanced the operator console with job-overview summaries, per-node quick actions, richer selection state/layout details, and a presenter layer with regression coverage
 - Synced changelog surfaces for the operator console workflows push
 - Added persistent widget job state, reconnect-safe job degradation, bootstrap job restoration, and durable sync/healer summaries with dedicated regression coverage
+- Synced changelog surfaces for the widget job state push
+- Rewrote the canvas agent widget lifecycle with stable run/task identity, deterministic ordering, richer box content, and orchestration wiring backed by helper tests
 
 ## v0.2.0 — 2026-03-26
 

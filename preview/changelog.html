@@ -442,7 +442,7 @@ const releases = [
     version: "v0.2.1",
     date: "2026-03-27",
     tag: "fix",
-    summary: "Notes compatibility, faster build loops, Codex-oriented guidance, compose targeting, preview hardening, project detection, broader JSON-ready CLI output, a new plugin V2 foundation, a normalized widget-bridge protocol, stronger operator workflows, and persistent widget job state.",
+    summary: "Notes compatibility, faster build loops, Codex-oriented guidance, compose targeting, preview hardening, project detection, broader JSON-ready CLI output, a new plugin V2 foundation, a normalized widget-bridge protocol, stronger operator workflows, persistent widget job state, and stable canvas agent widgets.",
     commits: [
       ["3b8403e", "Update CHANGELOG - add v0.2.0 Notes ecosystem release"],
       ["a347a33", "Fix Notes audit issues - activation gaps, recursive copy, dead code"],
@@ -501,7 +501,9 @@ const releases = [
       ["a79c591", "Sync changelog for widget bridge protocol"],
       ["8af9a80", "Enhance operator console workflows"],
       ["312bc4b", "Sync changelog for operator console workflows"],
-      ["813e481", "Add widget job state and sync summaries"]
+      ["813e481", "Add widget job state and sync summaries"],
+      ["4a40053", "Sync changelog for widget job state"],
+      ["5d13713", "Rewrite canvas agent box lifecycle"]
     ],
     decisions: [
       ["Notes become a real extension surface", "M\u00e9moire now treats Notes as installable skill packs, including workspace SKILL.md bundles, built-in notes, and compatibility fixes for activation and copy behavior."],
@@ -519,7 +521,8 @@ const releases = [
       ["Plugin bundles become generated artifacts", "The Figma widget source now lives under src/plugin as typed main, UI, and shared modules, while plugin/code.js and plugin/ui.html remain checked-in build outputs for npm packaging and postinstall copy."],
       ["Bridge compatibility becomes an explicit adapter", "The plugin UI, plugin main thread, and bridge server now share typed bridge envelopes in code while preserving the legacy WebSocket wire format for command, response, and passive bridge events."],
       ["Operator console optimizes for triage", "The plugin panel now treats jobs and selected nodes as operational surfaces, with presenter-driven summaries, node quick actions, and richer selection diagnostics above raw logs."],
-      ["Jobs become persistent widget state", "The plugin main thread now owns a real job store, bootstrap can restore existing job state, reconnect downgrades active work explicitly, and sync and healer summaries persist in the operator console instead of vanishing into logs."]
+      ["Jobs become persistent widget state", "The plugin main thread now owns a real job store, bootstrap can restore existing job state, reconnect downgrades active work explicitly, and sync and healer summaries persist in the operator console instead of vanishing into logs."],
+      ["Canvas agent widgets gain stable identity", "On-canvas agent boxes are now keyed by runId, taskId, and role, seeded per plan, and updated through real idle, busy, done, and error lifecycle transitions instead of overwriting a single role-based box."]
     ],
     changes: [
       "Added the Notes ecosystem release with activation cleanup, recursive-copy handling, and dead-code removal.",
@@ -548,7 +551,9 @@ const releases = [
       "Synced changelog surfaces for the widget bridge protocol push.",
       "Enhanced the operator console with job-overview summaries, per-node quick actions, richer selection state and layout details, and a presenter layer with regression coverage.",
       "Synced changelog surfaces for the operator console workflows push.",
-      "Added persistent widget job state, reconnect-safe job degradation, bootstrap job restoration, and durable sync and healer summaries with dedicated regression coverage."
+      "Added persistent widget job state, reconnect-safe job degradation, bootstrap job restoration, and durable sync and healer summaries with dedicated regression coverage.",
+      "Synced changelog surfaces for the widget job state push.",
+      "Rewrote the canvas agent widget lifecycle with stable run and task identity, deterministic ordering, richer box content, and orchestration wiring backed by helper tests."
     ]
   },
   {
