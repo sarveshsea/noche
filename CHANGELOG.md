@@ -58,6 +58,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `eef0a91` | Add JSON output to note mutation commands |
 | `04bd773` | Add JSON output to research commands |
 | `ed0bd00` | Ignore generated workspace artifacts |
+| `25e42a3` | Sync changelog for research and workspace hygiene |
+| `bef1171` | Add JSON output to daemon status |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
@@ -67,6 +69,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - **Codex-Oriented Operating Guidance** — built-in notes now include Codex ops guidance, and core inventory commands expose more JSON so agent workflows can inspect specs and IA state without scraping prose.
 - **Research Pipeline Becomes Scriptable** — research import, synthesis, and report commands now expose artifact paths and summaries in JSON, so automation can chain them without terminal scraping.
 - **Workspace State Is Less Noisy** — generated atomic output and preview build artifacts are now treated as workspace state in git ignore rules, reducing irrelevant status noise during agent work.
+- **Daemon Health Becomes Queryable** — `memi daemon status --json` now reports runtime ports, preview URL, uptime, Figma connection state, and stale-cleanup results so agents can check background state without parsing terminal prose.
 - **Runtime and Bridge Hardening** — Preview, the Figma bridge, signal handling, and listener management were tightened so bind failures and cleanup paths surface clearly.
 - **Modern Project Detection and Packaging** — Tailwind v4, shadcn, plugin manifest access, postinstall behavior, and npm packaging were hardened for current app layouts.
 
@@ -86,6 +89,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Added JSON output to `notes install`, `notes create`, and `notes remove` so downloadable note workflows can be automated end to end
 - Added JSON output to research `from-file`, `from-stickies`, `synthesize`, and `report` with artifact metadata and no human preamble noise in JSON mode
 - Ignored generated atomic component folders, `.astro/`, and preview-generated workspace artifacts to reduce git noise during normal operation
+- Synced changelog surfaces for the research and workspace-hygiene changes
+- Added JSON output to `daemon status` with stale-cleanup reporting, uptime, and preview connection metadata
 
 ## v0.2.0 — 2026-03-26
 

@@ -490,7 +490,9 @@ const releases = [
       ["a223ac3", "Add JSON output to IA commands"],
       ["eef0a91", "Add JSON output to note mutation commands"],
       ["04bd773", "Add JSON output to research commands"],
-      ["ed0bd00", "Ignore generated workspace artifacts"]
+      ["ed0bd00", "Ignore generated workspace artifacts"],
+      ["25e42a3", "Sync changelog for research and workspace hygiene"],
+      ["bef1171", "Add JSON output to daemon status"]
     ],
     decisions: [
       ["Notes become a real extension surface", "M\u00e9moire now treats Notes as installable skill packs, including workspace SKILL.md bundles, built-in notes, and compatibility fixes for activation and copy behavior."],
@@ -500,6 +502,7 @@ const releases = [
       ["Codex-oriented operating guidance", "The built-in Codex ops note and new JSON inventory commands make it easier for agents to inspect repo state and follow safe commit workflows."],
       ["Research pipeline becomes scriptable", "Research import, synthesis, and report commands now expose artifact paths and summaries in JSON so automation can chain them without scraping terminal prose."],
       ["Workspace state is less noisy", "Generated atomic output and preview build artifacts are now treated as workspace state in git ignore rules, which reduces irrelevant git status noise during agent work."],
+      ["Daemon health becomes queryable", "memi daemon status --json now reports runtime ports, preview URL, uptime, figma connection state, and stale-cleanup results so agents can inspect background state without scraping terminal prose."],
       ["Runtime and bridge hardening", "Preview, the Figma bridge, signal handling, and listener management now surface bind failures and cleanup paths clearly."],
       ["Modern project detection and packaging", "Tailwind v4, shadcn, plugin manifest access, postinstall behavior, and npm packaging were hardened for current app layouts."]
     ],
@@ -518,7 +521,9 @@ const releases = [
       "Added JSON output to spec list and IA list, show, and validate so agents can inspect architecture state without terminal scraping.",
       "Added JSON output to notes install, create, and remove so downloadable note workflows can be automated end to end.",
       "Added JSON output to research from-file, from-stickies, synthesize, and report with artifact metadata and no human preamble noise in JSON mode.",
-      "Ignored generated atomic component folders, .astro, and preview-generated workspace artifacts to reduce git noise during normal operation."
+      "Ignored generated atomic component folders, .astro, and preview-generated workspace artifacts to reduce git noise during normal operation.",
+      "Synced changelog surfaces for the research and workspace-hygiene changes.",
+      "Added JSON output to daemon status with stale-cleanup reporting, uptime, and preview connection metadata."
     ]
   },
   {
