@@ -15,10 +15,9 @@ import {
   installNote,
   removeNote,
   scaffoldNote,
-  getNoteInfo,
-  NoteLoader,
   type NoteCategory,
 } from "../notes/index.js";
+import type { InstalledNote, NoteManifest } from "../notes/index.js";
 
 export function registerNotesCommand(program: Command, engine: MemoireEngine) {
   const notes = program
@@ -53,13 +52,26 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
   notes
     .command("list")
     .description("Show all installed notes with status")
-    .action(async () => {
+    .option("--json", "Output notes as JSON")
+    .action(async (opts: { json?: boolean }) => {
       if (!engine.notes.loaded) await engine.notes.loadAll();
       const allNotes = engine.notes.notes;
 
       if (allNotes.length === 0) {
+        if (opts.json) {
+          console.log(JSON.stringify({ notes: [], summary: emptyNotesSummary() }, null, 2));
+          return;
+        }
         console.log("\n  No notes installed.\n");
         console.log("  Install one with: memi notes install <source>\n");
+        return;
+      }
+
+      if (opts.json) {
+        console.log(JSON.stringify({
+          notes: allNotes.map(serializeInstalledNote),
+          summary: buildNotesSummary(allNotes),
+        }, null, 2));
         return;
       }
 
@@ -149,27 +161,27 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
   notes
     .command("info <name>")
     .description("Show note details")
-    .action(async (name: string) => {
-      // Check installed notes first, then built-in
-      let manifest = await getNoteInfo(name, engine.config.projectRoot);
-      let source = "installed";
+    .option("--json", "Output note details as JSON")
+    .action(async (name: string, opts: { json?: boolean }) => {
+      if (!engine.notes.loaded) await engine.notes.loadAll();
+      const note = engine.notes.getNote(name);
 
-      if (!manifest) {
-        // Check built-in
-        const loader = new NoteLoader(engine.config.projectRoot);
-        await loader.loadAll();
-        const note = loader.getNote(name);
-        if (note) {
-          manifest = note.manifest;
-          source = "built-in";
-        }
-      }
-
-      if (!manifest) {
+      if (!note) {
         console.error(`\n  x Note "${name}" not found.\n`);
         process.exitCode = 1;
         return;
       }
+
+      if (opts.json) {
+        console.log(JSON.stringify({
+          source: note.builtIn ? "built-in" : "installed",
+          note: serializeInstalledNote(note),
+        }, null, 2));
+        return;
+      }
+
+      const manifest = note.manifest;
+      const source = note.builtIn ? "built-in" : "installed";
 
       console.log(`\n  ${manifest.name}@${manifest.version}  [${source}]`);
       console.log(`  ${manifest.description}`);
@@ -190,4 +202,54 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
       }
       console.log();
     });
+}
+
+function serializeInstalledNote(note: InstalledNote) {
+  return {
+    name: note.manifest.name,
+    version: note.manifest.version,
+    description: note.manifest.description,
+    category: note.manifest.category,
+    tags: note.manifest.tags,
+    author: note.manifest.author ?? null,
+    dependencies: note.manifest.dependencies,
+    builtIn: note.builtIn,
+    enabled: note.enabled,
+    skills: note.manifest.skills.map((skill) => ({
+      file: skill.file,
+      name: skill.name,
+      activateOn: skill.activateOn,
+      freedomLevel: skill.freedomLevel,
+    })),
+  };
+}
+
+function buildNotesSummary(notes: InstalledNote[]) {
+  return {
+    total: notes.length,
+    builtIn: notes.filter((note) => note.builtIn).length,
+    installed: notes.filter((note) => !note.builtIn).length,
+    active: notes.filter((note) => note.enabled).length,
+    byCategory: {
+      craft: notes.filter((note) => note.manifest.category === "craft").length,
+      research: notes.filter((note) => note.manifest.category === "research").length,
+      connect: notes.filter((note) => note.manifest.category === "connect").length,
+      generate: notes.filter((note) => note.manifest.category === "generate").length,
+    },
+  };
+}
+
+function emptyNotesSummary() {
+  return {
+    total: 0,
+    builtIn: 0,
+    installed: 0,
+    active: 0,
+    byCategory: {
+      craft: 0,
+      research: 0,
+      connect: 0,
+      generate: 0,
+    },
+  };
 }

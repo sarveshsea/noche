@@ -69,8 +69,11 @@ const engine = new MemoireEngine({
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const jsonOutputRequested = process.argv.includes("--json");
+
 // Listen for engine events and print them
 engine.on("event", (evt) => {
+  if (jsonOutputRequested) return;
   const icons: Record<string, string> = { info: "·", warn: "!", error: "x", success: "+" };
   const icon = icons[evt.type] ?? "·";
   console.log(`  ${icon} ${evt.message}`);
