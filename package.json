@@ -1,6 +1,6 @@
 {
   "name": "@sarveshsea/memoire",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "AI-Native Design Intelligence Engine — Figma + Research + Spec-Driven Code Generation",
   "type": "module",
   "main": "dist/index.js",
@@ -48,7 +48,8 @@
   },
   "files": [
     "dist",
-    "scripts",
+    "!dist/**/__tests__",
+    "scripts/postinstall.mjs",
     "skills",
     "notes",
     "plugin",
