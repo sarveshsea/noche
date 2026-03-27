@@ -12,6 +12,7 @@ import { join, basename, resolve } from "path";
 import { execSync } from "child_process";
 import { createLogger } from "../engine/logger.js";
 import { NoteManifestSchema, type NoteCategory, type NoteManifest } from "./types.js";
+import { buildWorkspaceSkillManifest, parseSkillMarkdown } from "./frontmatter.js";
 
 const log = createLogger("notes-installer");
 
@@ -47,10 +48,7 @@ export async function installNote(
 }
 
 async function installFromLocal(sourcePath: string, destRoot: string): Promise<NoteManifest> {
-  // Validate source has note.json
-  const manifestPath = join(sourcePath, "note.json");
-  const raw = await readFile(manifestPath, "utf-8");
-  const manifest = NoteManifestSchema.parse(JSON.parse(raw));
+  const { manifest, generated } = await readManifestFromSource(sourcePath, basename(sourcePath));
 
   assertSafeName(manifest.name);
 
@@ -69,6 +67,10 @@ async function installFromLocal(sourcePath: string, destRoot: string): Promise<N
     } else {
       await copyFile(srcFile, dstFile);
     }
+  }
+
+  if (generated) {
+    await writeFile(join(targetDir, "note.json"), JSON.stringify(manifest, null, 2));
   }
 
   log.info({ name: manifest.name, version: manifest.version }, "Note installed from local path");
@@ -91,10 +93,7 @@ async function installFromGithub(repo: string, destRoot: string): Promise<NoteMa
       timeout: 30_000,
     });
 
-    // Read and validate manifest
-    const manifestPath = join(tmpDir, "note.json");
-    const raw = await readFile(manifestPath, "utf-8");
-    const manifest = NoteManifestSchema.parse(JSON.parse(raw));
+    const { manifest, generated } = await readManifestFromSource(tmpDir, basename(repo));
 
     assertSafeName(manifest.name);
 
@@ -117,10 +116,41 @@ async function installFromGithub(repo: string, destRoot: string): Promise<NoteMa
       }
     }
 
+    if (generated) {
+      await writeFile(join(targetDir, "note.json"), JSON.stringify(manifest, null, 2));
+    }
+
     log.info({ name: manifest.name, repo }, "Note installed from GitHub");
     return manifest;
   } finally {
     await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+async function readManifestFromSource(sourcePath: string, fallbackName: string): Promise<{ manifest: NoteManifest; generated: boolean }> {
+  const noteJsonPath = join(sourcePath, "note.json");
+  try {
+    const raw = await readFile(noteJsonPath, "utf-8");
+    return {
+      manifest: NoteManifestSchema.parse(JSON.parse(raw)),
+      generated: false,
+    };
+  } catch {
+    const skillPath = join(sourcePath, "SKILL.md");
+    const skillRaw = await readFile(skillPath, "utf-8");
+    const parsedSkill = parseSkillMarkdown(skillRaw);
+    return {
+      manifest: buildWorkspaceSkillManifest(
+        parsedSkill.frontmatter,
+        parsedSkill.body,
+        {
+          noteDir: sourcePath,
+          fallbackName,
+          skillFileName: "SKILL.md",
+        },
+      ),
+      generated: true,
+    };
   }
 }
 

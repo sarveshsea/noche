@@ -42,7 +42,7 @@ export function buildWorkspaceSkillNote(
   options: WorkspaceSkillNoteOptions,
 ): InstalledNote {
   const parsed = parseSkillMarkdown(markdown);
-  const manifest = workspaceFrontmatterToManifest(parsed.frontmatter, parsed.body, options);
+  const manifest = buildWorkspaceSkillManifest(parsed.frontmatter, parsed.body, options);
 
   return {
     manifest,
@@ -52,7 +52,7 @@ export function buildWorkspaceSkillNote(
   };
 }
 
-function workspaceFrontmatterToManifest(
+export function buildWorkspaceSkillManifest(
   frontmatter: Record<string, unknown>,
   body: string,
   options: WorkspaceSkillNoteOptions,
