@@ -17,6 +17,16 @@ interface CheckResult {
   detail: string;
 }
 
+interface DoctorPayload {
+  summary: {
+    total: number;
+    pass: number;
+    warn: number;
+    fail: number;
+  };
+  checks: CheckResult[];
+}
+
 const ICON: Record<CheckStatus, string> = {
   pass: "+",
   warn: "!",
@@ -27,7 +37,8 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
   program
     .command("doctor")
     .description("Run self-diagnostic checks on the Memoire engine")
-    .action(async () => {
+    .option("--json", "Output doctor results as JSON")
+    .action(async (opts: { json?: boolean }) => {
       const results: CheckResult[] = [];
 
       // 1. Project detected
@@ -199,6 +210,13 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
         results.push({ status: "fail", label: "Workspace", detail: ".memoire/ missing or not writable" });
       }
 
+      const payload = buildDoctorPayload(results);
+
+      if (opts.json) {
+        console.log(JSON.stringify(payload, null, 2));
+        return;
+      }
+
       // Print results
       console.log("\n  Memoire Doctor\n");
 
@@ -206,10 +224,22 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
         console.log(`  ${ICON[r.status]} ${r.label}: ${r.detail}`);
       }
 
-      const pass = results.filter((r) => r.status === "pass").length;
-      const warn = results.filter((r) => r.status === "warn").length;
-      const fail = results.filter((r) => r.status === "fail").length;
-
-      console.log(`\n  ${pass} passed, ${warn} warnings, ${fail} failed\n`);
+      console.log(`\n  ${payload.summary.pass} passed, ${payload.summary.warn} warnings, ${payload.summary.fail} failed\n`);
     });
+}
+
+function buildDoctorPayload(results: CheckResult[]): DoctorPayload {
+  const pass = results.filter((r) => r.status === "pass").length;
+  const warn = results.filter((r) => r.status === "warn").length;
+  const fail = results.filter((r) => r.status === "fail").length;
+
+  return {
+    summary: {
+      total: results.length,
+      pass,
+      warn,
+      fail,
+    },
+    checks: results,
+  };
 }
