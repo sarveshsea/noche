@@ -112,6 +112,18 @@ export default function App() {
       if (line) log.warn(line);
     });
 
+    this.process.on("error", (err) => {
+      log.warn(`Preview process error: ${err.message}`);
+      this.process = null;
+    });
+
+    this.process.on("exit", (code) => {
+      if (code && code !== 0) {
+        log.warn(`Preview process exited with code ${code}`);
+      }
+      this.process = null;
+    });
+
     log.info(`Preview server starting on port ${this.port}`);
   }
 

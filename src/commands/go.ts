@@ -64,10 +64,20 @@ export function registerGoCommand(program: Command, engine: MemoireEngine) {
         const preview = new PreviewServer(engine.config.projectRoot, previewPort);
         await preview.buildGallery(engine.registry);
         preview.start();
-        console.log(`\n  Preview running at http://localhost:${previewPort}\n`);
+        console.log(`\n  Preview running at http://localhost:${previewPort}`);
+
+        // Clean up child processes on exit
+        const cleanup = () => {
+          console.log("\n  Shutting down...");
+          preview.stop();
+          engine.figma.disconnect();
+          process.exit(0);
+        };
+        process.on("SIGINT", cleanup);
+        process.on("SIGTERM", cleanup);
       }
 
-      console.log("  Pipeline complete. Mémoire is live.\n");
+      console.log("  Pipeline complete. Memoire is live.\n");
     });
 }
 
