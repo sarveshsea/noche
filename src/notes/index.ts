@@ -17,6 +17,10 @@ export {
 } from "./types.js";
 
 export { NoteLoader } from "./loader.js";
+export {
+  parseSkillMarkdown,
+  buildWorkspaceSkillNote,
+} from "./frontmatter.js";
 
 export {
   resolveForIntent,

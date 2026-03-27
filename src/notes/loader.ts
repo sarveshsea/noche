@@ -14,6 +14,7 @@ import {
   type NoteManifest,
   type NoteCategory,
 } from "./types.js";
+import { buildWorkspaceSkillNote } from "./frontmatter.js";
 
 const log = createLogger("notes-loader");
 
@@ -93,23 +94,25 @@ export class NoteLoader {
    * 3. User-installed Notes (.memoire/notes/)
    */
   async loadAll(): Promise<InstalledNote[]> {
-    const [builtIn, builtInPackages, installed] = await Promise.all([
+    const [builtIn, builtInPackages, workspace, installed] = await Promise.all([
       this.loadBuiltInNotes(),
       this.loadBuiltInNotePackages(),
+      this.loadWorkspaceSkillNotes(),
       this.loadInstalledNotes(),
     ]);
 
-    // User-installed notes override built-in ones with the same name
+    // Later sources override earlier ones with the same name.
     const noteMap = new Map<string, InstalledNote>();
     for (const note of builtIn) noteMap.set(note.manifest.name, note);
     for (const note of builtInPackages) noteMap.set(note.manifest.name, note);
     for (const note of installed) noteMap.set(note.manifest.name, note);
+    for (const note of workspace) noteMap.set(note.manifest.name, note);
 
     this._notes = Array.from(noteMap.values());
     this._loaded = true;
 
     const totalBuiltIn = builtIn.length + builtInPackages.length;
-    log.info({ builtIn: totalBuiltIn, installed: installed.length, total: this._notes.length }, "Notes loaded");
+    log.info({ builtIn: totalBuiltIn, workspace: workspace.length, installed: installed.length, total: this._notes.length }, "Notes loaded");
     return this._notes;
   }
 
@@ -170,6 +173,44 @@ export class NoteLoader {
       }
     } catch {
       // notes/ directory doesn't exist — that's fine
+    }
+
+    return notes;
+  }
+
+  /**
+   * Load workspace skills from <projectRoot>/skills/<skill-name>/SKILL.md.
+   * This is the ClawHub/AgentSkills compatibility path.
+   */
+  async loadWorkspaceSkillNotes(): Promise<InstalledNote[]> {
+    const skillsDir = join(this.projectRoot, "skills");
+    const notes: InstalledNote[] = [];
+
+    try {
+      const entries = await readdir(skillsDir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+
+        const noteDir = join(skillsDir, entry.name);
+        const skillPath = join(noteDir, "SKILL.md");
+
+        try {
+          const fileStat = await stat(skillPath);
+          if (!fileStat.isFile()) continue;
+
+          const markdown = await readFile(skillPath, "utf-8");
+          notes.push(buildWorkspaceSkillNote(markdown, {
+            noteDir,
+            fallbackName: entry.name,
+            skillFileName: "SKILL.md",
+          }));
+        } catch {
+          // Skip directories without a valid SKILL.md file
+        }
+      }
+    } catch {
+      // Workspace skills directory doesn't exist yet — that's fine
     }
 
     return notes;
