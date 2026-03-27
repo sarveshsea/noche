@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import type { BridgeClient } from "../figma/ws-server.js";
-import { DashboardServer } from "../dashboard/server.js";
+
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { createInterface } from "readline";
@@ -61,7 +61,6 @@ export function registerConnectCommand(program: Command, engine: MemoireEngine) 
     .option("-p, --port <port>", "Starting port to scan", "9223")
     .option("-n, --name <name>", "Instance name shown in Figma plugin")
     .option("--skip-setup", "Skip the guided setup, go straight to connecting")
-    .option("-d, --dash-port <port>", "Agent portal dashboard port", "3333")
     .action(async (opts) => {
       await engine.init();
 
@@ -222,23 +221,8 @@ export function registerConnectCommand(program: Command, engine: MemoireEngine) 
           console.log(`  .  PAGE → ${data.page || "unknown"}`);
         });
 
-        // ── Start the Agent Portal dashboard ─────────
-        const dashPort = parseInt(opts.dashPort ?? "3333", 10);
-        const dashboard = new DashboardServer(engine, dashPort);
-        try {
-          const actualDashPort = await dashboard.start();
-          console.log(`  ┌──────────────────────────────────────────────┐`);
-          console.log(`  │  AGENT PORTAL — http://localhost:${String(actualDashPort).padEnd(13)}│`);
-          console.log(`  │  Live dashboard with real-time Figma events  │`);
-          console.log(`  └──────────────────────────────────────────────┘\n`);
-        } catch (dashErr) {
-          const msg = dashErr instanceof Error ? dashErr.message : String(dashErr);
-          console.log(`  Dashboard failed: ${msg} (continuing without it)\n`);
-        }
-
         // Clean up on exit
         process.on("SIGINT", () => {
-          dashboard.stop();
           engine.figma.disconnect();
           process.exit(0);
         });

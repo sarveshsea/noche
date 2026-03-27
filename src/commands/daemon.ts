@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import { PreviewApiServer } from "../preview/api-server.js";
-import { DashboardServer } from "../dashboard/server.js";
+
 import { readFile, writeFile, unlink, mkdir } from "fs/promises";
 import { join, basename } from "path";
 
@@ -80,15 +80,13 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
     .description("Start the Memoire daemon as a persistent background service")
     .option("-p, --port <port>", "Preview server port", "5173")
     .option("-f, --figma-port <port>", "Starting Figma bridge port to scan", "9223")
-    .option("-d, --dash-port <port>", "Dashboard port", "3333")
     .action(async (opts) => {
       // Check if a daemon is already running
       const existing = await readStatus(engine);
       if (existing && isProcessAlive(existing.pid)) {
         console.log(`\n  Memoire daemon is already running (PID ${existing.pid})`);
         console.log(`    Preview:   http://localhost:${existing.port}`);
-        console.log(`    Figma:     port ${existing.figmaPort}`);
-        console.log(`    Dashboard: http://localhost:${existing.dashboardPort}\n`);
+        console.log(`    Figma:     port ${existing.figmaPort}\n`);
         return;
       }
 
@@ -96,7 +94,6 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
       await engine.init();
 
       const previewPort = parseInt(opts.port, 10);
-      const dashPort = parseInt(opts.dashPort, 10);
 
       // 1. Start Figma bridge
       let figmaPort: number;
@@ -121,18 +118,7 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
         process.exit(1);
       }
 
-      // 3. Start dashboard
-      const dashboard = new DashboardServer(engine, dashPort);
-      let actualDashPort: number;
-      try {
-        actualDashPort = await dashboard.start();
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.log(`  Dashboard failed to start: ${msg} (continuing without it)`);
-        actualDashPort = 0;
-      }
-
-      // 4. Write PID file and status JSON
+      // 3. Write PID file and status JSON
       const dir = memoireDir(engine);
       await mkdir(dir, { recursive: true });
 
@@ -140,34 +126,28 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
         pid: process.pid,
         port: actualPreviewPort,
         figmaPort,
-        dashboardPort: actualDashPort,
+        dashboardPort: 0,
         startedAt: new Date().toISOString(),
       };
 
       await writeFile(pidPath(engine), String(process.pid));
       await writeFile(statusPath(engine), JSON.stringify(status, null, 2));
 
-      // 5. Log running state
+      // 4. Log running state
       console.log(`
   ┌──────────────────────────────────────────────────┐
   |  MEMOIRE DAEMON — PID ${String(process.pid).padEnd(27)}|
   |                                                  |
   |  Preview:   http://localhost:${String(actualPreviewPort).padEnd(20)}|
-  |  Figma:     port ${String(figmaPort).padEnd(31)}|${actualDashPort > 0 ? `
-  |  Dashboard: http://localhost:${String(actualDashPort).padEnd(20)}|` : ""}
+  |  Figma:     port ${String(figmaPort).padEnd(31)}|
   |                                                  |
   |  Stop with: memi daemon stop                     |
   └──────────────────────────────────────────────────┘
 `);
 
-      // 6. Set up graceful shutdown handlers
+      // 5. Set up graceful shutdown handlers
       const shutdown = async () => {
         console.log("\n  Shutting down Memoire daemon...");
-        try {
-          dashboard.stop();
-        } catch {
-          // Already stopped
-        }
         try {
           engine.figma.disconnect();
         } catch {
@@ -270,7 +250,7 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
     Uptime:     ${formatUptime(uptimeSeconds)}
     Started:    ${status.startedAt}
     Preview:    http://localhost:${status.port}
-    Figma:      port ${status.figmaPort}${status.dashboardPort > 0 ? `\n    Dashboard:  http://localhost:${status.dashboardPort}` : ""}
+    Figma:      port ${status.figmaPort}
     Figma link: ${figmaConnected ? "connected" : "waiting for plugin"}
 `);
     });
@@ -281,7 +261,6 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
     .description("Restart the Memoire daemon")
     .option("-p, --port <port>", "Preview server port", "5173")
     .option("-f, --figma-port <port>", "Starting Figma bridge port to scan", "9223")
-    .option("-d, --dash-port <port>", "Dashboard port", "3333")
     .action(async (opts) => {
       // Stop existing daemon if running
       let pid: number | null = null;
