@@ -1,7 +1,37 @@
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
-import type { ComponentSpec, PageSpec, DataVizSpec, DesignSpec } from "../specs/types.js";
+import type { AnySpec, ComponentSpec, PageSpec, DataVizSpec, DesignSpec } from "../specs/types.js";
 import { validateSpec } from "../specs/validator.js";
+
+type SpecListStatus = "generated" | "pending";
+
+interface SpecListEntry {
+  name: string;
+  type: AnySpec["type"];
+  status: SpecListStatus;
+  generatedAt: string | null;
+  files: string[];
+}
+
+interface SpecListPayload {
+  options: {
+    json: boolean;
+  };
+  summary: {
+    total: number;
+    generated: number;
+    pending: number;
+    byType: {
+      component: number;
+      page: number;
+      dataviz: number;
+      design: number;
+      ia: number;
+      other: number;
+    };
+  };
+  specs: SpecListEntry[];
+}
 
 /** Validate spec name is a valid identifier */
 function validateName(name: string): void {
@@ -176,10 +206,18 @@ export function registerSpecCommand(program: Command, engine: MemoireEngine) {
   spec
     .command("list")
     .description("List all specs")
-    .action(async () => {
+    .option("--json", "Output spec list as JSON")
+    .action(async (opts: { json?: boolean }) => {
       await engine.init();
 
       const specs = await engine.registry.getAllSpecs();
+      const payload = buildSpecListPayload(specs, engine, Boolean(opts.json));
+
+      if (opts.json) {
+        console.log(JSON.stringify(payload, null, 2));
+        return;
+      }
+
       if (specs.length === 0) {
         console.log("\n  No specs found. Create one with `memi spec component <name>`.\n");
         return;
@@ -193,4 +231,48 @@ export function registerSpecCommand(program: Command, engine: MemoireEngine) {
       }
       console.log();
     });
+}
+
+function buildSpecListPayload(specs: Awaited<ReturnType<MemoireEngine["registry"]["getAllSpecs"]>>, engine: MemoireEngine, json: boolean): SpecListPayload {
+  const entries = specs.map((spec) => {
+    const generation = engine.registry.getGenerationState(spec.name);
+    const entry: SpecListEntry = {
+      name: spec.name,
+      type: spec.type,
+      status: generation ? "generated" : "pending",
+      generatedAt: generation?.generatedAt ?? null,
+      files: generation?.files ?? [],
+    };
+    return entry;
+  });
+
+  const byType = {
+    component: 0,
+    page: 0,
+    dataviz: 0,
+    design: 0,
+    ia: 0,
+    other: 0,
+  };
+
+  let generated = 0;
+  for (const entry of entries) {
+    if (entry.status === "generated") generated++;
+    if (entry.type in byType) {
+      byType[entry.type as keyof typeof byType]++;
+    } else {
+      byType.other++;
+    }
+  }
+
+  return {
+    options: { json },
+    summary: {
+      total: entries.length,
+      generated,
+      pending: entries.length - generated,
+      byType,
+    },
+    specs: entries,
+  };
 }
