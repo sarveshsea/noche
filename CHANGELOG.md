@@ -50,11 +50,18 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `415663d` | Harden preview and bridge bind errors |
 | `1810f4e` | Improve Tailwind and shadcn detection |
 | `bd6bae6` | Add JSON output to status and notes commands |
+| `a0f5234` | Speed up TypeScript builds |
+| `6ced37d` | Restore working fast build script |
+| `324de7f` | Add codex ops note |
+| `722496d` | Add JSON output to spec list command |
+| `a223ac3` | Add JSON output to IA commands |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
 - **Composable Agent Workflows** — Compose now resolves a concrete target spec before codegen, and the orchestrator no longer silently regenerates the full spec set for creation intents.
 - **Machine-Friendly CLI Surfaces** — `status`, `notes list`, and `notes info` can emit clean JSON, which makes the CLI more usable for Codex, Claude, and other automation.
+- **Fast Local Build Loop** — dedicated build config and build script reduce warm build latency and stop shipping unnecessary sourcemap artifacts during normal iteration.
+- **Codex-Oriented Operating Guidance** — built-in notes now include Codex ops guidance, and core inventory commands expose more JSON so agent workflows can inspect specs and IA state without scraping prose.
 - **Runtime and Bridge Hardening** — Preview, the Figma bridge, signal handling, and listener management were tightened so bind failures and cleanup paths surface clearly.
 - **Modern Project Detection and Packaging** — Tailwind v4, shadcn, plugin manifest access, postinstall behavior, and npm packaging were hardened for current app layouts.
 
@@ -67,7 +74,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Added CLI ergonomics like `--format`, `dash` aliasing, hidden command registration, and JSON output
 - Added regression coverage for compose targeting, export destinations, CLI registration, note installation, and packaged note assets
 - Added the built-in Figma web capture note and fixed note hook documentation
+- Added the built-in Codex ops note for JSON-first CLI usage, commit hygiene, and agent-safe repo workflows
 - Improved project detection for Tailwind and shadcn setups and removed noisy logger transport warnings
+- Sped up local TypeScript builds with a dedicated build config and restored the working fast-build script
+- Added JSON output to `spec list` and IA `list`/`show`/`validate` so agents can inspect architecture state without terminal scraping
 
 ## v0.2.0 — 2026-03-26
 

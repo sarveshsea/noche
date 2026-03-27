@@ -442,7 +442,7 @@ const releases = [
     version: "v0.2.1",
     date: "2026-03-27",
     tag: "fix",
-    summary: "Notes compatibility, compose targeting, preview and bridge hardening, project detection, and JSON-ready CLI output.",
+    summary: "Notes compatibility, faster build loops, Codex-oriented guidance, compose targeting, preview hardening, project detection, and broader JSON-ready CLI output.",
     commits: [
       ["3b8403e", "Update CHANGELOG - add v0.2.0 Notes ecosystem release"],
       ["a347a33", "Fix Notes audit issues - activation gaps, recursive copy, dead code"],
@@ -482,12 +482,19 @@ const releases = [
       ["7fdb657", "Add figma web capture note"],
       ["415663d", "Harden preview and bridge bind errors"],
       ["1810f4e", "Improve Tailwind and shadcn detection"],
-      ["bd6bae6", "Add JSON output to status and notes commands"]
+      ["bd6bae6", "Add JSON output to status and notes commands"],
+      ["a0f5234", "Speed up TypeScript builds"],
+      ["6ced37d", "Restore working fast build script"],
+      ["324de7f", "Add codex ops note"],
+      ["722496d", "Add JSON output to spec list command"],
+      ["a223ac3", "Add JSON output to IA commands"]
     ],
     decisions: [
       ["Notes become a real extension surface", "M\u00e9moire now treats Notes as installable skill packs, including workspace SKILL.md bundles, built-in notes, and compatibility fixes for activation and copy behavior."],
       ["Composable agent workflows", "Compose now resolves a concrete target spec before codegen, so create intents stop silently regenerating the full spec set."],
       ["Machine-friendly CLI surfaces", "status, notes list, and notes info can emit clean JSON for Codex, Claude, and other automation."],
+      ["Fast local build loop", "A dedicated TypeScript build config and build script reduce warm build time and remove unnecessary map output from the normal dist build."],
+      ["Codex-oriented operating guidance", "The built-in Codex ops note and new JSON inventory commands make it easier for agents to inspect repo state and follow safe commit workflows."],
       ["Runtime and bridge hardening", "Preview, the Figma bridge, signal handling, and listener management now surface bind failures and cleanup paths clearly."],
       ["Modern project detection and packaging", "Tailwind v4, shadcn, plugin manifest access, postinstall behavior, and npm packaging were hardened for current app layouts."]
     ],
@@ -500,7 +507,10 @@ const releases = [
       "Added CLI ergonomics like --format, dash aliasing, hidden command registration, and JSON output.",
       "Added regression coverage for compose targeting, export destinations, CLI registration, note installation, and packaged note assets.",
       "Added the built-in Figma web capture note and fixed note hook documentation.",
-      "Improved project detection for Tailwind and shadcn setups and removed logger transport warnings."
+      "Added the built-in Codex ops note for JSON-first CLI usage, commit hygiene, and agent-safe repo workflows.",
+      "Improved project detection for Tailwind and shadcn setups and removed logger transport warnings.",
+      "Sped up local TypeScript builds with a dedicated build config and restored the working fast-build script.",
+      "Added JSON output to spec list and IA list, show, and validate so agents can inspect architecture state without terminal scraping."
     ]
   },
   {
