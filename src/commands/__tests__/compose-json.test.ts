@@ -1,0 +1,156 @@
+import { mkdir, rm, writeFile } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { Command } from "commander";
+import { MemoireEngine } from "../../engine/core.js";
+import { registerComposeCommand } from "../compose.js";
+
+vi.mock("../../ai/index.js", () => ({
+  hasAI: () => false,
+  getTracker: () => null,
+  getAI: () => null,
+}));
+
+const tempDirs: string[] = [];
+
+afterEach(async () => {
+  vi.restoreAllMocks();
+  process.exitCode = 0;
+
+  await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
+});
+
+describe("compose --json", () => {
+  it("emits a structured dry-run payload with plan tasks", async () => {
+    const engine = await createEngine();
+    const logs = captureLogs();
+    const program = new Command();
+
+    registerComposeCommand(program, engine);
+    await program.parseAsync([
+      "compose",
+      "create",
+      "a",
+      "login",
+      "page",
+      "with",
+      "email",
+      "and",
+      "password",
+      "fields",
+      "--dry-run",
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.intent).toBe("create a login page with email and password fields");
+    expect(payload.category).toBe("page-layout");
+    expect(payload.options).toEqual({
+      dryRun: true,
+      autoSync: true,
+      verbose: false,
+    });
+    expect(payload.plan.totalTasks).toBeGreaterThan(0);
+    expect(payload.plan.tasks[0]).toMatchObject({
+      status: "pending",
+      error: null,
+      startedAt: null,
+      completedAt: null,
+      result: null,
+    });
+    expect(payload.execution).toMatchObject({
+      status: "completed",
+      completedTasks: 0,
+      totalTasks: payload.plan.totalTasks,
+      mutationCount: 0,
+      figmaSynced: false,
+    });
+    expect(payload.ai).toEqual({
+      apiKey: false,
+      calls: 0,
+      usage: null,
+      mode: "agent-cli",
+    });
+  });
+
+  it("reports autoSync false when compose runs with --no-figma", async () => {
+    const engine = await createEngine();
+    const logs = captureLogs();
+    const program = new Command();
+
+    registerComposeCommand(program, engine);
+    await program.parseAsync([
+      "compose",
+      "create",
+      "a",
+      "login",
+      "page",
+      "--dry-run",
+      "--json",
+      "--no-figma",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.options.autoSync).toBe(false);
+    expect(payload.execution.figmaSynced).toBe(false);
+  });
+
+  it("includes final task state and mutation summaries after execution", async () => {
+    const engine = await createEngine();
+    vi.spyOn(engine, "generateFromSpec").mockResolvedValue(join("generated", "pages", "LoginPage.tsx"));
+
+    const logs = captureLogs();
+    const program = new Command();
+
+    registerComposeCommand(program, engine);
+    await program.parseAsync([
+      "compose",
+      "create",
+      "a",
+      "login",
+      "page",
+      "with",
+      "email",
+      "and",
+      "password",
+      "fields",
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.execution.status).toBe("completed");
+    expect(payload.execution.completedTasks).toBe(payload.plan.totalTasks);
+    expect(payload.execution.mutationCount).toBeGreaterThan(0);
+    expect(payload.execution.mutations.some((mutation: { type: string; target: string }) =>
+      mutation.type === "spec-created" && mutation.target === "LoginPage")).toBe(true);
+    expect(payload.plan.tasks.some((task: { completedAt: string | null; result: unknown }) =>
+      task.completedAt !== null && task.result !== null)).toBe(true);
+  });
+});
+
+async function createEngine(): Promise<MemoireEngine> {
+  const dir = join(tmpdir(), `memoire-compose-json-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  tempDirs.push(dir);
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, "package.json"), JSON.stringify({ name: "compose-json-test" }, null, 2));
+
+  const engine = new MemoireEngine({ projectRoot: dir });
+  await engine.init();
+  return engine;
+}
+
+function captureLogs(): string[] {
+  const logs: string[] = [];
+  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
+    logs.push(args.join(" "));
+  });
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  return logs;
+}
+
+function lastLog(logs: string[]): string {
+  const value = logs.at(-1);
+  if (!value) throw new Error("Expected a console.log call");
+  return value;
+}
