@@ -201,19 +201,35 @@ export class FigmaBridge extends EventEmitter {
   async extractDesignSystem(): Promise<DesignSystem> {
     this.emitEvent("info", "Pulling design tokens, components, and styles from Figma...");
 
-    // Extract tokens, components, and styles in parallel
+    // Extract tokens, components, and styles in parallel — each is resilient to failures
+    // so a timeout on one (e.g., getVariables on free plans without published variables)
+    // doesn't block the rest of the extraction
     const [rawTokens, rawComponents, rawStyles] = await Promise.all([
-      this.server.sendCommand("getVariables", {}, 60000) as Promise<{ collections?: RawVariableCollection[] } | null>,
-      this.server.sendCommand("getComponents", {}, 60000) as Promise<RawComponent[] | null>,
-      this.server.sendCommand("getStyles", {}, 30000) as Promise<RawStyle[] | null>,
+      (this.server.sendCommand("getVariables", {}, 60000) as Promise<{ collections?: RawVariableCollection[] } | null>)
+        .catch((err) => { this.emitEvent("warn", `Variables extraction failed: ${err.message}`); return null; }),
+      (this.server.sendCommand("getComponents", {}, 60000) as Promise<RawComponent[] | null>)
+        .catch((err) => { this.emitEvent("warn", `Components extraction failed: ${err.message}`); return null; }),
+      (this.server.sendCommand("getStyles", {}, 30000) as Promise<RawStyle[] | null>)
+        .catch((err) => { this.emitEvent("warn", `Styles extraction failed: ${err.message}`); return null; }),
     ]);
 
-    return {
+    const result = {
       tokens: this.parseTokens(rawTokens),
       components: this.parseComponents(rawComponents),
       styles: this.parseStyles(rawStyles),
       lastSync: new Date().toISOString(),
     };
+
+    // Report what we got even if partial
+    const parts = [];
+    if (result.tokens.length > 0) parts.push(`${result.tokens.length} tokens`);
+    if (result.components.length > 0) parts.push(`${result.components.length} components`);
+    if (result.styles.length > 0) parts.push(`${result.styles.length} styles`);
+    if (parts.length === 0) {
+      this.emitEvent("warn", "No design system data extracted — check that the Figma file has variables, components, or styles");
+    }
+
+    return result;
   }
 
   async extractStickies(): Promise<StickyNote[]> {
