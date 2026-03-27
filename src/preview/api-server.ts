@@ -22,18 +22,23 @@ const MIME_TYPES: Record<string, string> = {
   ".ico": "image/x-icon",
 };
 
+const MAX_PORT_RETRIES = 10;
+
 export class PreviewApiServer {
   private engine: MemoireEngine;
   private staticDir: string;
   private port: number;
+  private startPort: number;
   private server: ReturnType<typeof createServer> | null = null;
   private wss: WebSocketServer | null = null;
   private liveClients = new Set<WebSocket>();
+  private onEngineEvent: ((evt: MemoireEvent) => void) | null = null;
 
   constructor(engine: MemoireEngine, staticDir: string, port = 3030) {
     this.engine = engine;
     this.staticDir = staticDir;
     this.port = port;
+    this.startPort = port;
   }
 
   async start(): Promise<number> {
@@ -99,12 +104,12 @@ export class PreviewApiServer {
       });
 
       // Listen for engine events that should trigger browser reload
-      const onEvent = (evt: MemoireEvent) => {
+      this.onEngineEvent = (evt: MemoireEvent) => {
         if (evt.source === "codegen" || evt.source === "auto-spec") {
           this.notifyReload(evt.message);
         }
       };
-      this.engine.on("event", onEvent);
+      this.engine.on("event", this.onEngineEvent);
 
       this.server.listen(this.port, () => {
         resolve(this.port);
@@ -112,6 +117,10 @@ export class PreviewApiServer {
 
       this.server.on("error", (err: NodeJS.ErrnoException) => {
         if (err.code === "EADDRINUSE") {
+          if (this.port - this.startPort >= MAX_PORT_RETRIES) {
+            reject(new Error(`All preview ports ${this.startPort}-${this.port} are in use`));
+            return;
+          }
           this.port++;
           this.server?.listen(this.port);
         } else {
@@ -132,6 +141,10 @@ export class PreviewApiServer {
   }
 
   stop(): void {
+    if (this.onEngineEvent) {
+      this.engine.off("event", this.onEngineEvent);
+      this.onEngineEvent = null;
+    }
     for (const ws of this.liveClients) ws.close();
     this.liveClients.clear();
     this.wss?.close();
