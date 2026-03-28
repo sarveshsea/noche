@@ -751,10 +751,10 @@ async function deleteNode(nodeId: string): Promise<unknown> {
   return { deleted: nodeId };
 }
 
-function setSelection(nodeIds: string[]): unknown {
+async function setSelection(nodeIds: string[]): Promise<unknown> {
   const nodes = [];
   for (const id of nodeIds) {
-    const node = figma.getNodeById(id);
+    const node = await figma.getNodeByIdAsync(id);
     if (node && "parent" in node) nodes.push(node);
   }
   figma.currentPage.selection = nodes;
