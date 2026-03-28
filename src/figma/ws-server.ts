@@ -78,6 +78,7 @@ export class MemoireWsServer extends EventEmitter {
     resolve: (value: unknown) => void;
     reject: (error: Error) => void;
     timeout: ReturnType<typeof setTimeout>;
+    clientId: string;
   }>();
   private commandId = 0;
 
@@ -175,7 +176,7 @@ export class MemoireWsServer extends EventEmitter {
         reject(new Error(`Command timed out: ${method}`));
       }, timeout);
 
-      this.pendingCommands.set(id, { resolve, reject, timeout: timer });
+      this.pendingCommands.set(id, { resolve, reject, timeout: timer, clientId: client.id });
 
       if (client.ws.readyState !== WebSocket.OPEN) {
         clearTimeout(timer);
@@ -184,13 +185,19 @@ export class MemoireWsServer extends EventEmitter {
         return;
       }
 
-      client.ws.send(
-        JSON.stringify(
-          serializeBridgeEnvelope(
-            createBridgeCommandEnvelope(id, method as WidgetCommandName, params),
+      try {
+        client.ws.send(
+          JSON.stringify(
+            serializeBridgeEnvelope(
+              createBridgeCommandEnvelope(id, method as WidgetCommandName, params),
+            ),
           ),
-        ),
-      );
+        );
+      } catch (err) {
+        clearTimeout(timer);
+        this.pendingCommands.delete(id);
+        reject(new Error(`Failed to send command ${method}: ${(err as Error).message}`));
+      }
     });
   }
 
@@ -247,7 +254,11 @@ export class MemoireWsServer extends EventEmitter {
     const payload = JSON.stringify(data);
     for (const client of this.clients.values()) {
       if (client.ws.readyState === WebSocket.OPEN) {
-        client.ws.send(payload);
+        try {
+          client.ws.send(payload);
+        } catch (err) {
+          log.warn({ clientId: client.id, err: (err as Error).message }, "Broadcast send failed");
+        }
       }
     }
   }
@@ -312,18 +323,24 @@ export class MemoireWsServer extends EventEmitter {
       this.emitEvent("success", "Figma plugin connected");
       this.emit("client-connected", client);
 
-      // Send identification
-      ws.send(
-        JSON.stringify(
-          serializeBridgeEnvelope({
-            channel: "memoire.bridge.v2",
-            source: "server",
-            type: "identify",
-            name: this.config.instanceName ?? `Mémoire Terminal`,
-            port: this.port,
-          }),
-        ),
-      );
+      // Send identification — wrapped in try-catch for early disconnect
+      try {
+        ws.send(
+          JSON.stringify(
+            serializeBridgeEnvelope({
+              channel: "memoire.bridge.v2",
+              source: "server",
+              type: "identify",
+              name: this.config.instanceName ?? `Mémoire Terminal`,
+              port: this.port,
+            }),
+          ),
+        );
+      } catch (err) {
+        log.warn({ clientId, err: (err as Error).message }, "Failed to send identify — client already gone");
+        this.clients.delete(clientId);
+        return;
+      }
 
       ws.on("message", (data) => {
         try {
@@ -354,9 +371,9 @@ export class MemoireWsServer extends EventEmitter {
         this.clients.delete(clientId);
         this.rateLimits.delete(clientId);
 
-        // Reject all pending commands — no point waiting 30s for timeout
-        if (this.clients.size === 0) {
-          for (const [id, pending] of this.pendingCommands.entries()) {
+        // Reject pending commands that were sent to this specific client
+        for (const [id, pending] of this.pendingCommands.entries()) {
+          if (pending.clientId === clientId) {
             clearTimeout(pending.timeout);
             pending.reject(new Error("Figma plugin disconnected"));
             this.pendingCommands.delete(id);
@@ -377,7 +394,7 @@ export class MemoireWsServer extends EventEmitter {
       });
     });
 
-    // Health check ping every 60s — stored as instance var for proper cleanup
+    // Health check ping every 30s — symmetric with client-side 20s keepalive
     this.healthInterval = setInterval(() => {
       const now = new Date();
       for (const [clientId, client] of this.clients.entries()) {
@@ -387,18 +404,28 @@ export class MemoireWsServer extends EventEmitter {
           this.rateLimits.delete(clientId);
           continue;
         }
-        // Drop clients that haven't responded to a ping in over 90s
+        // Drop clients that haven't responded to a ping in over 45s
         const silentMs = now.getTime() - client.lastPing.getTime();
-        if (silentMs > 90_000) {
+        if (silentMs > 45_000) {
           log.warn({ clientId, silentMs }, "Client unresponsive — closing");
-          client.ws.close(1000, "Ping timeout");
+          try { client.ws.close(1000, "Ping timeout"); } catch { /* ignore */ }
           this.clients.delete(clientId);
           this.rateLimits.delete(clientId);
+          // Reject pending commands for this client
+          for (const [id, pending] of this.pendingCommands.entries()) {
+            if (pending.clientId === clientId) {
+              clearTimeout(pending.timeout);
+              pending.reject(new Error("Plugin unresponsive — ping timeout"));
+              this.pendingCommands.delete(id);
+            }
+          }
+          this.emitEvent("warn", `Plugin ${clientId} unresponsive — disconnected`);
+          this.emit("client-disconnected", clientId);
           continue;
         }
-        client.ws.ping();
+        try { client.ws.ping(); } catch { /* ignore — close handler will clean up */ }
       }
-    }, 60000);
+    }, 30000);
   }
 
   private handleMessage(clientId: string, msg: BridgeEnvelope): void {
@@ -409,15 +436,19 @@ export class MemoireWsServer extends EventEmitter {
       case "ping":
         // JSON-level keepalive from plugin UI
         client.lastPing = new Date();
-        client.ws.send(
-          JSON.stringify(
-            serializeBridgeEnvelope({
-              channel: "memoire.bridge.v2",
-              source: "plugin",
-              type: "pong",
-            }),
-          ),
-        );
+        try {
+          client.ws.send(
+            JSON.stringify(
+              serializeBridgeEnvelope({
+                channel: "memoire.bridge.v2",
+                source: "server",
+                type: "pong",
+              }),
+            ),
+          );
+        } catch {
+          // Client gone — will be cleaned up by close handler
+        }
         break;
 
       case "bridge-hello":

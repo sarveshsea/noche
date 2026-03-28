@@ -70,7 +70,9 @@ const PORT_END = 9232;
 const LOG_LIMIT = 80;
 const MAX_JOBS = 24;
 const MAX_AGENT_STATUSES = 48;
+const PENDING_REQUEST_TIMEOUT_MS = 35000;
 const pendingBridgeRequests = new Map<string, PendingBridgeRequest>();
+const pendingRequestTimers = new Map<string, number>();
 
 let app: HTMLDivElement | null = null;
 let bootstrapped = false;
@@ -152,13 +154,20 @@ function bootstrap(): void {
   bindPluginMessages();
   sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
   window.setTimeout(scanBridge, 200);
-  window.setInterval(() => {
+  window.setInterval(function keepalive() {
     sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
     if (state.bridge.ws && state.bridge.ws.readyState === WebSocket.OPEN) {
       state.bridge.lastPingSentAt = Date.now();
-      state.bridge.ws.send(JSON.stringify({ type: "ping" }));
+      try {
+        state.bridge.ws.send(JSON.stringify({ channel: "memoire.bridge.v2", source: "plugin", type: "ping" }));
+      } catch {
+        // Send failed — connection is stale
+        state.bridge.ws = null;
+        setBridgeStage("reconnecting");
+        scheduleReconnect();
+      }
     }
-  }, 30000);
+  }, 20000);
 }
 
 function bindPluginMessages(): void {
@@ -248,51 +257,69 @@ function scanBridge(): void {
   setBridgeStage("scanning");
   state.bridge.portsTried = [];
   scheduleRender();
-  tryNextPort(PORT_START);
+  // Prefer last known port for faster reconnection
+  const startPort = state.bridge.port && state.bridge.port >= PORT_START && state.bridge.port <= PORT_END
+    ? state.bridge.port
+    : PORT_START;
+  tryNextPort(startPort);
+}
+
+function nextScanPort(current: number): number {
+  // Wrap around: after PORT_END, go back to PORT_START
+  // Stop when we've tried all ports in the range
+  const next = current >= PORT_END ? PORT_START : current + 1;
+  return next;
 }
 
 function tryNextPort(port: number): void {
-  if (port > PORT_END) {
+  // Stop if we've tried all ports in the range
+  if (state.bridge.portsTried.length >= (PORT_END - PORT_START + 1)) {
     setBridgeStage("offline");
     scheduleReconnect();
     return;
   }
 
+  // Skip ports already tried in this scan cycle
+  if (state.bridge.portsTried.indexOf(port) >= 0) {
+    tryNextPort(nextScanPort(port));
+    return;
+  }
+
   state.bridge.portsTried.push(port);
-  const ws = new WebSocket(`ws://localhost:${port}`);
+  let ws: WebSocket;
+  try {
+    ws = new WebSocket("ws://localhost:" + port);
+  } catch {
+    tryNextPort(nextScanPort(port));
+    return;
+  }
   let settled = false;
   let opened = false;
 
-  const timeout = window.setTimeout(() => {
+  const timeout = window.setTimeout(function onScanTimeout() {
     if (settled) return;
     settled = true;
-    try {
-      ws.close();
-    } catch {
-      // ignore
-    }
-    tryNextPort(port + 1);
+    try { ws.close(); } catch { /* ignore */ }
+    tryNextPort(nextScanPort(port));
   }, 2500);
 
-  ws.onopen = () => {
+  ws.onopen = function onScanOpen() {
     opened = true;
-    scheduleRender();
   };
 
-  ws.onmessage = (event) => {
-    let payload: any;
-    try {
-      payload = JSON.parse(event.data as string);
-    } catch {
-      return;
-    }
+  ws.onmessage = function onScanMessage(event) {
+    var payload;
+    try { payload = JSON.parse(event.data); } catch { return; }
 
     if (payload.type === "pong" && state.bridge.lastPingSentAt > 0) {
       state.bridge.latencyMs = Date.now() - state.bridge.lastPingSentAt;
     }
 
     if (!settled) {
-      if (payload.type === "identify" || payload.type === "pong" || payload.name) {
+      // Validate identity: must be a proper Mémoire bridge (type=identify with channel field)
+      var isIdentify = payload.type === "identify" && payload.channel === "memoire.bridge.v2";
+      var isPong = payload.type === "pong" && payload.channel === "memoire.bridge.v2";
+      if (isIdentify || isPong) {
         settled = true;
         window.clearTimeout(timeout);
         adoptBridge(ws, port, payload);
@@ -303,30 +330,28 @@ function tryNextPort(port: number): void {
     handleBridgeMessage(payload);
   };
 
-  ws.onerror = () => {
+  ws.onerror = function onScanError() {
     if (settled) return;
     settled = true;
     window.clearTimeout(timeout);
-    tryNextPort(port + 1);
+    tryNextPort(nextScanPort(port));
   };
 
-  ws.onclose = () => {
+  ws.onclose = function onScanClose() {
     if (!settled) {
       settled = true;
       window.clearTimeout(timeout);
-      // Only try next port if we never got a proper open
-      if (!opened) {
-        tryNextPort(port + 1);
-      } else {
-        // Opened but closed before identify — server rejected or wrong service
-        tryNextPort(port + 1);
-      }
+      tryNextPort(nextScanPort(port));
       return;
     }
+    // Active connection lost
     if (state.bridge.ws === ws) {
+      // Preserve last known port for fast reconnect
+      var lastPort = state.bridge.port;
       state.bridge.ws = null;
-      state.bridge.port = null;
+      state.bridge.port = lastPort;
       state.jobs = disconnectActiveJobs(state.jobs);
+      cleanupPendingRequests();
       setBridgeStage("reconnecting");
       addLog("warn", "Bridge disconnected");
       scheduleRender();
@@ -384,8 +409,25 @@ function forwardToBridge(payload: Record<string, unknown>): boolean {
   if (!state.bridge.ws || state.bridge.ws.readyState !== WebSocket.OPEN) {
     return false;
   }
-  state.bridge.ws.send(JSON.stringify(payload));
-  return true;
+  try {
+    state.bridge.ws.send(JSON.stringify(payload));
+    return true;
+  } catch {
+    // Send failed — connection is stale, trigger reconnect
+    state.bridge.ws = null;
+    setBridgeStage("reconnecting");
+    scheduleReconnect();
+    return false;
+  }
+}
+
+function cleanupPendingRequests(): void {
+  // Clear all pending bridge request tracking on disconnect
+  for (var timerId of pendingRequestTimers.values()) {
+    window.clearTimeout(timerId);
+  }
+  pendingBridgeRequests.clear();
+  pendingRequestTimers.clear();
 }
 
 function handleBridgeMessage(payload: any): void {
@@ -438,13 +480,28 @@ function handleBridgeMessage(payload: any): void {
 function handleBridgeCommand(message: BridgeCommandEnvelope): void {
   if (!isWidgetCommandName(message.method)) {
     forwardToBridge(serializeBridgeEnvelope(
-      createBridgeResponseEnvelope(message.id, undefined, `Unknown bridge command: ${message.method}`),
+      createBridgeResponseEnvelope(message.id, undefined, "Unknown bridge command: " + message.method),
     ));
     return;
   }
 
-  const dispatch = createBridgeCommandDispatch(message);
+  var dispatch = createBridgeCommandDispatch(message);
   trackBridgeRequest(pendingBridgeRequests, dispatch.requestId, message);
+
+  // Auto-cleanup if main thread never responds within timeout
+  var timerId = window.setTimeout(function onRequestTimeout() {
+    var pending = pendingBridgeRequests.get(dispatch.requestId);
+    if (pending) {
+      pendingBridgeRequests.delete(dispatch.requestId);
+      pendingRequestTimers.delete(dispatch.requestId);
+      forwardToBridge(serializeBridgeEnvelope(
+        createBridgeResponseEnvelope(pending.bridgeId, undefined, "Request timed out: " + dispatch.command),
+      ));
+      addLog("warn", "Command timed out: " + dispatch.command);
+    }
+  }, PENDING_REQUEST_TIMEOUT_MS);
+  pendingRequestTimers.set(dispatch.requestId, timerId);
+
   sendToMain({
     channel: WIDGET_V2_CHANNEL,
     source: "ui",
@@ -456,7 +513,14 @@ function handleBridgeCommand(message: BridgeCommandEnvelope): void {
 }
 
 function handleCommandResult(message: Extract<WidgetMainEnvelope, { type: "command-result" }>): void {
-  const bridgeResponse = resolveBridgeResponse(pendingBridgeRequests, message);
+  // Clear pending request timeout
+  var timer = pendingRequestTimers.get(message.requestId);
+  if (timer) {
+    window.clearTimeout(timer);
+    pendingRequestTimers.delete(message.requestId);
+  }
+
+  var bridgeResponse = resolveBridgeResponse(pendingBridgeRequests, message);
   if (bridgeResponse) {
     forwardToBridge(serializeBridgeEnvelope(bridgeResponse));
   }
