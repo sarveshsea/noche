@@ -680,7 +680,11 @@ function handleAction(action: string): void {
       }
       state.bridge.ws = null;
       state.bridge.port = null;
-      state.bridge.scanTimer = null;
+      if (state.bridge.scanTimer) {
+        window.clearTimeout(state.bridge.scanTimer);
+        state.bridge.scanTimer = null;
+      }
+      state.bridge.reconnectDelayMs = 1000;
       scanBridge();
       break;
     default:
