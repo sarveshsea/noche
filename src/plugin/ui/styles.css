@@ -195,7 +195,7 @@ button {
 
 .panel-title {
   font-family: var(--serif);
-  font-size: 23px;
+  font-size: 21px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.2px;
@@ -249,14 +249,14 @@ button {
 
 .tool-btn {
   font-family: var(--sans);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.01em;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.64);
   color: var(--fg);
-  padding: 6px 10px;
+  padding: 5px 8px;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   white-space: nowrap;
@@ -300,7 +300,7 @@ button {
 .tab-panel {
   display: none;
   border-top: 1px solid var(--border);
-  min-height: 220px;
+  min-height: 180px;
 }
 
 .tab-panel.active {
@@ -314,7 +314,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
+  padding: 10px;
 }
 
 .job-card,
@@ -500,11 +500,6 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .toolbar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .jobs-summary-grid,
   .split-grid {
     grid-template-columns: 1fr;
   }

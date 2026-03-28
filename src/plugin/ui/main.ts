@@ -617,17 +617,19 @@ function render(): void {
             </div>
           </section>
         </div>
-        <div class="side-column">
-          <section class="panel">
-            <div class="panel-header">
-              <div class="stack">
-                <div class="panel-title">Activity Feed</div>
-                <div class="panel-subtitle">Bridge events, sync summaries, failures.</div>
+        ${state.logs.length ? `
+          <div class="side-column">
+            <section class="panel">
+              <div class="panel-header">
+                <div class="stack">
+                  <div class="panel-title">Activity Feed</div>
+                  <div class="panel-subtitle">Bridge events, sync summaries, failures.</div>
+                </div>
               </div>
-            </div>
-            <div class="log-list">${renderLogs()}</div>
-          </section>
-        </div>
+              <div class="log-list">${renderLogs()}</div>
+            </section>
+          </div>
+        ` : ""}
       </div>
     </div>
   `;

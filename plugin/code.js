@@ -51,7 +51,7 @@ var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
   };
   figma.showUI(__html__, {
     width: 480,
-    height: 660,
+    height: 620,
     title: "Mémoire Control Plane",
     themeColors: true
   });
