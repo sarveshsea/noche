@@ -664,6 +664,7 @@ async function createNode(params: Record<string, unknown>): Promise<unknown> {
   if (x !== undefined) node.x = Number(x);
   if (y !== undefined) node.y = Number(y);
   if (width && height && "resize" in node) node.resize(Number(width), Number(height));
+  if (params.fills && "fills" in node) node.fills = params.fills;
 
   if (parentId) {
     const parent = await figma.getNodeByIdAsync(String(parentId));
