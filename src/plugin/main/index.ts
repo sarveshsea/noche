@@ -66,7 +66,7 @@ const state: PluginState = {
 
 figma.showUI(__html__, {
   width: 480,
-  height: 760,
+  height: 660,
   title: "Mémoire Control Plane",
   themeColors: true,
 });
