@@ -73,6 +73,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `5d13713` | Rewrite canvas agent box lifecycle |
 | `d64527d` | Add preview control-plane endpoints and agent visibility |
 | `0f02bcd` | Add widget bundle metadata and health checks |
+| `aedf43a` | Fix plugin bundle compatibility and symlink-safe installs |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
@@ -94,6 +95,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - **Canvas Agent Widgets Gain Stable Identity** — On-canvas agent boxes are now keyed by `{runId, taskId, role}`, seeded per plan, and updated through real idle/busy/done/error lifecycle transitions instead of overwriting a single role-based box.
 - **Preview Gains Widget-Grade State** — The preview API now keeps a live cache of bridge, selection, job, sync, healer, and agent status so dashboards can query the same operational state the Figma widget sees.
 - **Widget Bundle Health Becomes Explicit** — The build now emits widget metadata, postinstall records install state, and `connect` / `doctor` report whether the installed Control Plane bundle is built, current, and operator-ready.
+- **Figma Imports Must Use a Copied, Runtime-Compatible Bundle** — The shipped widget now targets ES2019, build tests fail on leaked `??` / `?.`, postinstall dereferences the copied plugin bundle, and install health treats symlink-resolved imports as unsafe before Figma rejects them.
 
 ### Changes
 - Added the Notes ecosystem release, including audit fixes, activation cleanup, recursive-copy handling, and dead-code removal
@@ -129,6 +131,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Upgraded the preview gallery footer into a live control summary and published agent-status updates beyond the canvas so preview and the Control Plane share the same orchestration view
 - Added widget build metadata, install metadata, and a new install-health resolver so the Control Plane bundle can be verified programmatically
 - Upgraded `connect` and `doctor` to report widget version, bundle readiness, install freshness, and plugin health in both JSON and human-readable output, then aligned README, notes, and multi-agent guidance with the shipped Widget V2 behavior
+- Downleveled the shipped Figma widget bundle to ES2019, rebuilt `plugin/code.js` and `plugin/ui.html`, and added regression tests that fail if modern syntax leaks into checked-in plugin assets
+- Hardened postinstall to replace `~/.memoire/plugin` with a dereferenced copy, persist resolved install metadata, and warn when the safe copied import path cannot be created
+- Expanded symlink-risk detection to catch imports resolved through linked paths, then updated connect and README guidance so users re-import from `~/.memoire/plugin/manifest.json` when Figma rejects a linked manifest
 
 ## v0.2.0 — 2026-03-26
 
