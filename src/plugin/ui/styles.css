@@ -9,8 +9,8 @@
   --border: rgba(17, 17, 17, 0.08);
   --border-strong: rgba(17, 17, 17, 0.15);
   --shadow: 0 16px 42px rgba(17, 17, 17, 0.08);
-  --mono: "JetBrains Mono", "SF Mono", monospace;
-  --serif: "Cormorant Garamond", Georgia, serif;
+  --mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --green: #257b4b;
   --green-soft: rgba(37, 123, 75, 0.12);
   --yellow: #9b6d10;

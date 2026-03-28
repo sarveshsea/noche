@@ -23,6 +23,10 @@ describe("plugin build pipeline", () => {
       expect(html).toContain("Selection");
       expect(html).toContain("System");
       expect(html).toContain('document.addEventListener("DOMContentLoaded", bootstrap, { once: true })');
+      expect(html).not.toContain("fonts.googleapis.com");
+      expect(html).not.toContain("fonts.gstatic.com");
+      expect(html).not.toContain("JetBrains Mono");
+      expect(html).not.toContain("Cormorant Garamond");
       expect(html).not.toContain('src="/assets/');
       expect(html).not.toContain('href="/assets/');
       expect(code).not.toContain("??");
