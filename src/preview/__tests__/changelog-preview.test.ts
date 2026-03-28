@@ -1,0 +1,24 @@
+import { describe, expect, it } from "vitest";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import {
+  applyChangelogData,
+  parseChangelogMarkdown,
+} from "../../../scripts/build-changelog-preview.mjs";
+
+describe("preview changelog sync", () => {
+  it("keeps preview/changelog.html generated from CHANGELOG.md", async () => {
+    const root = process.cwd();
+    const [markdown, currentHtml] = await Promise.all([
+      readFile(join(root, "CHANGELOG.md"), "utf-8"),
+      readFile(join(root, "preview", "changelog.html"), "utf-8"),
+    ]);
+
+    const releases = parseChangelogMarkdown(markdown);
+    const generatedHtml = applyChangelogData(currentHtml, releases);
+
+    expect(releases[0]?.version).toBeTruthy();
+    expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
+    expect(currentHtml).toBe(generatedHtml);
+  });
+});

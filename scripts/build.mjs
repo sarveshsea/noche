@@ -3,6 +3,7 @@ import { access, readdir, rm } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildPluginBundle } from "./build-plugin.mjs";
+import { syncChangelogPreview } from "./build-changelog-preview.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = resolve(root, "dist");
@@ -35,6 +36,10 @@ if (exitCode !== 0) {
 }
 
 await buildPluginBundle({ rootDir: root, outDir: resolve(root, "plugin") });
+await syncChangelogPreview({
+  changelogPath: resolve(root, "CHANGELOG.md"),
+  outputPath: resolve(root, "preview", "changelog.html"),
+});
 
 process.exit(0);
 
