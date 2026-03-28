@@ -81,6 +81,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `dc41507` | Strengthen widget typography hierarchy |
 | `fda8782` | Strengthen widget typography hierarchy |
 | `06c9112` | Strengthen widget typography hierarchy |
+| `15be77e` | Compress widget layout and reduce panel height |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
@@ -109,6 +110,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - **Widget Typography Uses Local System Stacks** — The Figma panel no longer depends on remote Google Fonts, so the embedded webview renders with reliable mono and serif system fonts even when external font loads are blocked.
 - **Widget Typography Now Carries Real Hierarchy** — The Control Plane now uses serif only for brand/section emphasis, sans for controls and values, and mono for operator metadata so the panel reads like a tool instead of one flat font block.
 - **Widget Typography Now Has Real Hierarchy** — The Control Plane uses sans text for readable body and controls, reserves mono for operational metadata, and keeps serif accents only where they add identity, which makes the panel feel deliberate instead of uniformly thin.
+- **Widget Density Now Prioritizes Operator Throughput** — The Control Plane opens shorter, collapses internal spacing, and removes artificial empty-state height so the Figma panel shows more state per viewport instead of spending its budget on whitespace.
 
 ### Changes
 - Added the Notes ecosystem release, including audit fixes, activation cleanup, recursive-copy handling, and dead-code removal
@@ -160,6 +162,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Strengthened the widget typography hierarchy by enlarging brand and section titles, increasing metric-value emphasis, and using a clearer sans treatment for tabs and operator controls
 - Reworked the widget type hierarchy so operator copy and controls use a stronger sans stack, brand and section heads keep serif emphasis, and telemetry labels stay mono instead of flattening the whole panel into one weak font treatment
 - Tightened the widget typography pass with a larger base text size, stronger control weights, clearer status pills, and better subtitle/chip readability inside the Figma panel
+- Reduced the widget height, tightened panel and card spacing, turned the action row into a denser grid, and cut the operator tab panel minimum so the Figma plugin wastes less vertical space
 
 ## v0.2.0 — 2026-03-26
 
