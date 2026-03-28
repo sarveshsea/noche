@@ -75,6 +75,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `0f02bcd` | Add widget bundle metadata and health checks |
 | `aedf43a` | Fix plugin bundle compatibility and symlink-safe installs |
 | `430ec6e` | Downlevel plugin bundle to remove object spread |
+| `3ea17d5` | Fix blank widget panel bootstrap |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
@@ -98,6 +99,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - **Widget Bundle Health Becomes Explicit** — The build now emits widget metadata, postinstall records install state, and `connect` / `doctor` report whether the installed Control Plane bundle is built, current, and operator-ready.
 - **Figma Imports Must Use a Copied, Runtime-Compatible Bundle** — The shipped widget now targets ES2019, build tests fail on leaked `??` / `?.`, postinstall dereferences the copied plugin bundle, and install health treats symlink-resolved imports as unsafe before Figma rejects them.
 - **Figma Runtime Compatibility Is Enforced at an ES2017 Syntax Floor** — The shipped widget bundle now targets ES2017 so raw object spread is compiled away before import, and the build regression test now checks for parser-breaking object spread instead of relying on a broad regex.
+- **Widget UI Bootstraps Only After the Mount Node Exists** — The operator console now waits for `DOMContentLoaded` before resolving `#app`, which keeps the inlined bundle from crashing when Vite hoists the script into `<head>`.
 
 ### Changes
 - Added the Notes ecosystem release, including audit fixes, activation cleanup, recursive-copy handling, and dead-code removal
@@ -139,6 +141,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Lowered the plugin bundle target from ES2019 to ES2017 so Vite compiles raw object spread out of both `plugin/code.js` and `plugin/ui.html`, which fixes the Figma parser failure at `...state.connection`
 - Rebuilt the shipped widget artifacts and updated widget metadata after the ES2017 compatibility pass
 - Tightened the plugin build regression test so it catches actual object spread in built artifacts without false-flagging safe array spread
+- Fixed the blank widget panel by deferring UI bootstrap until `#app` exists, which prevents the inlined `plugin/ui.html` script from throwing before the body is parsed
+- Replaced `replaceAll` in the plugin UI escape helpers with regex replacements to avoid another first-render compatibility trap in embedded runtimes
+- Added build coverage that asserts the generated widget bundle includes the DOM-ready bootstrap path
 
 ## v0.2.0 — 2026-03-26
 
