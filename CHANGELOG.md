@@ -81,6 +81,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `fda8782` | Strengthen widget typography hierarchy |
 | `06c9112` | Strengthen widget typography hierarchy |
 | `01cf9a9` | Compress widget layout and reduce panel height |
+| `43decaf` | Reduce widget height and increase density |
 
 ### Key Design Decisions
 - **Notes Become a Real Extension Surface** — Mémoire now treats Notes as installable skill packs, including workspace `SKILL.md` bundles, built-in notes, and compatibility fixes for activation and copy behavior.
