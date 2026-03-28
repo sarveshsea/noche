@@ -743,7 +743,7 @@ ${existingMappings}
           await this.updateAgentBox(this.makeAgentBoxUpdate(plan, task, taskIndex, "busy"));
 
           try {
-            const result = await this.executeSubTask(task, plan.context);
+            const result = await this.executeWithRetry(task, plan.context);
             task.status = "completed";
             task.result = result;
             task.completedAt = new Date().toISOString();
@@ -804,6 +804,29 @@ ${existingMappings}
   ];
 
   // ── Sub-Agent Execution ────────────────────────────────
+
+  private static readonly MAX_RETRIES = 2;
+  private static readonly RETRY_BASE_MS = 500;
+
+  private async executeWithRetry(task: SubTask, ctx: AgentContext): Promise<unknown> {
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt <= AgentOrchestrator.MAX_RETRIES; attempt++) {
+      try {
+        return await this.executeSubTask(task, ctx);
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        if (attempt < AgentOrchestrator.MAX_RETRIES) {
+          const delayMs = AgentOrchestrator.RETRY_BASE_MS * Math.pow(2, attempt);
+          log.warn(
+            { taskId: task.id, attempt: attempt + 1, delayMs, err: lastError.message },
+            "Sub-task failed, retrying",
+          );
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+    throw lastError;
+  }
 
   private async executeSubTask(task: SubTask, ctx: AgentContext): Promise<unknown> {
     log.info({ taskId: task.id, agent: task.agentType, name: task.name }, "Executing sub-task");
