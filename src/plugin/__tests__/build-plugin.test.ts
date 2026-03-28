@@ -22,6 +22,7 @@ describe("plugin build pipeline", () => {
       expect(html).toContain("Jobs");
       expect(html).toContain("Selection");
       expect(html).toContain("System");
+      expect(html).toContain('document.addEventListener("DOMContentLoaded", bootstrap, { once: true })');
       expect(html).not.toContain('src="/assets/');
       expect(html).not.toContain('href="/assets/');
       expect(code).not.toContain("??");

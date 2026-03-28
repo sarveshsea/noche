@@ -71,11 +71,8 @@ const MAX_JOBS = 24;
 const MAX_AGENT_STATUSES = 48;
 const pendingBridgeRequests = new Map<string, PendingBridgeRequest>();
 
-const appRoot = document.getElementById("app");
-if (!appRoot) {
-  throw new Error("Plugin root element not found");
-}
-const app = appRoot as HTMLDivElement;
+let app: HTMLDivElement | null = null;
+let bootstrapped = false;
 
 const emptyConnection: WidgetConnectionState = {
   stage: "offline",
@@ -127,17 +124,37 @@ const state: UiState = {
   },
 };
 
-render();
-bindPluginMessages();
-sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
-window.setTimeout(scanBridge, 120);
-window.setInterval(() => {
-  sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
-  if (state.bridge.ws && state.bridge.ws.readyState === WebSocket.OPEN) {
-    state.bridge.lastPingSentAt = Date.now();
-    state.bridge.ws.send(JSON.stringify({ type: "ping" }));
+bootstrap();
+
+function bootstrap(): void {
+  if (bootstrapped) {
+    return;
   }
-}, 10000);
+
+  const root = document.getElementById("app");
+  if (!root) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
+      return;
+    }
+    throw new Error("Plugin root element not found");
+  }
+
+  app = root as HTMLDivElement;
+  bootstrapped = true;
+
+  render();
+  bindPluginMessages();
+  sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
+  window.setTimeout(scanBridge, 120);
+  window.setInterval(() => {
+    sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
+    if (state.bridge.ws && state.bridge.ws.readyState === WebSocket.OPEN) {
+      state.bridge.lastPingSentAt = Date.now();
+      state.bridge.ws.send(JSON.stringify({ type: "ping" }));
+    }
+  }, 10000);
+}
 
 function bindPluginMessages(): void {
   window.onmessage = (event: MessageEvent<{ pluginMessage?: WidgetMainEnvelope }>) => {
@@ -537,6 +554,10 @@ function addLog(level: WidgetLogEntry["level"], message: string, detail?: unknow
 }
 
 function render(): void {
+  if (!app) {
+    return;
+  }
+
   app.innerHTML = `
     <div class="shell">
       <div class="topbar">
@@ -1110,9 +1131,9 @@ async function copyToClipboard(value: string, successMessage: string, detail: Re
 
 function escapeHtml(value: string): string {
   return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
