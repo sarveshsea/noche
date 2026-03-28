@@ -53,7 +53,7 @@ button {
 
 #app {
   display: flex;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 .shell {
@@ -67,7 +67,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border);
   background: rgba(247, 243, 235, 0.92);
   backdrop-filter: blur(14px);
@@ -98,7 +98,7 @@ button {
 
 .brand-name {
   font-family: var(--serif);
-  font-size: 23px;
+  font-size: 21px;
   font-weight: 600;
   letter-spacing: 0.8px;
   font-style: italic;
@@ -165,15 +165,15 @@ button {
 .content {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-  gap: 10px;
-  padding: 10px;
+  gap: 8px;
+  padding: 8px;
 }
 
 .main-column,
 .side-column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .panel {
@@ -189,13 +189,13 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
 }
 
 .panel-title {
   font-family: var(--serif);
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.2px;
@@ -212,14 +212,14 @@ button {
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 10px 12px 0;
+  gap: 6px;
+  padding: 8px 10px 0;
 }
 
 .metric-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 8px 10px;
+  padding: 7px 9px;
   background: rgba(255, 255, 255, 0.48);
 }
 
@@ -243,8 +243,8 @@ button {
 .toolbar {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  padding: 10px 12px 12px;
+  gap: 5px;
+  padding: 8px 10px 10px;
 }
 
 .tool-btn {
@@ -256,7 +256,7 @@ button {
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.64);
   color: var(--fg);
-  padding: 5px 8px;
+  padding: 5px 7px;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   white-space: nowrap;
@@ -271,13 +271,13 @@ button {
 .tabstrip {
   display: flex;
   gap: 2px;
-  padding: 0 12px;
+  padding: 0 10px;
 }
 
 .tab {
   font-family: var(--sans);
   flex: 1;
-  padding: 8px 10px;
+  padding: 7px 8px;
   border: 1px solid transparent;
   border-bottom: none;
   border-top-left-radius: var(--radius);
@@ -300,7 +300,7 @@ button {
 .tab-panel {
   display: none;
   border-top: 1px solid var(--border);
-  min-height: 180px;
+  min-height: 160px;
 }
 
 .tab-panel.active {
@@ -313,8 +313,8 @@ button {
 .log-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 9px;
 }
 
 .job-card,
@@ -325,7 +325,7 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.62);
-  padding: 10px;
+  padding: 9px;
 }
 
 .job-card.running {
@@ -351,22 +351,22 @@ button {
 .jobs-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .summary-metric {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.54);
-  padding: 8px 10px;
+  padding: 7px 9px;
 }
 
 .jobs-alert {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 8px;
-  padding: 8px 10px;
+  margin-top: 6px;
+  padding: 7px 9px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
@@ -386,7 +386,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .card-title {
@@ -411,7 +411,7 @@ button {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .kv-grid {
@@ -477,7 +477,7 @@ button {
 .split-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .inline-actions {

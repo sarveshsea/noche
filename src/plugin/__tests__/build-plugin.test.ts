@@ -17,12 +17,16 @@ describe("plugin build pipeline", () => {
       const meta = await readFile(result.metaPath, "utf8");
 
       expect(code).toContain("figma.showUI");
+      expect(code).toContain("height: 600");
       expect(html).toContain("Operator Console");
       expect(html).toContain("<script>");
       expect(html).toContain("Jobs");
       expect(html).toContain("Selection");
       expect(html).toContain("System");
       expect(html).toContain('document.addEventListener("DOMContentLoaded", bootstrap, { once: true })');
+      expect(html).not.toContain("min-height: 100vh");
+      expect(html).toContain("min-height: 160px");
+      expect(html).toContain("grid-template-columns: repeat(3, minmax(0, 1fr));");
       expect(html).not.toContain("fonts.googleapis.com");
       expect(html).not.toContain("fonts.gstatic.com");
       expect(html).not.toContain("JetBrains Mono");
