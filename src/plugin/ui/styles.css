@@ -37,12 +37,13 @@ body {
 
 body {
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--fg);
   background:
     radial-gradient(circle at top right, rgba(47, 94, 184, 0.08), transparent 22rem),
     radial-gradient(circle at bottom left, rgba(37, 123, 75, 0.08), transparent 24rem),
     var(--bg);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -106,7 +107,7 @@ button {
 .brand-sub {
   font-family: var(--mono);
   color: var(--fg-muted);
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1.4px;
 }
@@ -119,8 +120,9 @@ button {
 
 .status-pill {
   font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -201,7 +203,7 @@ button {
 .panel-subtitle {
   font-family: var(--mono);
   color: var(--fg-muted);
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1.3px;
 }
@@ -234,6 +236,7 @@ button {
   font-size: 17px;
   font-weight: 600;
   line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .toolbar {
@@ -245,9 +248,9 @@ button {
 
 .tool-btn {
   font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.64);
@@ -387,7 +390,8 @@ button {
 .card-title {
   font-family: var(--sans);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .muted {
@@ -452,7 +456,8 @@ button {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.72);
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .log-card.success {
@@ -481,7 +486,7 @@ button {
 
 .inline-actions .tool-btn {
   padding: 6px 10px;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 @media (max-width: 960px) {
