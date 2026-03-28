@@ -344,7 +344,7 @@ export class FigmaBridge extends EventEmitter {
       30000
     ) as { base64: string; format: string };
 
-    return Buffer.from(result.base64, "binary");
+    return Buffer.from(result.base64, "base64");
   }
 
   // ── Parsers ──────────────────────────────────────────
