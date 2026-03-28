@@ -264,14 +264,22 @@ export function registerHeartbeatCommand(program: Command, engine: MemoireEngine
     .description("Check design system health, spec staleness, and token drift")
     .option("--watch", "Run continuously on an interval")
     .option("--interval <minutes>", "Interval in minutes for watch mode", String(DEFAULT_INTERVAL_MINUTES))
-    .action(async (opts: { watch?: boolean; interval?: string }) => {
+    .option("--json", "Output heartbeat result as JSON")
+    .action(async (opts: { watch?: boolean; interval?: string; json?: boolean }) => {
+      const json = Boolean(opts.json);
       const intervalMinutes = parseInt(opts.interval ?? String(DEFAULT_INTERVAL_MINUTES), 10);
       const intervalMs = intervalMinutes * 60 * 1000;
 
       // Run once immediately
       const result = await runHeartbeat(engine, opts.watch ? intervalMs : undefined);
-      printHeartbeat(result);
       const outPath = await writeHeartbeat(engine, result);
+
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      printHeartbeat(result);
       console.log(`  Written to ${outPath}\n`);
 
       if (!opts.watch) {

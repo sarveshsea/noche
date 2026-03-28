@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import { join } from "path";
+import { existsSync } from "fs";
 
 type ResearchAction = "from-file" | "from-stickies" | "from-transcript" | "web" | "synthesize" | "report";
 
@@ -60,6 +61,11 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
     .option("--json", "Output file import result as JSON")
     .action(async (filePath: string, opts: { json?: boolean }) => {
       const json = Boolean(opts.json);
+      if (!existsSync(filePath)) {
+        console.error(`\n  File not found: ${filePath}\n`);
+        process.exitCode = 1;
+        return;
+      }
       await engine.init();
       await engine.research.load();
       if (!json) {
@@ -142,6 +148,11 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
     .option("--json", "Output transcript analysis as JSON")
     .action(async (filePath: string, opts: { label?: string; json?: boolean }) => {
       const json = Boolean(opts.json);
+      if (!existsSync(filePath)) {
+        console.error(`\n  File not found: ${filePath}\n`);
+        process.exitCode = 1;
+        return;
+      }
       await engine.init();
       await engine.research.load();
 
