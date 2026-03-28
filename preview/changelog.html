@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">93</span> commits</span>
+      <span><span class="n" id="stat-commits">94</span> commits</span>
       <span><span class="n" id="stat-versions">5</span> versions</span>
       <span><span class="n" id="stat-latest">2026-03-27</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v0.2.1</strong>
-            <div class="summary-caption">65 commits tracked in v0.2.1 from CHANGELOG.md.</div>
+            <div class="summary-caption">66 commits tracked in v0.2.1 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -703,6 +703,10 @@ const releases = [
       [
         "3ea17d5",
         "Fix blank widget panel bootstrap"
+      ],
+      [
+        "6818e32",
+        "Generate preview changelog from CHANGELOG.md"
       ]
     ],
     "decisions": [
@@ -793,6 +797,10 @@ const releases = [
       [
         "Widget UI Bootstraps Only After the Mount Node Exists",
         "The operator console now waits for DOMContentLoaded before resolving #app, which keeps the inlined bundle from crashing when Vite hoists the script into <head>."
+      ],
+      [
+        "Preview Changelog Is Now Generated from CHANGELOG.md",
+        "preview/changelog.html is no longer hand-synced via an embedded release array; the build regenerates it from CHANGELOG.md, and a regression test now fails if the checked-in preview page drifts from the changelog source."
       ]
     ],
     "changes": [
@@ -837,7 +845,10 @@ const releases = [
       "Tightened the plugin build regression test so it catches actual object spread in built artifacts without false-flagging safe array spread",
       "Fixed the blank widget panel by deferring UI bootstrap until #app exists, which prevents the inlined plugin/ui.html script from throwing before the body is parsed",
       "Replaced replaceAll in the plugin UI escape helpers with regex replacements to avoid another first-render compatibility trap in embedded runtimes",
-      "Added build coverage that asserts the generated widget bundle includes the DOM-ready bootstrap path"
+      "Added build coverage that asserts the generated widget bundle includes the DOM-ready bootstrap path",
+      "Added scripts/build-changelog-preview.mjs to parse CHANGELOG.md, normalize release data, and regenerate preview/changelog.html from the changelog source of truth",
+      "Wired npm run build to refresh the preview changelog automatically and added npm run build:changelog for direct regeneration",
+      "Added a regression test that compares the checked-in preview/changelog.html against generated output from CHANGELOG.md, so stale preview changelog data now fails locally"
     ]
   },
   {
