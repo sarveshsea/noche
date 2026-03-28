@@ -714,7 +714,21 @@ ${existingMappings}
       );
 
       if (ready.length === 0 && completed.size < plan.subTasks.length) {
-        // Deadlock or all remaining tasks failed
+        // Deadlock — remaining tasks have unsatisfied dependencies
+        const stuck = plan.subTasks.filter((t) => !completed.has(t.id));
+        const stuckNames = stuck.map((t) => `${t.name} (deps: ${t.dependencies.join(", ")})`);
+        log.error(
+          { stuck: stuckNames, completed: Array.from(completed) },
+          "Task dependency deadlock — %d tasks blocked, breaking execution",
+          stuck.length,
+        );
+        for (const task of stuck) {
+          if (task.status === "pending") {
+            task.status = "failed";
+            task.error = `Deadlocked: depends on ${task.dependencies.filter((d) => !completed.has(d)).join(", ")}`;
+            task.completedAt = new Date().toISOString();
+          }
+        }
         break;
       }
 

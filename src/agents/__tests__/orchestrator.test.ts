@@ -59,7 +59,7 @@ function makeEngine(initialSpecs: AnySpec[]) {
     engine: {
       registry,
       notes: { loaded: false, notes: [] },
-      figma: { isConnected: false },
+      figma: { isConnected: false, publishAgentStatus() {} },
       project: { framework: "vite" },
       async generateFromSpec(name: string) {
         generated.push(name);
