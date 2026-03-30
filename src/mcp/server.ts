@@ -24,7 +24,7 @@ export function createMemoireMcpServer(engine: MemoireEngine): McpServer {
   const server = new McpServer(
     {
       name: "memoire",
-      version: "0.5.0",
+      version: "0.6.0",
     },
     {
       capabilities: {

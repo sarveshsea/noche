@@ -6,6 +6,34 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v0.6.0 — 2026-03-30
+
+### Commits
+| Hash | Message |
+|------|---------|
+| `dd4bd77` | Add research preview tab — insights, personas, themes, coverage bar in dashboard |
+| `b152460` | Add research traceability — bidirectional insight-to-spec links |
+| `bcb437a` | Add transcript processor — heuristic interview parsing into structured research |
+| `7bc6aef` | Add pull diff output — show token/component/style changes after pull |
+| `3390192` | Add memi validate command — expose spec validator as CLI tool |
+| `dcac4a7` | Add capability matrix — every command declares what it needs |
+
+### Key Design Decisions
+
+- **Capability Matrix** — Every command declares required and optional capabilities (figma, ai, specs, generated-code, research, daemon). Missing required capabilities produce recovery-oriented error messages. Missing optional capabilities trigger degraded mode with warnings. This enables offline-first workflows and clear "what to do next" guidance.
+
+- **Spec Validation CLI** — `memi validate` exposes the existing Zod schema validator + cross-reference checker as a CLI tool. Checks atomic design hierarchy, prop explosion, Code Connect mapping, and spec-to-spec references. Exit code 1 on errors for CI integration.
+
+- **Pull Diff** — `memi pull` now snapshots the design system before pulling and shows a structured diff after: added/modified/removed tokens, components, and styles. Designers can see exactly what changed before generating code.
+
+- **Transcript Processor** — Heuristic-first interview parsing with 4 speaker detection patterns, TF-IDF theme extraction (150+ stop words), first-person quote detection, and per-segment sentiment analysis. Generates ResearchInsight objects automatically from negative/positive themes. AI enhances but never gates.
+
+- **Research Traceability** — Bidirectional reverse index between insights and specs. `getSpecsForInsight()` for impact analysis, `getInsightsForSpec()` for provenance, `getOrphanedInsights()` for cleanup, `getCoverage()` for reporting. Persisted to `.memoire/research/spec-index.json`.
+
+- **Research Preview Tab** — Dashboard now has a Research panel showing insights, personas, themes, and a coverage bar (% of specs backed by research). Lazy-loaded on toggle. API endpoint upgraded with coverage stats.
+
+---
+
 ## v0.5.0 — 2026-03-30
 
 ### Commits
