@@ -589,6 +589,14 @@ export class MemoireWsServer extends EventEmitter {
     if (!limit || now - limit.windowStart > RATE_LIMIT.windowMs) {
       limit = { messageCount: 0, bytesCount: 0, windowStart: now };
       this.rateLimits.set(clientId, limit);
+
+      // Evict stale entries from disconnected clients (5 windows old)
+      if (this.rateLimits.size > 50) {
+        const staleThreshold = now - RATE_LIMIT.windowMs * 5;
+        for (const [id, rl] of this.rateLimits) {
+          if (rl.windowStart < staleThreshold) this.rateLimits.delete(id);
+        }
+      }
     }
 
     limit.messageCount++;
