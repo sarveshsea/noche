@@ -130,19 +130,49 @@ function buildVariantType(spec: ComponentSpec): string {
 function buildComponentBody(spec: ComponentSpec, tokens: DesignToken[] = []): string {
   const hasCard = spec.shadcnBase.includes("Card");
   const hasBadge = spec.shadcnBase.includes("Badge");
+  const hasButton = spec.shadcnBase.includes("Button");
+  const hasInput = spec.shadcnBase.includes("Input");
+  const hasAvatar = spec.shadcnBase.includes("Avatar");
+  const hasDialog = spec.shadcnBase.includes("Dialog");
   const tokenStyles = buildTokenStyles(spec, tokens);
+  const variantLogic = buildVariantLogic(spec);
 
   if (hasCard) {
-    return buildCardComponent(spec, hasBadge, tokenStyles);
+    return buildCardComponent(spec, hasBadge, tokenStyles, variantLogic);
   }
 
-  // Default: simple div wrapper
-  const lines = ["  return ("];
-  const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
-  lines.push(`    <div className={cn("${defaultClasses(spec)}", className)}${styleAttr} {...props}>`);
+  if (hasButton) {
+    return buildButtonComponent(spec, tokenStyles, variantLogic);
+  }
 
-  for (const [name] of Object.entries(spec.props)) {
-    lines.push(`      {${name} && <span>{${name}}</span>}`);
+  if (hasInput) {
+    return buildInputComponent(spec, tokenStyles);
+  }
+
+  if (hasAvatar) {
+    return buildAvatarComponent(spec, tokenStyles);
+  }
+
+  if (hasDialog) {
+    return buildDialogComponent(spec, tokenStyles);
+  }
+
+  // Default: smart div wrapper with variant support
+  const lines: string[] = [];
+  if (variantLogic) lines.push(variantLogic, "");
+  lines.push("  return (");
+  const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
+  const variantClass = spec.variants.length > 1 ? ", variantClasses" : "";
+  lines.push(`    <div className={cn("${defaultClasses(spec)}"${variantClass}, className)}${styleAttr} {...props}>`);
+
+  for (const [name, type] of Object.entries(spec.props)) {
+    if (type === "boolean" || type === "boolean?") {
+      lines.push(`      {${name} && <div className="text-sm">{${name}}</div>}`);
+    } else if (type === "ReactNode" || type === "ReactNode?") {
+      lines.push(`      {${name}}`);
+    } else {
+      lines.push(`      {${name} && <span className="text-sm">{${name}}</span>}`);
+    }
   }
 
   lines.push("    </div>");
@@ -150,15 +180,149 @@ function buildComponentBody(spec: ComponentSpec, tokens: DesignToken[] = []): st
   return lines.join("\n");
 }
 
-function buildCardComponent(spec: ComponentSpec, hasBadge: boolean, tokenStyles?: string): string {
+/** Generate variant CSS class mapping logic. */
+function buildVariantLogic(spec: ComponentSpec): string | null {
+  if (spec.variants.length <= 1) return null;
+
+  const variantMap: string[] = [];
+  for (const v of spec.variants) {
+    const classes = inferVariantClasses(v, spec);
+    variantMap.push(`    "${v}": "${classes}",`);
+  }
+
+  return [
+    `  const variantStyles: Record<${spec.name}Variant, string> = {`,
+    ...variantMap,
+    `  }`,
+    `  const variantClasses = variantStyles[variant ?? "default"] ?? ""`,
+  ].join("\n");
+}
+
+/** Infer Tailwind classes for a variant name. */
+function inferVariantClasses(variant: string, spec: ComponentSpec): string {
+  const v = variant.toLowerCase();
+
+  // Common variant → Tailwind class mappings
+  const map: Record<string, string> = {
+    default: "",
+    primary: "bg-primary text-primary-foreground",
+    secondary: "bg-secondary text-secondary-foreground",
+    destructive: "bg-destructive text-destructive-foreground",
+    outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+    ghost: "hover:bg-accent hover:text-accent-foreground",
+    link: "text-primary underline-offset-4 hover:underline",
+    compact: "p-2 text-sm",
+    large: "p-6 text-lg",
+    small: "p-1 text-xs",
+    success: "bg-green-500/10 text-green-700 border-green-200",
+    warning: "bg-yellow-500/10 text-yellow-700 border-yellow-200",
+    error: "bg-red-500/10 text-red-700 border-red-200",
+    info: "bg-blue-500/10 text-blue-700 border-blue-200",
+    online: "bg-green-500",
+    offline: "bg-gray-400",
+    away: "bg-yellow-500",
+    active: "bg-primary/10 font-medium",
+    inactive: "opacity-60",
+    disabled: "opacity-50 pointer-events-none",
+    loading: "animate-pulse",
+  };
+
+  return map[v] ?? "";
+}
+
+function buildButtonComponent(spec: ComponentSpec, tokenStyles?: string, variantLogic?: string | null): string {
+  const props = Object.keys(spec.props);
+  const labelProp = props.find((p) => /label|text|children/i.test(p)) ?? props[0];
+  const iconProp = props.find((p) => /icon/i.test(p));
+  const disabledProp = props.find((p) => /disabled/i.test(p));
+
+  const lines: string[] = [];
+  if (variantLogic) lines.push(variantLogic, "");
+  lines.push("  return (");
+  const variantAttr = spec.variants.length > 1 ? ` variant={variant as any}` : "";
+  const disabledAttr = disabledProp ? ` disabled={${disabledProp}}` : "";
+  const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
+  lines.push(`    <Button className={cn(className)}${variantAttr}${disabledAttr}${styleAttr} {...props}>`);
+  if (iconProp) lines.push(`      {${iconProp} && <span className="mr-2">{${iconProp}}</span>}`);
+  if (labelProp) lines.push(`      {${labelProp}}`);
+  lines.push("    </Button>");
+  lines.push("  )");
+  return lines.join("\n");
+}
+
+function buildInputComponent(spec: ComponentSpec, tokenStyles?: string): string {
+  const props = Object.keys(spec.props);
+  const labelProp = props.find((p) => /label/i.test(p));
+  const placeholderProp = props.find((p) => /placeholder|hint/i.test(p));
+  const valueProp = props.find((p) => /value/i.test(p));
+  const errorProp = props.find((p) => /error/i.test(p));
+
+  const lines: string[] = [];
+  lines.push("  return (");
+  const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
+  lines.push(`    <div className={cn("grid gap-2", className)}${styleAttr} {...props}>`);
+  if (labelProp) lines.push(`      {${labelProp} && <Label>{${labelProp}}</Label>}`);
+  lines.push(`      <Input${placeholderProp ? ` placeholder={${placeholderProp}}` : ""}${valueProp ? ` value={${valueProp}}` : ""} />`);
+  if (errorProp) lines.push(`      {${errorProp} && <p className="text-sm text-destructive">{${errorProp}}</p>}`);
+  lines.push("    </div>");
+  lines.push("  )");
+  return lines.join("\n");
+}
+
+function buildAvatarComponent(spec: ComponentSpec, tokenStyles?: string): string {
+  const props = Object.keys(spec.props);
+  const srcProp = props.find((p) => /src|avatar|image|url/i.test(p));
+  const nameProp = props.find((p) => /name|alt/i.test(p));
+
+  const lines: string[] = [];
+  lines.push("  return (");
+  const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
+  lines.push(`    <Avatar className={cn(className)}${styleAttr} {...props}>`);
+  if (srcProp) lines.push(`      <AvatarImage src={${srcProp}} alt={${nameProp ?? '""'}} />`);
+  lines.push(`      <AvatarFallback>{${nameProp ? `${nameProp}?.slice(0, 2).toUpperCase()` : '"?"'}}</AvatarFallback>`);
+  lines.push("    </Avatar>");
+  lines.push("  )");
+  return lines.join("\n");
+}
+
+function buildDialogComponent(spec: ComponentSpec, tokenStyles?: string): string {
+  const props = Object.keys(spec.props);
+  const titleProp = props.find((p) => /title/i.test(p));
+  const descProp = props.find((p) => /desc|description/i.test(p));
+  const triggerProp = props.find((p) => /trigger|label|button/i.test(p));
+  const childrenProp = props.find((p) => /children|content|body/i.test(p));
+
+  const lines: string[] = [];
+  lines.push("  return (");
+  const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
+  lines.push(`    <Dialog>`);
+  lines.push(`      <DialogTrigger asChild>`);
+  lines.push(`        <Button variant="outline">{${triggerProp ?? '"Open"'}}</Button>`);
+  lines.push(`      </DialogTrigger>`);
+  lines.push(`      <DialogContent className={cn(className)}${styleAttr}>`);
+  lines.push(`        <DialogHeader>`);
+  if (titleProp) lines.push(`          <DialogTitle>{${titleProp}}</DialogTitle>`);
+  if (descProp) lines.push(`          <DialogDescription>{${descProp}}</DialogDescription>`);
+  lines.push(`        </DialogHeader>`);
+  if (childrenProp) lines.push(`        {${childrenProp}}`);
+  lines.push(`      </DialogContent>`);
+  lines.push(`    </Dialog>`);
+  lines.push("  )");
+  return lines.join("\n");
+}
+
+function buildCardComponent(spec: ComponentSpec, hasBadge: boolean, tokenStyles?: string, variantLogic?: string | null): string {
   const props = Object.keys(spec.props);
   const titleProp = props.find((p) => p.toLowerCase().includes("title"));
   const valueProp = props.find((p) => p.toLowerCase().includes("value") || p.toLowerCase().includes("metric"));
   const descProp = props.find((p) => p.toLowerCase().includes("desc") || p.toLowerCase().includes("subtitle"));
 
-  const lines = ["  return ("];
+  const lines: string[] = [];
+  if (variantLogic) lines.push(variantLogic, "");
+  lines.push("  return (");
   const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
-  lines.push(`    <Card className={cn("${defaultClasses(spec)}", className)}${styleAttr} {...props}>`);
+  const variantClass = spec.variants.length > 1 ? ", variantClasses" : "";
+  lines.push(`    <Card className={cn("${defaultClasses(spec)}"${variantClass}, className)}${styleAttr} {...props}>`);
 
   if (titleProp || descProp) {
     lines.push("      <CardHeader>");

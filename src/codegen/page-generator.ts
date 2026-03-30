@@ -109,12 +109,17 @@ export function generatePage(spec: PageSpec, ctx: CodegenContext): PageCode {
   }
   lines.push("");
 
-  // Component
+  // Component — derive data props from section configurations
+  const dataProps = derivePageDataProps(spec);
   lines.push(`export interface ${spec.name}Props {`);
   lines.push(`  className?: string`);
+  for (const [name, type] of Object.entries(dataProps)) {
+    lines.push(`  ${name}?: ${type}`);
+  }
   lines.push(`}`);
   lines.push("");
-  lines.push(`export function ${spec.name}({ className }: ${spec.name}Props) {`);
+  const destructuredPageProps = ["className", ...Object.keys(dataProps)].join(", ");
+  lines.push(`export function ${spec.name}({ ${destructuredPageProps} }: ${spec.name}Props) {`);
   lines.push("  return (");
   lines.push(`    <div className={cn("", className)}>`);
   lines.push(wrappedContent);
@@ -202,4 +207,34 @@ function buildResponsiveClasses(responsive: PageSpec["responsive"]): string {
   }
 
   return classes.join(" ");
+}
+
+/** Derive data props from page sections' props for the page-level component interface. */
+function derivePageDataProps(spec: PageSpec): Record<string, string> {
+  const dataProps: Record<string, string> = {};
+
+  for (const section of spec.sections) {
+    for (const [key, value] of Object.entries(section.props)) {
+      // Infer TypeScript types from prop values
+      if (typeof value === "string") {
+        dataProps[key] = "string";
+      } else if (typeof value === "number") {
+        dataProps[key] = "number";
+      } else if (typeof value === "boolean") {
+        dataProps[key] = "boolean";
+      } else if (Array.isArray(value)) {
+        dataProps[key] = "unknown[]";
+      } else {
+        dataProps[key] = "Record<string, unknown>";
+      }
+    }
+  }
+
+  // Add common page data props
+  if (spec.meta && Object.keys(spec.meta).length > 0) {
+    dataProps["pageTitle"] = "string";
+    dataProps["pageDescription"] = "string";
+  }
+
+  return dataProps;
 }
