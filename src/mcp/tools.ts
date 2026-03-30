@@ -298,4 +298,44 @@ export function registerTools(server: McpServer, engine: MemoireEngine): void {
       return { content: [{ type: "text" as const, text: JSON.stringify(tree, null, 2) }] };
     },
   );
+
+  // ── measure_text ───────────────────────────────────────
+  server.tool(
+    "measure_text",
+    "Measure text dimensions using Pretext — predict height, line count, overflow, and breakpoint behavior without a browser",
+    {
+      text: z.string().describe("The text to measure"),
+      maxWidth: z.number().describe("Maximum width in pixels for line wrapping"),
+      font: z.string().default("16px sans-serif").describe("CSS font string (e.g., '16px Inter', 'bold 14px sans-serif')"),
+      lineHeight: z.number().optional().describe("Line height in px (default: fontSize * 1.5)"),
+      containerHeight: z.number().optional().describe("If set, checks whether text fits in this container height"),
+      checkBreakpoints: z.boolean().default(false).describe("If true, test text at mobile/tablet/desktop widths"),
+    },
+    async ({ text, maxWidth, font, lineHeight, containerHeight, checkBreakpoints: doBreakpoints }) => {
+      const { getTextMeasurer } = await import("../engine/text-measurer.js");
+      const measurer = getTextMeasurer();
+
+      const result: Record<string, unknown> = {};
+
+      // Basic measurement
+      const measurement = measurer.measureDetailed(text, { maxWidth, font, lineHeight });
+      result.height = measurement.height;
+      result.lineCount = measurement.lineCount;
+      result.lines = measurement.lines;
+
+      // Overflow check
+      if (containerHeight !== undefined) {
+        const overflow = measurer.checkOverflow(text, { maxWidth, font, lineHeight, containerHeight });
+        result.overflow = overflow;
+      }
+
+      // Breakpoint analysis
+      if (doBreakpoints) {
+        const breakpoints = measurer.checkBreakpoints(text, { font, lineHeight, containerHeight });
+        result.breakpoints = breakpoints;
+      }
+
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+    },
+  );
 }
