@@ -390,8 +390,8 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">113</span> commits</span>
-      <span><span class="n" id="stat-versions">7</span> versions</span>
+      <span><span class="n" id="stat-commits">119</span> commits</span>
+      <span><span class="n" id="stat-versions">8</span> versions</span>
       <span><span class="n" id="stat-latest">2026-03-30</span> latest</span>
     </div>
   </header>
@@ -407,8 +407,8 @@ a:hover { text-decoration: underline; }
         <div class="hero-kpis">
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
-            <strong class="summary-value">v0.5.0</strong>
-            <div class="summary-caption">5 commits tracked in v0.5.0 from CHANGELOG.md.</div>
+            <strong class="summary-value">v0.6.0</strong>
+            <div class="summary-caption">6 commits tracked in v0.6.0 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -434,10 +434,69 @@ a:hover { text-decoration: underline; }
     <section class="release-list" id="release-list"></section>
   </main>
 
-  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v0.5.0</footer>
+  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v0.6.0</footer>
 
 <script>
 const releases = [
+  {
+    "version": "v0.6.0",
+    "date": "2026-03-30",
+    "tag": "feature",
+    "summary": "Every command declares required and optional capabilities (figma, ai, specs, generated-code, research, daemon). Missing required capabilities produce recovery-oriented error messages. Missing optional capabilities trigger degraded mode with warnings. This enables offline-first workflows and clear \"what to do next\" guidance.",
+    "commits": [
+      [
+        "dd4bd77",
+        "Add research preview tab — insights, personas, themes, coverage bar in dashboard"
+      ],
+      [
+        "b152460",
+        "Add research traceability — bidirectional insight-to-spec links"
+      ],
+      [
+        "bcb437a",
+        "Add transcript processor — heuristic interview parsing into structured research"
+      ],
+      [
+        "7bc6aef",
+        "Add pull diff output — show token/component/style changes after pull"
+      ],
+      [
+        "3390192",
+        "Add memi validate command — expose spec validator as CLI tool"
+      ],
+      [
+        "dcac4a7",
+        "Add capability matrix — every command declares what it needs"
+      ]
+    ],
+    "decisions": [
+      [
+        "Capability Matrix",
+        "Every command declares required and optional capabilities (figma, ai, specs, generated-code, research, daemon). Missing required capabilities produce recovery-oriented error messages. Missing optional capabilities trigger degraded mode with warnings. This enables offline-first workflows and clear \"what to do next\" guidance."
+      ],
+      [
+        "Spec Validation CLI",
+        "memi validate exposes the existing Zod schema validator + cross-reference checker as a CLI tool. Checks atomic design hierarchy, prop explosion, Code Connect mapping, and spec-to-spec references. Exit code 1 on errors for CI integration."
+      ],
+      [
+        "Pull Diff",
+        "memi pull now snapshots the design system before pulling and shows a structured diff after: added/modified/removed tokens, components, and styles. Designers can see exactly what changed before generating code."
+      ],
+      [
+        "Transcript Processor",
+        "Heuristic-first interview parsing with 4 speaker detection patterns, TF-IDF theme extraction (150+ stop words), first-person quote detection, and per-segment sentiment analysis. Generates ResearchInsight objects automatically from negative/positive themes. AI enhances but never gates."
+      ],
+      [
+        "Research Traceability",
+        "Bidirectional reverse index between insights and specs. getSpecsForInsight() for impact analysis, getInsightsForSpec() for provenance, getOrphanedInsights() for cleanup, getCoverage() for reporting. Persisted to .memoire/research/spec-index.json."
+      ],
+      [
+        "Research Preview Tab",
+        "Dashboard now has a Research panel showing insights, personas, themes, and a coverage bar (% of specs backed by research). Lazy-loaded on toggle. API endpoint upgraded with coverage stats."
+      ]
+    ],
+    "changes": []
+  },
   {
     "version": "v0.5.0",
     "date": "2026-03-30",
