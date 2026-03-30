@@ -2815,7 +2815,9 @@ function connectWs() {
     try {
       const msg = JSON.parse(e.data);
       handleWsMessage(msg);
-    } catch {}
+    } catch (err) {
+      console.warn('[Mémoire] Invalid WebSocket message:', err);
+    }
   };
 
   ws.onclose = () => {
@@ -2970,10 +2972,10 @@ async function runAgent(intent) {
       status.innerHTML = '<span style="color:#4ade80">&#10003;</span> Agent started: ' + escHtml(data.task.id);
       setTimeout(closePalette, 1500);
     } else {
-      status.innerHTML = '<span style="color:var(--error)">&#10007;</span> ' + (data.error || 'Failed to start agent');
+      status.innerHTML = '<span style="color:var(--error)">&#10007;</span> ' + escHtml(data.error || 'Failed to start agent');
     }
   } catch (err) {
-    status.innerHTML = '<span style="color:var(--error)">&#10007;</span> ' + err.message;
+    status.innerHTML = '<span style="color:var(--error)">&#10007;</span> ' + escHtml(err.message || 'Unknown error');
   }
 }
 
@@ -3064,7 +3066,10 @@ async function saveEdit() {
       // Collect updated values from form
       const modeInputs = document.querySelectorAll('#edit-body [data-mode]');
       for (const input of modeInputs) {
-        token.values[input.dataset.mode] = input.value;
+        const mode = input.dataset.mode;
+        if (mode && Object.hasOwn(token.values, mode)) {
+          token.values[mode] = input.value;
+        }
       }
       const res = await fetch(API_BASE + '/api/tokens', {
         method: 'PUT',
@@ -3089,7 +3094,7 @@ async function saveEdit() {
         const shadcnEl = document.getElementById('edit-spec-shadcn');
         if (shadcnEl) spec.shadcnBase = shadcnEl.value.split(',').map(s => s.trim()).filter(Boolean);
         const propsEl = document.getElementById('edit-spec-props');
-        if (propsEl) { try { spec.props = JSON.parse(propsEl.value); } catch {} }
+        if (propsEl) { try { spec.props = JSON.parse(propsEl.value); } catch { showToast('Invalid JSON in Props field', 'error'); return; } }
       }
       if (spec.type === 'page') {
         const layoutEl = document.getElementById('edit-spec-layout');
@@ -3152,7 +3157,7 @@ function updateAgentLog(task) {
   let html = '<div style="color:var(--accent);margin-bottom:4px;font-size:11px">' + escHtml(task.intent) + '</div>';
   for (const step of (task.steps || [])) {
     html += '<div style="padding-left:12px;font-size:10px"><span class="step-name">' + escHtml(step.name) + '</span>';
-    html += '<span class="step-status ' + step.status + '">' + step.status;
+    html += '<span class="step-status ' + escAttr(step.status) + '">' + escHtml(step.status);
     if (step.detail) html += ' — ' + escHtml(step.detail);
     html += '</span></div>';
   }

@@ -72,7 +72,10 @@ export class PreviewApiServer {
         // API routes
         if (url.pathname.startsWith("/api/")) {
           res.setHeader("Content-Type", "application/json");
-          res.setHeader("Access-Control-Allow-Origin", "*");
+          const origin = req.headers.origin;
+          if (origin && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+            res.setHeader("Access-Control-Allow-Origin", origin);
+          }
 
           if (url.pathname === "/api/specs") {
             try {
@@ -173,7 +176,10 @@ export class PreviewApiServer {
           res.setHeader("Content-Type", "text/event-stream");
           res.setHeader("Cache-Control", "no-cache");
           res.setHeader("Connection", "keep-alive");
-          res.setHeader("Access-Control-Allow-Origin", "*");
+          const sseOrigin = req.headers.origin;
+          if (sseOrigin && /^https?:\/\/localhost(:\d+)?$/.test(sseOrigin)) {
+            res.setHeader("Access-Control-Allow-Origin", sseOrigin);
+          }
 
           // Send initial state
           const initPayload = {
@@ -420,11 +426,34 @@ export class PreviewApiServer {
   }
 }
 
+const MAX_BODY_BYTES = 1_048_576; // 1 MB
+
 function readRequestBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on("data", (chunk: Buffer) => chunks.push(chunk));
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", reject);
+    let size = 0;
+    const timer = setTimeout(() => {
+      req.destroy();
+      reject(new Error("Request body read timed out"));
+    }, 10_000);
+
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        clearTimeout(timer);
+        req.destroy();
+        reject(new Error("Request body too large"));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => {
+      clearTimeout(timer);
+      resolve(Buffer.concat(chunks).toString("utf-8"));
+    });
+    req.on("error", (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
   });
 }

@@ -4,7 +4,7 @@
  */
 
 import { spawn, type ChildProcess } from "child_process";
-import { writeFile, mkdir, readdir } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { createLogger } from "../engine/logger.js";
 import type { Registry } from "../engine/registry.js";
@@ -78,7 +78,7 @@ export default function App() {
         ${galleryItems.join("\n        ")}
       </div>
 
-      {${galleryItems.length} === 0 && (
+      {galleryItems.length === 0 && (
         <div className="text-center text-muted-foreground py-20">
           <p>No generated components yet.</p>
           <p className="text-sm mt-2">Run <code>memi spec component MyComponent</code> then <code>memi generate</code></p>
