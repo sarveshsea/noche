@@ -9,6 +9,7 @@ import type {
 import { createRunId } from "../shared/contracts.js";
 import type {
   BridgeCommandEnvelope,
+  BridgeComponentChangedEnvelope,
   BridgeConnectionStateEnvelope,
   BridgeDocumentChangedEnvelope,
   BridgeJobStatusEnvelope,
@@ -17,6 +18,7 @@ import type {
   BridgeSelectionEnvelope,
   BridgeSyncPart,
   BridgeSyncResultEnvelope,
+  BridgeVariableChangedEnvelope,
 } from "../shared/bridge.js";
 import { BRIDGE_V2_CHANNEL, createBridgeResponseEnvelope } from "../shared/bridge.js";
 
@@ -142,6 +144,28 @@ export function createBridgeSyncResultMessage(
     summary: summarizeSyncResult(part, result, error),
     result,
     error,
+  };
+}
+
+export function createBridgeVariableChangedMessage(
+  data: { name: string; collection: string; values: Record<string, string | number>; updatedAt: number },
+): BridgeVariableChangedEnvelope {
+  return {
+    channel: BRIDGE_V2_CHANNEL,
+    source: "plugin",
+    type: "variable-changed",
+    data,
+  };
+}
+
+export function createBridgeComponentChangedMessage(
+  data: { name: string; key: string; figmaNodeId: string; updatedAt: number },
+): BridgeComponentChangedEnvelope {
+  return {
+    channel: BRIDGE_V2_CHANNEL,
+    source: "plugin",
+    type: "component-changed",
+    data,
   };
 }
 

@@ -30,6 +30,8 @@ import {
   createBridgePageChangedMessage,
   createBridgeSelectionMessage,
   createBridgeSyncResultMessage,
+  createBridgeVariableChangedMessage,
+  createBridgeComponentChangedMessage,
   resolveBridgeResponse,
   trackBridgeRequest,
   type PendingBridgeRequest,
@@ -237,6 +239,15 @@ function bindPluginMessages(): void {
         forwardToBridge(serializeBridgeEnvelope(createBridgeJobStatusMessage(message.job)));
         scheduleRender();
         break;
+      case "granular-change" as any: {
+        var granular = message as any;
+        if (granular.granularType === "variable-changed") {
+          forwardToBridge(serializeBridgeEnvelope(createBridgeVariableChangedMessage(granular.data)));
+        } else if (granular.granularType === "component-changed") {
+          forwardToBridge(serializeBridgeEnvelope(createBridgeComponentChangedMessage(granular.data)));
+        }
+        break;
+      }
       case "command-result":
         handleCommandResult(message);
         scheduleRender();

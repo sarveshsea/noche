@@ -20,6 +20,7 @@ export const WIDGET_COMMAND_NAMES = [
   "getPageList",
   "getPageTree",
   "captureScreenshot",
+  "pushTokens",
 ] as const;
 
 export type WidgetCommandName = (typeof WIDGET_COMMAND_NAMES)[number];

@@ -120,7 +120,8 @@ const WIDGET_COMMAND_NAMES = [
   "navigateTo",
   "getPageList",
   "getPageTree",
-  "captureScreenshot"
+  "captureScreenshot",
+  "pushTokens"
 ];
 function isWidgetV2Envelope(value) {
   return Boolean(
@@ -570,6 +571,22 @@ function createBridgeSyncResultMessage(part, result, error) {
     error
   };
 }
+function createBridgeVariableChangedMessage(data) {
+  return {
+    channel: BRIDGE_V2_CHANNEL,
+    source: "plugin",
+    type: "variable-changed",
+    data
+  };
+}
+function createBridgeComponentChangedMessage(data) {
+  return {
+    channel: BRIDGE_V2_CHANNEL,
+    source: "plugin",
+    type: "component-changed",
+    data
+  };
+}
 function summarizeSyncResult(part, result, error) {
   const summary = {
     tokens: 0,
@@ -890,6 +907,15 @@ function bindPluginMessages() {
         forwardToBridge(serializeBridgeEnvelope(createBridgeJobStatusMessage(message.job)));
         scheduleRender();
         break;
+      case "granular-change": {
+        var granular = message;
+        if (granular.granularType === "variable-changed") {
+          forwardToBridge(serializeBridgeEnvelope(createBridgeVariableChangedMessage(granular.data)));
+        } else if (granular.granularType === "component-changed") {
+          forwardToBridge(serializeBridgeEnvelope(createBridgeComponentChangedMessage(granular.data)));
+        }
+        break;
+      }
       case "command-result":
         handleCommandResult(message);
         scheduleRender();

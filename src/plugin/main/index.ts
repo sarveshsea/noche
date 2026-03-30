@@ -78,6 +78,38 @@ const state: PluginState = {
   },
 };
 
+/** Emit a granular variable-changed or component-changed event to the UI for bridge relay. */
+function emitGranularChange(type: "variable-changed" | "component-changed", change: { id: string; node?: any }, timestamp: number): void {
+  if (type === "variable-changed") {
+    post({
+      channel: WIDGET_V2_CHANNEL,
+      source: "main",
+      type: "granular-change",
+      granularType: "variable-changed",
+      data: {
+        name: change.id,
+        collection: "",
+        values: {},
+        updatedAt: timestamp,
+      },
+    });
+  } else if (type === "component-changed") {
+    var node = change.node;
+    post({
+      channel: WIDGET_V2_CHANNEL,
+      source: "main",
+      type: "granular-change",
+      granularType: "component-changed",
+      data: {
+        name: node ? node.name : "unknown",
+        key: node && node.key ? node.key : change.id,
+        figmaNodeId: change.id,
+        updatedAt: timestamp,
+      },
+    });
+  }
+}
+
 figma.showUI(__html__, {
   width: 480,
   height: 600,
@@ -130,7 +162,7 @@ async function bootstrap(): Promise<void> {
     });
   });
 
-  figma.on("documentchange", (event: { documentChanges: Array<{ type: string; id: string; origin?: string }> }) => {
+  figma.on("documentchange", (event: { documentChanges: Array<{ type: string; id: string; origin?: string; node?: any; properties?: string[] }> }) => {
     const now = Date.now();
     for (const change of event.documentChanges || []) {
       state.changeBuffer.push({
@@ -142,6 +174,17 @@ async function bootstrap(): Promise<void> {
         pageId: figma.currentPage?.id ?? null,
         timestamp: now,
       });
+
+      // Emit granular events for variable and component changes
+      if (change.type === "STYLE_CREATE" || change.type === "STYLE_DELETE" || change.type === "STYLE_CHANGE") {
+        emitGranularChange("variable-changed", change, now);
+      }
+      if (change.type === "PROPERTY_CHANGE" && change.node) {
+        var nodeType = change.node.type;
+        if (nodeType === "COMPONENT" || nodeType === "COMPONENT_SET") {
+          emitGranularChange("component-changed", change, now);
+        }
+      }
     }
     if (state.changeBuffer.length > state.maxChangeBuffer) {
       state.changeBuffer = state.changeBuffer.slice(-state.maxChangeBuffer);
@@ -321,6 +364,8 @@ async function handleCommand(command: WidgetCommandName, params: Record<string, 
       return getPageTree(Number(params.depth ?? 2));
     case "captureScreenshot":
       return captureScreenshot(params);
+    case "pushTokens":
+      return pushTokens(params);
     default:
       throw new Error(`Unknown command: ${command}`);
   }
@@ -809,4 +854,52 @@ async function captureScreenshot(params: Record<string, unknown>): Promise<unkno
       bounds: "absoluteBoundingBox" in node ? node.absoluteBoundingBox : null,
     },
   };
+}
+
+/**
+ * Push token values from the server into Figma variables.
+ * Finds matching variables by name and updates their values.
+ */
+async function pushTokens(params: Record<string, unknown>): Promise<unknown> {
+  var tokens = Array.isArray(params.tokens) ? params.tokens : [];
+  var updated = 0;
+  var notFound: string[] = [];
+
+  var collections = await figma.variables.getLocalVariableCollectionsAsync();
+
+  for (var i = 0; i < tokens.length; i++) {
+    var token = tokens[i] as { name: string; values: Record<string, string | number> };
+    if (!token || !token.name) continue;
+
+    var found = false;
+    for (var ci = 0; ci < collections.length; ci++) {
+      var col = collections[ci];
+      var varIds = col.variableIds;
+      for (var vi = 0; vi < varIds.length; vi++) {
+        var v = await figma.variables.getVariableByIdAsync(varIds[vi]);
+        if (v && v.name === token.name) {
+          var modeId = col.modes[0]?.modeId;
+          if (modeId && token.values) {
+            var firstValue = Object.values(token.values)[0];
+            if (typeof firstValue === "string" && firstValue.startsWith("#")) {
+              var hex = firstValue;
+              var r = parseInt(hex.slice(1, 3), 16) / 255;
+              var g = parseInt(hex.slice(3, 5), 16) / 255;
+              var b = parseInt(hex.slice(5, 7), 16) / 255;
+              v.setValueForMode(modeId, { r: r, g: g, b: b, a: 1 });
+            } else {
+              v.setValueForMode(modeId, firstValue);
+            }
+            updated++;
+            found = true;
+          }
+          break;
+        }
+      }
+      if (found) break;
+    }
+    if (!found) notFound.push(token.name);
+  }
+
+  return { updated: updated, notFound: notFound, total: tokens.length };
 }
