@@ -2664,6 +2664,37 @@ body {
 </div>
 <button id="agent-log-toggle" class="agent-log-toggle" onclick="toggleAgentLog()">&#9670; AGENT LOG</button>
 
+<!-- ── Sync Conflicts Panel ──────────────────── -->
+<div id="conflicts-panel" class="conflicts-panel hidden">
+  <div class="conflicts-header">
+    <span>SYNC CONFLICTS</span>
+    <button onclick="toggleConflictsPanel()" style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-family:var(--mono)">&times;</button>
+  </div>
+  <div id="conflicts-body" class="conflicts-body">
+    <div class="conflicts-empty">No unresolved conflicts</div>
+  </div>
+</div>
+<button id="conflicts-toggle" class="conflicts-toggle hidden" onclick="toggleConflictsPanel()">&#9670; CONFLICTS (<span id="conflicts-count">0</span>)</button>
+
+<style>
+.conflicts-panel { position:fixed; bottom:48px; left:16px; right:16px; max-height:280px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; overflow:hidden; z-index:50; box-shadow:0 -4px 20px rgba(0,0,0,0.15); }
+.conflicts-panel.hidden { display:none; }
+.conflicts-header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border); font-size:10px; letter-spacing:1.5px; color:var(--fg-muted); }
+.conflicts-body { max-height:220px; overflow-y:auto; padding:8px; }
+.conflicts-empty { padding:16px; text-align:center; color:var(--fg-muted); font-size:11px; }
+.conflicts-toggle { position:fixed; bottom:12px; left:16px; background:var(--bg-card); border:1px solid var(--border); border-radius:4px; padding:4px 12px; font-size:10px; font-family:var(--mono); color:var(--yellow); cursor:pointer; z-index:49; }
+.conflicts-toggle.hidden { display:none; }
+.conflict-row { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid var(--border); font-size:11px; font-family:var(--mono); }
+.conflict-row:last-child { border-bottom:none; }
+.conflict-name { color:var(--fg); font-weight:500; }
+.conflict-detail { color:var(--fg-muted); font-size:10px; }
+.conflict-actions { display:flex; gap:6px; }
+.conflict-btn { background:none; border:1px solid var(--border); border-radius:3px; padding:3px 8px; font-size:9px; font-family:var(--mono); cursor:pointer; color:var(--fg-muted); }
+.conflict-btn:hover { background:var(--bg-hover); color:var(--fg); }
+.conflict-btn.figma { color:var(--green); border-color:var(--green); }
+.conflict-btn.code { color:var(--accent-bright,#5b9ef5); border-color:var(--accent-bright,#5b9ef5); }
+</style>
+
 <style>
 /* ── Command Palette ──────────────────────── */
 .cmd-palette { position:fixed; top:0; left:0; right:0; bottom:0; z-index:100; display:flex; align-items:flex-start; justify-content:center; padding-top:15vh; }
@@ -3146,6 +3177,63 @@ function toggleAgentLog() {
   btn.style.display = agentLogVisible ? 'none' : '';
 }
 
+var conflictsPanelVisible = false;
+
+function toggleConflictsPanel() {
+  const panel = document.getElementById('conflicts-panel');
+  const btn = document.getElementById('conflicts-toggle');
+  conflictsPanelVisible = !conflictsPanelVisible;
+  panel.classList.toggle('hidden', !conflictsPanelVisible);
+  btn.style.display = conflictsPanelVisible ? 'none' : '';
+}
+
+function renderConflicts(syncState) {
+  const btn = document.getElementById('conflicts-toggle');
+  const countEl = document.getElementById('conflicts-count');
+  const body = document.getElementById('conflicts-body');
+
+  if (!syncState || !syncState.conflicts || syncState.conflicts.length === 0) {
+    btn.classList.add('hidden');
+    body.innerHTML = '<div class="conflicts-empty">No unresolved conflicts</div>';
+    return;
+  }
+
+  btn.classList.remove('hidden');
+  countEl.textContent = String(syncState.conflictCount || syncState.conflicts.length);
+
+  body.innerHTML = syncState.conflicts.map(function(c) {
+    var figHash = (c.figmaHash || '').slice(0, 8);
+    var codeHash = (c.codeHash || '').slice(0, 8);
+    return '<div class="conflict-row">' +
+      '<div>' +
+        '<div class="conflict-name">' + escapeHtml(c.name) + '</div>' +
+        '<div class="conflict-detail">' + c.entityType + ' / figma:' + figHash + ' vs code:' + codeHash + '</div>' +
+      '</div>' +
+      '<div class="conflict-actions">' +
+        '<button class="conflict-btn figma" onclick="resolveConflict(\'' + escapeHtml(c.name) + '\',\'figma-wins\')">Figma wins</button>' +
+        '<button class="conflict-btn code" onclick="resolveConflict(\'' + escapeHtml(c.name) + '\',\'code-wins\')">Code wins</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function resolveConflict(name, resolution) {
+  try {
+    await fetch(API_BASE + '/api/sync/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, resolution: resolution }),
+    });
+    checkFigmaStatus();
+  } catch (err) {
+    addLog('error', 'Failed to resolve conflict: ' + err.message);
+  }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function updateAgentLog(task) {
   if (!task) return;
   const body = document.getElementById('agent-log-body');
@@ -3187,6 +3275,7 @@ async function checkFigmaStatus() {
     figmaControlState._sync = syncPayload;
     figmaControlState._registry = registryPayload;
     renderFigmaControlSummary();
+    renderConflicts(syncPayload);
     syncAgentLogFromControlState();
   } catch {
     figmaControlState = createEmptyFigmaControlState();

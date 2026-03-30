@@ -191,6 +191,20 @@ export class PreviewApiServer {
             return;
           }
 
+          // POST /api/sync/resolve — resolve a sync conflict
+          if (url.pathname === "/api/sync/resolve" && req.method === "POST") {
+            const body = await readRequestBody(req);
+            try {
+              const { name, resolution } = JSON.parse(body);
+              const resolved = this.engine.sync.resolveConflict(name, resolution);
+              res.end(JSON.stringify({ ok: resolved, name, resolution }));
+            } catch (err) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+            }
+            return;
+          }
+
           // POST /api/action — dispatch actions to Figma bridge
           if (url.pathname === "/api/action" && req.method === "POST") {
             const body = await readRequestBody(req);
