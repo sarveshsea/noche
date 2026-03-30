@@ -62,6 +62,36 @@ var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
       reconnectDelayMs: null
     }
   };
+  function emitGranularChange(type, change, timestamp) {
+    if (type === "variable-changed") {
+      post({
+        channel: WIDGET_V2_CHANNEL,
+        source: "main",
+        type: "granular-change",
+        granularType: "variable-changed",
+        data: {
+          name: change.id,
+          collection: "",
+          values: {},
+          updatedAt: timestamp
+        }
+      });
+    } else if (type === "component-changed") {
+      var node = change.node;
+      post({
+        channel: WIDGET_V2_CHANNEL,
+        source: "main",
+        type: "granular-change",
+        granularType: "component-changed",
+        data: {
+          name: node ? node.name : "unknown",
+          key: node && node.key ? node.key : change.id,
+          figmaNodeId: change.id,
+          updatedAt: timestamp
+        }
+      });
+    }
+  }
   figma.showUI(__html__, {
     width: 480,
     height: 600,
@@ -121,6 +151,15 @@ var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
           pageId: (_c = (_b = figma.currentPage) == null ? void 0 : _b.id) != null ? _c : null,
           timestamp: now
         });
+        if (change.type === "STYLE_CREATE" || change.type === "STYLE_DELETE" || change.type === "STYLE_CHANGE") {
+          emitGranularChange("variable-changed", change, now);
+        }
+        if (change.type === "PROPERTY_CHANGE" && change.node) {
+          var nodeType = change.node.type;
+          if (nodeType === "COMPONENT" || nodeType === "COMPONENT_SET") {
+            emitGranularChange("component-changed", change, now);
+          }
+        }
       }
       if (state.changeBuffer.length > state.maxChangeBuffer) {
         state.changeBuffer = state.changeBuffer.slice(-300);
@@ -290,6 +329,8 @@ var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
         return getPageTree(Number((_g = params.depth) != null ? _g : 2));
       case "captureScreenshot":
         return captureScreenshot(params);
+      case "pushTokens":
+        return pushTokens(params);
       default:
         throw new Error(`Unknown command: ${command}`);
     }
@@ -724,5 +765,45 @@ var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
         bounds: "absoluteBoundingBox" in node ? node.absoluteBoundingBox : null
       }
     };
+  }
+  async function pushTokens(params) {
+    var _a;
+    var tokens = Array.isArray(params.tokens) ? params.tokens : [];
+    var updated = 0;
+    var notFound = [];
+    var collections = await figma.variables.getLocalVariableCollectionsAsync();
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i];
+      if (!token || !token.name) continue;
+      var found = false;
+      for (var ci = 0; ci < collections.length; ci++) {
+        var col = collections[ci];
+        var varIds = col.variableIds;
+        for (var vi = 0; vi < varIds.length; vi++) {
+          var v = await figma.variables.getVariableByIdAsync(varIds[vi]);
+          if (v && v.name === token.name) {
+            var modeId = (_a = col.modes[0]) == null ? void 0 : _a.modeId;
+            if (modeId && token.values) {
+              var firstValue = Object.values(token.values)[0];
+              if (typeof firstValue === "string" && firstValue.startsWith("#")) {
+                var hex = firstValue;
+                var r = parseInt(hex.slice(1, 3), 16) / 255;
+                var g = parseInt(hex.slice(3, 5), 16) / 255;
+                var b = parseInt(hex.slice(5, 7), 16) / 255;
+                v.setValueForMode(modeId, { r, g, b, a: 1 });
+              } else {
+                v.setValueForMode(modeId, firstValue);
+              }
+              updated++;
+              found = true;
+            }
+            break;
+          }
+        }
+        if (found) break;
+      }
+      if (!found) notFound.push(token.name);
+    }
+    return { updated, notFound, total: tokens.length };
   }
 })();

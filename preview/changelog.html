@@ -390,8 +390,8 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">108</span> commits</span>
-      <span><span class="n" id="stat-versions">6</span> versions</span>
+      <span><span class="n" id="stat-commits">113</span> commits</span>
+      <span><span class="n" id="stat-versions">7</span> versions</span>
       <span><span class="n" id="stat-latest">2026-03-30</span> latest</span>
     </div>
   </header>
@@ -407,8 +407,8 @@ a:hover { text-decoration: underline; }
         <div class="hero-kpis">
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
-            <strong class="summary-value">v0.4.0</strong>
-            <div class="summary-caption">14 commits tracked in v0.4.0 from CHANGELOG.md.</div>
+            <strong class="summary-value">v0.5.0</strong>
+            <div class="summary-caption">5 commits tracked in v0.5.0 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -434,40 +434,67 @@ a:hover { text-decoration: underline; }
     <section class="release-list" id="release-list"></section>
   </main>
 
-  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v0.4.0</footer>
+  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v0.5.0</footer>
 
 <script>
 const releases = [
+  {
+    "version": "v0.5.0",
+    "date": "2026-03-30",
+    "tag": "feature",
+    "summary": "Claude's multimodal capability is now available for design QA. The AnthropicClient supports image content blocks (base64 PNG/JPEG). DesignAnalyzer provides 3 modes: general quality analysis (0-100 score), WCAG accessibility audit, and spec compliance checking. All return structured VisualIssue arrays with severity, category, location, and fix suggestions.",
+    "commits": [
+      [
+        "ba3e637",
+        "Implement real heuristic fallbacks in 5 stubbed agents"
+      ],
+      [
+        "dc04f42",
+        "Add research-to-design mapping — insights drive spec requirements"
+      ],
+      [
+        "59245d9",
+        "Upgrade codegen — variant logic, smart component bodies, page prop drilling"
+      ],
+      [
+        "ca9ba2c",
+        "Add real accessibility enforcement — WCAG contrast computation, spec auditing"
+      ],
+      [
+        "0064999",
+        "Add AI vision for design QA — multimodal analysis of Figma screenshots"
+      ]
+    ],
+    "decisions": [
+      [
+        "AI Vision (analyze_design MCP tool)",
+        "Claude's multimodal capability is now available for design QA. The AnthropicClient supports image content blocks (base64 PNG/JPEG). DesignAnalyzer provides 3 modes: general quality analysis (0-100 score), WCAG accessibility audit, and spec compliance checking. All return structured VisualIssue arrays with severity, category, location, and fix suggestions."
+      ],
+      [
+        "Real WCAG Enforcement",
+        "The AccessibilityChecker computes actual WCAG 2.2 contrast ratios from hex token values (relative luminance + contrast ratio formula). It validates AA/AAA/AA-Large thresholds, checks semantic token completeness (focus ring, error, disabled), and audits component specs for ariaLabel, keyboardNav, focusStyle, and touchTarget. runFullAudit() produces a 0-100 score with WCAG level determination."
+      ],
+      [
+        "Smart Component Bodies",
+        "Code generation now produces variant-aware components. buildVariantLogic() generates a variant → Tailwind class mapping (20 presets: primary, outline, ghost, compact, success, warning, etc.). New component builders for Button (variant prop + disabled + icon), Input (Label + error message), Avatar (image + fallback initials), and Dialog (trigger + header + content). Page generator now derives data props from section configurations for dynamic pages."
+      ],
+      [
+        "Research → Design Mapping",
+        "12 keyword rules map research insights to typed SpecRequirements (accessibility, ux, interaction, content, performance). Insights target specific specs by name mention, tag overlap, or rule patterns. generateA11yChecklist() builds prioritized [MUST]/[SHOULD]/[COULD] checklists. mapPersonaRequirements() extracts requirements from persona pain points."
+      ],
+      [
+        "Agent Intelligence Layer",
+        "All 5 stubbed agents now have real heuristic logic. Token-engineer parses hex colors and numeric values from prompts to create/update tokens. Design-auditor runs full WCAG audit + research coverage analysis. Accessibility-checker computes pairwise contrast failures. Theme-builder generates semantic palettes from a base color (6 derived tokens + 6 semantic defaults). Responsive-specialist validates grid layouts, component variants, and touch targets."
+      ]
+    ],
+    "changes": []
+  },
   {
     "version": "v0.4.0",
     "date": "2026-03-30",
     "tag": "feature",
     "summary": "Memoire exposes 14 tools and 3 resources via the Model Context Protocol, making it callable by Claude Code, Cursor, or any MCP-compatible AI. Stdout logging is suppressed in MCP mode to prevent interference with the JSON-RPC stdio transport.",
     "commits": [
-      [
-        "fe0d562",
-        "Update CLAUDE.md — document v0.4 commands, MCP server, multi-agent, bidirectional sync"
-      ],
-      [
-        "30d1360",
-        "Add 19 stress tests — large datasets, concurrency, edge cases"
-      ],
-      [
-        "8e9984f",
-        "Upgrade preview dashboard — pipeline stats, sync state, agent registry chips"
-      ],
-      [
-        "951b4f9",
-        "Add MCP config generation — memi mcp config for Claude Code / Cursor / generic"
-      ],
-      [
-        "00ceef5",
-        "Add plugin-side granular events — variable-changed, component-changed, pushTokens"
-      ],
-      [
-        "5f07f5e",
-        "Bump to v0.4.0 — add 66 unit tests, update changelog"
-      ],
       [
         "7639909",
         "Add multi-Claude native orchestration — agent registry, task queue, agent bridge"
