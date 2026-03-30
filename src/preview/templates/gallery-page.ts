@@ -2646,6 +2646,8 @@ body {
       <span id="figma-summary-selection" class="figma-chip">Selection: --</span>
       <span id="figma-summary-agents" class="figma-chip">Agents: --</span>
       <span id="figma-summary-sync" class="figma-chip">Sync: --</span>
+      <span id="figma-summary-pipeline" class="figma-chip">Pipeline: --</span>
+      <span id="figma-summary-registry" class="figma-chip">Registry: --</span>
       <span id="figma-summary-heal" class="figma-chip">Healer: --</span>
     </div>
   </div>
@@ -3170,14 +3172,20 @@ function updateAgentLog(task) {
 // ── Figma Status ───────────────────────────
 async function checkFigmaStatus() {
   try {
-    const [statusPayload, jobsPayload, selectionPayload, agentsPayload] = await Promise.all([
+    const [statusPayload, jobsPayload, selectionPayload, agentsPayload, pipelinePayload, syncPayload, registryPayload] = await Promise.all([
       fetchJsonWithFallback(['/api/figma/status', '/api/status']),
       fetchJsonOptional('/api/figma/jobs', []),
       fetchJsonOptional('/api/figma/selection', null),
       fetchJsonOptional('/api/figma/agents', []),
+      fetchJsonOptional('/api/pipeline/stats', null),
+      fetchJsonOptional('/api/sync/state', null),
+      fetchJsonOptional('/api/agents', null),
     ]);
 
     figmaControlState = normalizeFigmaControlState(statusPayload, jobsPayload, selectionPayload, agentsPayload);
+    figmaControlState._pipeline = pipelinePayload;
+    figmaControlState._sync = syncPayload;
+    figmaControlState._registry = registryPayload;
     renderFigmaControlSummary();
     syncAgentLogFromControlState();
   } catch {
@@ -3334,6 +3342,33 @@ function renderFigmaControlSummary() {
   setChip(selectionChip, 'Selection: ' + selectionLabel(selection), selection?.count ? 'good' : 'dim');
   setChip(agentsChip, 'Agents: ' + agentsLabel(agents), agents.length ? 'good' : 'dim');
   setChip(syncChip, 'Sync: ' + syncLabel(figmaControlState.sync), figmaControlState.sync ? 'good' : 'dim');
+
+  // Pipeline chip
+  const pipelineChip = document.getElementById('figma-summary-pipeline');
+  const pl = figmaControlState._pipeline;
+  if (pl) {
+    const plLabel = pl.pullCount + ' pulls / ' + pl.generateCount + ' gen' + (pl.errorCount ? ' / ' + pl.errorCount + ' err' : '');
+    setChip(pipelineChip, 'Pipeline: ' + plLabel, pl.errorCount ? 'warn' : pl.pullCount ? 'good' : 'dim');
+  } else {
+    setChip(pipelineChip, 'Pipeline: idle', 'dim');
+  }
+
+  // Agent Registry chip
+  const registryChip = document.getElementById('figma-summary-registry');
+  const reg = figmaControlState._registry;
+  if (reg && reg.agentCount > 0) {
+    const regLabel = reg.online + ' online' + (reg.busy ? ' / ' + reg.busy + ' busy' : '') + ' / ' + reg.queue.pending + ' queued';
+    setChip(registryChip, 'Registry: ' + regLabel, reg.online ? 'good' : 'dim');
+  } else {
+    setChip(registryChip, 'Registry: no agents', 'dim');
+  }
+
+  // Update Sync chip with conflict data from new endpoint
+  const syncState = figmaControlState._sync;
+  if (syncState && syncState.conflictCount > 0) {
+    setChip(syncChip, 'Sync: ' + syncState.conflictCount + ' conflict' + (syncState.conflictCount > 1 ? 's' : ''), 'warn');
+  }
+
   setChip(healChip, 'Healer: ' + healLabel(figmaControlState.heal), figmaControlState.heal?.healed ? 'good' : figmaControlState.heal ? 'warn' : 'dim');
 }
 

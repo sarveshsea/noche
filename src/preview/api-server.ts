@@ -156,6 +156,29 @@ export class PreviewApiServer {
             return;
           }
 
+          if (url.pathname === "/api/sync/state") {
+            const conflicts = this.engine.sync.getConflicts();
+            res.end(JSON.stringify({
+              conflicts,
+              conflictCount: conflicts.length,
+              isGuarded: this.engine.sync.isGuarded,
+            }));
+            return;
+          }
+
+          if (url.pathname === "/api/agents") {
+            const agents = this.engine.agentRegistry.getAll();
+            const queueStats = this.engine.taskQueue.getStats();
+            res.end(JSON.stringify({
+              agents,
+              agentCount: agents.length,
+              online: agents.filter((a) => a.status === "online").length,
+              busy: agents.filter((a) => a.status === "busy").length,
+              queue: queueStats,
+            }));
+            return;
+          }
+
           if (url.pathname === "/api/research") {
             try {
               await this.engine.research.load();
