@@ -45,6 +45,7 @@ import { registerExportCommand } from "./commands/export.js";
 import { registerNotesCommand } from "./commands/notes.js";
 import { registerWatchCommand } from "./commands/watch.js";
 import { registerListCommand } from "./commands/list.js";
+import { registerMcpCommand } from "./commands/mcp.js";
 
 // Prevent MaxListenersExceededWarning — commands attach cleanup handlers to process
 process.setMaxListeners(30);
@@ -73,14 +74,17 @@ const engine = new MemoireEngine({
 });
 
 const jsonOutputRequested = process.argv.includes("--json");
+const mcpMode = process.argv.includes("mcp");
 
-// Listen for engine events and print them
-engine.on("event", (evt) => {
-  if (jsonOutputRequested) return;
-  const icons: Record<string, string> = { info: "·", warn: "!", error: "x", success: "+" };
-  const icon = icons[evt.type] ?? "·";
-  console.log(`  ${icon} ${evt.message}`);
-});
+// Listen for engine events and print them (suppressed in MCP mode — stdio is reserved for JSON-RPC)
+if (!mcpMode) {
+  engine.on("event", (evt) => {
+    if (jsonOutputRequested) return;
+    const icons: Record<string, string> = { info: "·", warn: "!", error: "x", success: "+" };
+    const icon = icons[evt.type] ?? "·";
+    console.log(`  ${icon} ${evt.message}`);
+  });
+}
 
 // Register all commands
 registerConnectCommand(program, engine);
@@ -105,6 +109,7 @@ registerExportCommand(program, engine);
 registerNotesCommand(program, engine);
 registerWatchCommand(program, engine);
 registerListCommand(program, engine);
+registerMcpCommand(program, engine);
 
 // Parse and execute
 program.parse();
