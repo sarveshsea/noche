@@ -72,10 +72,15 @@ export class ResearchEngine {
 
     try {
       const raw = await readFile(join(this.config.outputDir, "insights.json"), "utf-8");
-      this.store = JSON.parse(raw);
-      this.insightCounter = this.store.insights.length;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && Array.isArray(parsed.insights)) {
+        this.store = parsed;
+        this.insightCounter = this.store.insights.length;
+      } else {
+        this.log.warn("insights.json has unexpected shape — starting fresh");
+      }
     } catch {
-      // Fresh start
+      // No existing file — fresh start
     }
   }
 
