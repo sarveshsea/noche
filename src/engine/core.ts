@@ -57,6 +57,8 @@ export class MemoireEngine extends EventEmitter {
   readonly agentRegistry: AgentRegistry;
   readonly taskQueue: TaskQueue;
   private _agentBridge: AgentBridge | null = null;
+  private pullCache: { hash: string; pulledAt: number } | null = null;
+  private static readonly PULL_CACHE_TTL_MS = 300_000; // 5 minutes
 
   private _project: ProjectContext | null = null;
   private _initialized = false;
@@ -301,13 +303,24 @@ export class MemoireEngine extends EventEmitter {
     }
   }
 
-  async pullDesignSystem(): Promise<void> {
+  async pullDesignSystem(force = false): Promise<void> {
     if (!this.figma.isConnected) {
       throw new Error("Not connected to Figma. Run `memi connect` first, or use `memi pull` which waits for the plugin.");
     }
 
+    // Skip pull if cache is fresh (within TTL) unless forced
+    const now = Date.now();
+    if (!force && this.pullCache && now - this.pullCache.pulledAt < MemoireEngine.PULL_CACHE_TTL_MS) {
+      this.log.info({ cachedAgoMs: now - this.pullCache.pulledAt }, "Design system pull skipped — cache still fresh");
+      return;
+    }
+
     const designSystem = await this.figma.extractDesignSystem();
     await this.registry.updateDesignSystem(designSystem);
+
+    // Update cache
+    const hash = `${designSystem.tokens.length}-${designSystem.components.length}-${designSystem.styles.length}`;
+    this.pullCache = { hash, pulledAt: now };
 
     this.emit("event", {
       type: "success",
