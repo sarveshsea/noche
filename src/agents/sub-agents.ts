@@ -683,7 +683,7 @@ export class SubAgentRunner {
   private buildAgentSystemPrompt(agentType: SubAgentType, ctx: AgentContext): string {
     const roleDesc = this.getAgentRoleDescription(agentType);
     const tokenSummary = ctx.designSystem.tokens.slice(0, 20).map(t =>
-      `${t.name}: ${t.type} = ${JSON.stringify(Object.values(t.values)[0])}`
+      `${t.name}: ${t.type} = ${JSON.stringify(Object.values(t.values)[0] ?? "(empty)")}`
     ).join("\n");
 
     return [

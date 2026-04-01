@@ -34,7 +34,7 @@ function tokenTable(tokens: DesignToken[]): string {
   if (tokens.length === 0) return "(none)";
   return tokens
     .slice(0, 30)
-    .map((t) => `  ${t.name}: ${JSON.stringify(Object.values(t.values)[0])} [${t.type}/${t.collection}]`)
+    .map((t) => `  ${t.name}: ${JSON.stringify(Object.values(t.values)[0] ?? "(empty)")} [${t.type}/${t.collection}]`)
     .join("\n");
 }
 
