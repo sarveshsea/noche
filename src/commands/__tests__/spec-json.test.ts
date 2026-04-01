@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerSpecCommand } from "../spec.js";
+import { captureLogs, lastLog } from "./test-helpers.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -106,19 +107,4 @@ function makeSpecEngine(specs = [
       async saveSpec() {},
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
 }

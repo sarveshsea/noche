@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { Command } from "commander";
 import { registerInitCommand } from "../init.js";
+import { captureLogs } from "./test-helpers.js";
 
 let projectRoot: string;
 
@@ -72,13 +73,4 @@ function makeInitEngine(input: { existingSpecs: Set<string> }) {
       }),
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
 }

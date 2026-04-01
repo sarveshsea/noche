@@ -11,7 +11,7 @@
 
 import type { DesignToken, DesignSystem, DesignComponent } from "../engine/registry.js";
 import type { AnySpec, ComponentSpec, PageSpec, DataVizSpec } from "../specs/types.js";
-import type { AgentContext } from "./orchestrator.js";
+import type { AgentContext } from "./plan-builder.js";
 
 // ── Prompt Builder Helpers ───────────────────────────────
 

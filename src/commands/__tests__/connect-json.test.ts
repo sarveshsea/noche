@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { Command } from "commander";
 import { registerConnectCommand } from "../connect.js";
+import { captureLogs, lastLog, writePluginBundle } from "./test-helpers.js";
 
 let projectRoot: string;
 let originalHome: string | undefined;
@@ -187,49 +188,4 @@ function makeConnectEngine(
       disconnect() {},
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
-}
-
-async function writePluginBundle(pluginRoot: string, meta: { packageVersion: string; widgetVersion: string }) {
-  await writeFile(join(pluginRoot, "manifest.json"), JSON.stringify({ name: "memoire-plugin" }), "utf-8");
-  await writeFile(join(pluginRoot, "code.js"), "console.log('widget');\n", "utf-8");
-  await writeFile(join(pluginRoot, "ui.html"), "<html><body>Operator Console</body></html>\n", "utf-8");
-  await writeFile(join(pluginRoot, "widget-meta.json"), JSON.stringify({
-    widgetVersion: meta.widgetVersion,
-    packageVersion: meta.packageVersion,
-    builtAt: "2026-03-27T12:00:00.000Z",
-    bundleHash: "bundle-hash",
-    manifest: {
-      path: join(pluginRoot, "manifest.json"),
-      exists: true,
-      bytes: 20,
-      sha256: "manifest-hash",
-    },
-    code: {
-      path: join(pluginRoot, "code.js"),
-      exists: true,
-      bytes: 22,
-      sha256: "code-hash",
-    },
-    ui: {
-      path: join(pluginRoot, "ui.html"),
-      exists: true,
-      bytes: 38,
-      sha256: "ui-hash",
-    },
-  }, null, 2), "utf-8");
 }

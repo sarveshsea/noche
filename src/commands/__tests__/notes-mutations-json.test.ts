@@ -4,6 +4,7 @@ import { join } from "path";
 import { tmpdir } from "os";
 import { Command } from "commander";
 import { registerNotesCommand } from "../notes.js";
+import { captureLogs, lastLog } from "./test-helpers.js";
 
 let projectRoot: string;
 let sourceDir: string;
@@ -133,19 +134,4 @@ function makeNotesEngine(projectRootPath: string) {
       },
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
 }

@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
-import { mkdir, rm, writeFile } from "fs/promises";
+import { mkdir, rm } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { registerDoctorCommand } from "../doctor.js";
+import { captureLogs, lastLog, writePluginBundle } from "./test-helpers.js";
 
 const { accessMock, readdirMock } = vi.hoisted(() => ({
   accessMock: vi.fn(async (path: unknown) => {
@@ -177,21 +178,6 @@ function makeDoctorEngine() {
   };
 }
 
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
-}
-
 function getChecks(payload: { checks?: unknown; results?: unknown }): Array<{ label: string; status: string; detail: string }> {
   const checks = payload.checks ?? payload.results;
   if (!Array.isArray(checks)) {
@@ -227,32 +213,3 @@ function detailMap(checks: Array<{ label: string; detail: string }>): Map<string
   return new Map(checks.map((check) => [check.label, check.detail]));
 }
 
-async function writePluginBundle(pluginRoot: string) {
-  await writeFile(join(pluginRoot, "manifest.json"), JSON.stringify({ name: "memoire-plugin" }), "utf-8");
-  await writeFile(join(pluginRoot, "code.js"), "console.log('widget');\n", "utf-8");
-  await writeFile(join(pluginRoot, "ui.html"), "<html><body>Operator Console</body></html>\n", "utf-8");
-  await writeFile(join(pluginRoot, "widget-meta.json"), JSON.stringify({
-    widgetVersion: "2",
-    packageVersion: "0.2.1",
-    builtAt: "2026-03-27T10:00:00.000Z",
-    bundleHash: "bundle-hash",
-    manifest: {
-      path: join(pluginRoot, "manifest.json"),
-      exists: true,
-      bytes: 20,
-      sha256: "manifest-hash",
-    },
-    code: {
-      path: join(pluginRoot, "code.js"),
-      exists: true,
-      bytes: 22,
-      sha256: "code-hash",
-    },
-    ui: {
-      path: join(pluginRoot, "ui.html"),
-      exists: true,
-      bytes: 38,
-      sha256: "ui-hash",
-    },
-  }, null, 2), "utf-8");
-}

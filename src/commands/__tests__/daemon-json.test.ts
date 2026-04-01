@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { Command } from "commander";
 import { registerDaemonCommand } from "../daemon.js";
+import { captureLogs, lastLog } from "./test-helpers.js";
 
 let projectRoot: string;
 
@@ -134,19 +135,4 @@ function makeDaemonEngine(projectRootPath: string, connectedClients = 0) {
       },
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
 }

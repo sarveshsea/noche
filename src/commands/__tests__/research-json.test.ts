@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerResearchCommand } from "../research.js";
+import { captureLogs, lastLog } from "./test-helpers.js";
 
 // Mock existsSync so the from-file command doesn't bail on missing fixtures
 vi.mock("fs", async (importOriginal) => {
@@ -150,19 +151,4 @@ function makeResearchEngine(input?: { figmaConnected?: boolean }) {
       },
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
 }

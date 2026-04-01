@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerSyncCommand } from "../sync.js";
+import { captureLogs } from "./test-helpers.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -85,13 +86,4 @@ function makeSyncEngine({ figmaConnected }: { figmaConnected: boolean }) {
       },
     },
   };
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
 }

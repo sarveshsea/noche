@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { access, readdir, rm } from "node:fs/promises";
+import { access, readdir, rm, copyFile, mkdir } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildPluginBundle } from "./build-plugin.mjs";
@@ -34,6 +34,19 @@ const exitCode = await new Promise((resolveExit, reject) => {
 if (exitCode !== 0) {
   process.exit(exitCode);
 }
+
+// Copy non-TS assets that tsc doesn't handle (CSS, client JS, HTML)
+const templateSrc = resolve(root, "src", "preview", "templates");
+const templateDist = resolve(distDir, "preview", "templates");
+await mkdir(templateDist, { recursive: true });
+
+const assetExtensions = [".css", ".js", ".html"];
+const templateFiles = await readdir(templateSrc);
+await Promise.all(
+  templateFiles
+    .filter((f) => assetExtensions.some((ext) => f.endsWith(ext)))
+    .map((f) => copyFile(join(templateSrc, f), join(templateDist, f))),
+);
 
 await buildPluginBundle({ rootDir: root, outDir: resolve(root, "plugin") });
 await syncChangelogPreview({

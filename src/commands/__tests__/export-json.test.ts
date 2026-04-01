@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MemoireEngine } from "../../engine/core.js";
 import { registerExportCommand } from "../export.js";
+import { captureLogs, lastLog } from "./test-helpers.js";
 
 let testDir: string;
 
@@ -170,19 +171,4 @@ function makeEngine(): MemoireEngine {
     },
     init: vi.fn(async () => undefined),
   } as unknown as MemoireEngine;
-}
-
-function captureLogs(): string[] {
-  const logs: string[] = [];
-  vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
-    logs.push(args.join(" "));
-  });
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  return logs;
-}
-
-function lastLog(logs: string[]): string {
-  const value = logs.at(-1);
-  if (!value) throw new Error("Expected a console.log call");
-  return value;
 }
