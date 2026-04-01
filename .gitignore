@@ -6,6 +6,7 @@ dist/
 *.tsbuildinfo
 preview/dist/
 preview/generated/
+preview/standalone/
 
 # Generated atomic output is workspace state, not product source
 generated/components/ui/

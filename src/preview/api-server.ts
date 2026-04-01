@@ -309,7 +309,10 @@ export class PreviewApiServer {
         this.wss.on("connection", (ws) => {
           this.liveClients.add(ws);
           ws.on("close", () => this.liveClients.delete(ws));
-          ws.on("error", () => this.liveClients.delete(ws));
+          ws.on("error", () => {
+            this.liveClients.delete(ws);
+            try { ws.close(); } catch { /* already closed */ }
+          });
         });
         this.wss.on("error", (err) => {
           if (!resolved) {

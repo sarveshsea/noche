@@ -22,6 +22,7 @@ export class AgentRegistry extends EventEmitter {
   private agents = new Map<string, AgentRegistryEntry>();
   private agentsDir: string;
   private healthTimer: ReturnType<typeof setInterval> | null = null;
+  private evicting = false;
 
   constructor(memoireDir: string) {
     super();
@@ -155,8 +156,10 @@ export class AgentRegistry extends EventEmitter {
 
   // ── Private ──────────────────────────────────────────────
 
-  /** Evict agents with stale heartbeats. */
+  /** Evict agents with stale heartbeats. Guarded against concurrent execution. */
   private async evictStale(): Promise<void> {
+    if (this.evicting) return;
+    this.evicting = true;
     const now = Date.now();
     const stale: string[] = [];
 
@@ -169,12 +172,16 @@ export class AgentRegistry extends EventEmitter {
       }
     }
 
-    for (const id of stale) {
-      const entry = this.agents.get(id);
-      log.warn({ id, role: entry?.role }, "Evicting stale agent");
-      this.agents.delete(id);
-      await this.removeFile(id);
-      this.emit("agent-evicted", { agentId: id, role: entry?.role });
+    try {
+      for (const id of stale) {
+        const entry = this.agents.get(id);
+        log.warn({ id, role: entry?.role }, "Evicting stale agent");
+        this.agents.delete(id);
+        await this.removeFile(id);
+        this.emit("agent-evicted", { agentId: id, role: entry?.role });
+      }
+    } finally {
+      this.evicting = false;
     }
   }
 

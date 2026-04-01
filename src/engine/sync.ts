@@ -228,6 +228,10 @@ export class BidirectionalSync extends EventEmitter {
               "code",
             );
             pushed = codeSideChanges.length;
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            log.error({ err: msg, tokenCount: codeSideChanges.length }, "Code → Figma push failed");
+            this.emit("sync-error", { direction: "code-to-figma", error: msg, tokenCount: codeSideChanges.length });
           } finally {
             this.disableGuard();
           }
@@ -295,16 +299,19 @@ export class BidirectionalSync extends EventEmitter {
 
   /** Build a minimal DesignSystem from tracked state for diffing. */
   private buildDesignSystemFromState(): DesignSystem {
-    // Use the current registry as the baseline
-    return JSON.parse(JSON.stringify(this.engine.registry.designSystem));
+    return structuredClone(this.engine.registry.designSystem);
   }
 
-  /** Update entity tracking for one side. */
+  /** Update entity tracking for one side. Prunes stale entries not in current DS. */
   private updateEntityTracking(side: "figma" | "code", ds: DesignSystem): void {
     const map = side === "figma" ? this.state.figma : this.state.code;
     const now = Date.now();
 
+    // Collect current entity names to prune stale entries
+    const currentNames = new Set<string>();
+
     for (const token of ds.tokens) {
+      currentNames.add(token.name);
       map.set(token.name, {
         name: token.name,
         hash: tokenHash(token),
@@ -314,6 +321,7 @@ export class BidirectionalSync extends EventEmitter {
     }
 
     for (const component of ds.components) {
+      currentNames.add(component.name);
       map.set(component.name, {
         name: component.name,
         hash: componentHash(component),
@@ -323,12 +331,20 @@ export class BidirectionalSync extends EventEmitter {
     }
 
     for (const style of ds.styles) {
+      currentNames.add(style.name);
       map.set(style.name, {
         name: style.name,
         hash: styleHash(style),
         updatedAt: now,
         source: side,
       });
+    }
+
+    // Evict entities no longer present in the design system
+    for (const name of map.keys()) {
+      if (!currentNames.has(name)) {
+        map.delete(name);
+      }
     }
   }
 

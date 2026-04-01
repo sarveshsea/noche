@@ -133,8 +133,13 @@ export class CodeWatcher extends EventEmitter {
     let changeType: CodeChange["changeType"] = "modified";
     try {
       await stat(filePath);
-    } catch {
-      changeType = "deleted";
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        changeType = "deleted";
+      } else {
+        log.warn({ file: filePath, err: (err as Error).message }, "Failed to stat changed file");
+        return;
+      }
     }
 
     const change: CodeChange = {

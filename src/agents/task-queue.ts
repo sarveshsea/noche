@@ -59,8 +59,8 @@ export class TaskQueue extends EventEmitter {
     if (this.reclaimTimer) return;
     this.reclaimTimer = setInterval(() => {
       this.reclaimTimedOut();
-      // Auto-prune completed tasks older than 10 minutes when queue is large
-      if (this.tasks.size > 1000) this.prune(600_000);
+      // Auto-prune completed tasks older than 5 minutes every cycle
+      if (this.tasks.size > 100) this.prune(300_000);
     }, 10_000);
   }
 
@@ -141,6 +141,8 @@ export class TaskQueue extends EventEmitter {
     task.completedAt = Date.now();
     this.emit("task-completed", { taskId, agentId, result });
     log.info({ taskId, agentId }, "Task completed");
+    // Eagerly prune finished tasks to prevent unbounded growth
+    if (this.tasks.size > 200) this.prune(300_000);
     return true;
   }
 

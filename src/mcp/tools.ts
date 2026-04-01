@@ -84,16 +84,20 @@ export function registerTools(server: McpServer, engine: MemoireEngine): void {
     "Create or update a spec. Pass a JSON string matching ComponentSpec, PageSpec, or DataVizSpec schema.",
     { spec: z.string().describe("JSON string of the spec object") },
     async ({ spec: specJson }) => {
-      const raw = JSON.parse(specJson);
-      let parsed;
-      switch (raw.type) {
-        case "component": parsed = ComponentSpecSchema.parse(raw); break;
-        case "page": parsed = PageSpecSchema.parse(raw); break;
-        case "dataviz": parsed = DataVizSpecSchema.parse(raw); break;
-        default: throw new Error(`Unknown spec type: ${raw.type}. Must be component, page, or dataviz.`);
+      try {
+        const raw = JSON.parse(specJson);
+        let parsed;
+        switch (raw.type) {
+          case "component": parsed = ComponentSpecSchema.parse(raw); break;
+          case "page": parsed = PageSpecSchema.parse(raw); break;
+          case "dataviz": parsed = DataVizSpecSchema.parse(raw); break;
+          default: return { isError: true, content: [{ type: "text" as const, text: `Unknown spec type: ${raw.type}. Must be component, page, or dataviz.` }] };
+        }
+        await engine.registry.saveSpec(parsed);
+        return { content: [{ type: "text" as const, text: `Spec "${parsed.name}" saved (${parsed.type})` }] };
+      } catch (err) {
+        return { isError: true, content: [{ type: "text" as const, text: `Failed to create spec: ${(err as Error).message}` }] };
       }
-      await engine.registry.saveSpec(parsed);
-      return { content: [{ type: "text" as const, text: `Spec "${parsed.name}" saved (${parsed.type})` }] };
     },
   );
 

@@ -83,6 +83,7 @@ export class Registry extends EventEmitter {
   private arkDir: string;
   private specs = new Map<string, AnySpec>();
   private generations = new Map<string, GenerationState>();
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private _designSystem: DesignSystem = {
     tokens: [],
     components: [],
@@ -176,6 +177,7 @@ export class Registry extends EventEmitter {
       this._designSystem.tokens.push(token);
     }
     this.emit("token-changed", { name: token.name, action: previous ? "updated" : "added", previous, current: token });
+    this.deferSave();
   }
 
   updateToken(name: string, token: DesignToken): void {
@@ -187,6 +189,7 @@ export class Registry extends EventEmitter {
       this._designSystem.tokens.push(token);
     }
     this.emit("token-changed", { name, action: previous ? "updated" : "added", previous, current: token });
+    this.deferSave();
   }
 
   removeToken(name: string): boolean {
@@ -195,6 +198,7 @@ export class Registry extends EventEmitter {
       const removed = this._designSystem.tokens[idx];
       this._designSystem.tokens.splice(idx, 1);
       this.emit("token-changed", { name, action: "removed", previous: removed, current: null });
+      this.deferSave();
       return true;
     }
     return false;
@@ -202,6 +206,17 @@ export class Registry extends EventEmitter {
 
   async save(): Promise<void> {
     await this.updateDesignSystem(this._designSystem);
+  }
+
+  /** Coalesce rapid token mutations into a single disk write (100ms debounce). */
+  private deferSave(): void {
+    if (this.saveTimer) return;
+    this.saveTimer = setTimeout(() => {
+      this.saveTimer = null;
+      this.save().catch((err) => {
+        log.warn({ err: (err as Error).message }, "Deferred save failed");
+      });
+    }, 100);
   }
 
   async updateDesignSystem(ds: DesignSystem): Promise<void> {

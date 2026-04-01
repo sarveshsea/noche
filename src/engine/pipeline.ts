@@ -79,6 +79,7 @@ export class EventPipeline extends EventEmitter {
   private specWatchers: FSWatcher[] = [];
   private debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private recentEvents: PipelineEvent[] = [];
+  private static readonly MAX_RECENT_EVENTS = 50;
   private lastSnapshot: DesignSystem | null = null;
   private taskCounter = 0;
   private engineEventHandler: ((evt: { type: string; source: string; message: string }) => void) | null = null;
@@ -276,6 +277,12 @@ export class EventPipeline extends EventEmitter {
   // ── Spec File Watchers ────────────────────────────────────
 
   private startSpecWatchers(): void {
+    // Close existing watchers before creating new ones to prevent accumulation
+    for (const watcher of this.specWatchers) {
+      watcher.close();
+    }
+    this.specWatchers = [];
+
     const specsRoot = join(this.engine.config.projectRoot, "specs");
     const subdirs = ["components", "pages", "dataviz", "design", "ia"];
 
@@ -298,7 +305,7 @@ export class EventPipeline extends EventEmitter {
   // ── Helpers ───────────────────────────────────────────────
 
   private snapshotDesignSystem(): DesignSystem {
-    return JSON.parse(JSON.stringify(this.engine.registry.designSystem));
+    return structuredClone(this.engine.registry.designSystem);
   }
 
   private diffTokenCount(before: DesignSystem, after: DesignSystem): number {
@@ -318,8 +325,9 @@ export class EventPipeline extends EventEmitter {
     };
 
     this.recentEvents.push(event);
-    if (this.recentEvents.length > 50) {
-      this.recentEvents.shift();
+    // Cap at MAX_RECENT_EVENTS using splice to avoid repeated shift() overhead
+    if (this.recentEvents.length > EventPipeline.MAX_RECENT_EVENTS * 2) {
+      this.recentEvents = this.recentEvents.slice(-EventPipeline.MAX_RECENT_EVENTS);
     }
 
     this.emit("pipeline-event", event);

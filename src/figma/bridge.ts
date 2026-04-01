@@ -116,6 +116,8 @@ export class FigmaBridge extends EventEmitter {
     this.server.on("client-connected", (client) => {
       this.emit("plugin-connected", client);
       // Auto-resync selection after reconnect so caches are repopulated
+      // Skip if a previous resync is already in-flight
+      if (this.resyncTimer) clearTimeout(this.resyncTimer);
       this.resyncTimer = setTimeout(() => {
         this.resyncTimer = undefined;
         this.server.sendCommand("getSelection", {}, 10000)
