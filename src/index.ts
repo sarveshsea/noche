@@ -48,6 +48,8 @@ import { registerListCommand } from "./commands/list.js";
 import { registerMcpCommand } from "./commands/mcp.js";
 import { registerAgentCommand } from "./commands/agent.js";
 import { registerValidateCommand } from "./commands/validate.js";
+import { existsSync, rmSync } from "fs";
+import { join } from "path";
 
 // Prevent MaxListenersExceededWarning — commands attach cleanup handlers to process
 process.setMaxListeners(30);
@@ -114,6 +116,30 @@ registerListCommand(program, engine);
 registerMcpCommand(program, engine);
 registerAgentCommand(program, engine);
 registerValidateCommand(program, engine);
+
+// Uninstall command — removes all Mémoire artifacts
+program
+  .command("uninstall")
+  .description("Remove all Mémoire artifacts from this machine")
+  .action(() => {
+    const home = process.env.HOME || process.env.USERPROFILE || "";
+    const globalDir = join(home, ".memoire");
+    const localDir = join(process.cwd(), ".memoire");
+
+    if (home && existsSync(globalDir)) {
+      rmSync(globalDir, { recursive: true, force: true });
+      console.log(`  - Removed ${globalDir}`);
+    }
+    if (existsSync(localDir)) {
+      rmSync(localDir, { recursive: true, force: true });
+      console.log(`  - Removed ${localDir}`);
+    }
+
+    console.log();
+    console.log("  To fully uninstall:");
+    console.log("    npm uninstall -g @sarveshsea/memoire");
+    console.log();
+  });
 
 // Parse and execute
 program.parse();
