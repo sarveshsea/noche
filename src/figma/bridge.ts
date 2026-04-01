@@ -97,6 +97,9 @@ export class FigmaBridge extends EventEmitter {
   private config: FigmaBridgeConfig;
   private server: MemoireWsServer;
   private resyncTimer: ReturnType<typeof setTimeout> | undefined;
+  private reconnectAttempt = 0;
+  private static readonly RECONNECT_BASE_MS = 100;
+  private static readonly RECONNECT_MAX_MS = 5000;
 
   constructor(config: FigmaBridgeConfig) {
     super();
@@ -114,6 +117,7 @@ export class FigmaBridge extends EventEmitter {
 
     // Forward server events
     this.server.on("client-connected", (client) => {
+      this.reconnectAttempt = 0; // Reset backoff on successful connection
       this.emit("plugin-connected", client);
       // Auto-resync selection after reconnect so caches are repopulated
       // Skip if a previous resync is already in-flight
@@ -125,12 +129,16 @@ export class FigmaBridge extends EventEmitter {
           .catch((err) => {
             this.log.warn({ err }, "Selection resync failed after reconnect");
           });
-      }, 500);
+      }, this.getReconnectDelay());
     });
 
     this.server.on("client-disconnected", () => {
       if (this.server.connectedClients.length === 0) {
-        this.log.warn("All Figma plugins disconnected — waiting for reconnection on same port");
+        this.reconnectAttempt++;
+        this.log.warn(
+          { attempt: this.reconnectAttempt, nextDelayMs: this.getReconnectDelay() },
+          "All Figma plugins disconnected — waiting for reconnection on same port",
+        );
       }
       this.emit("plugin-disconnected");
     });
@@ -428,6 +436,16 @@ export class FigmaBridge extends EventEmitter {
       type: (s.styleType?.toLowerCase() || "fill") as DesignStyle["type"],
       value: s.value || {},
     }));
+  }
+
+  /** Exponential backoff with jitter for reconnection delays. */
+  private getReconnectDelay(): number {
+    const base = FigmaBridge.RECONNECT_BASE_MS;
+    const max = FigmaBridge.RECONNECT_MAX_MS;
+    const exp = Math.min(base * Math.pow(2, this.reconnectAttempt), max);
+    // Add ±25% jitter to prevent thundering herd
+    const jitter = exp * (0.75 + Math.random() * 0.5);
+    return Math.round(jitter);
   }
 
   private emitEvent(type: MemoireEvent["type"], message: string): void {
