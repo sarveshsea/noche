@@ -62,7 +62,18 @@ export class AgentOrchestrator {
    * Main entry point — take a natural language intent, classify it,
    * build a plan of sub-agent tasks, and execute them.
    */
-  async execute(intent: string, options?: { autoSync?: boolean; dryRun?: boolean }): Promise<import("./sub-agents.js").AgentExecutionResult> {
+  async executeBatch(intents: string[], options: { dryRun?: boolean } = {}): Promise<import("./sub-agents.js").AgentExecutionResult[]> {
+    const results: import("./sub-agents.js").AgentExecutionResult[] = [];
+    // Build context once, reuse across all intents
+    const ctx = await this.buildContext();
+    for (const intent of intents) {
+      const result = await this.execute(intent, { ...options, context: ctx });
+      results.push(result);
+    }
+    return results;
+  }
+
+  async execute(intent: string, options?: { autoSync?: boolean; dryRun?: boolean; context?: AgentContext }): Promise<import("./sub-agents.js").AgentExecutionResult> {
     const category = classifyIntent(intent);
     log.info({ intent, category }, "Classified design intent");
 
@@ -74,7 +85,7 @@ export class AgentOrchestrator {
       log.info({ notes: resolvedNotes.map((n) => n.noteId), category }, "Notes activated for intent");
     }
 
-    const context = await this.buildContext();
+    const context = options?.context ?? await this.buildContext();
     const plan = this.buildPlan(intent, category, context, resolvedNotes);
 
     log.info({ planId: plan.id, tasks: plan.subTasks.length }, "Execution plan ready");
