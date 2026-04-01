@@ -480,7 +480,11 @@ export class PreviewApiServer {
     const payload = JSON.stringify({ type, data, ts: Date.now() });
     for (const res of this.sseClients) {
       if (!res.writableEnded) {
-        res.write(`data: ${payload}\n\n`);
+        const ok = res.write(`data: ${payload}\n\n`);
+        if (!ok) {
+          // Backpressure — client can't keep up, drop it
+          this.sseClients.delete(res);
+        }
       }
     }
   }
