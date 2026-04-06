@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      - run: pwd && ls -la && cat package.json | head -5
       - run: npm ci
       - run: npm run lint
       - run: npm test -- --run
