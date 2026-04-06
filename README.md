@@ -75,6 +75,7 @@ Your specs, generated code, and .env files are never touched.
 | `memi init` | Initialize workspace with starter specs |
 | `memi connect` | Start Figma bridge, report plugin health |
 | `memi pull` | Extract tokens, components, styles from Figma |
+| `memi pull --rest` | Pull via REST API — no plugin or Figma Desktop required |
 | `memi spec <type> <name>` | Create a component, page, or dataviz spec |
 | `memi generate [name]` | Generate shadcn/ui code from specs |
 | `memi generate --preview` | Show generated code without writing files |
@@ -120,6 +121,7 @@ Your specs, generated code, and .env files are never touched.
 | `memi status` | Project status overview |
 | `memi doctor` | Health check: project, plugin, bridge, workspace |
 | `memi dashboard` | Launch monitoring dashboard |
+| `memi design-doc <url>` | Extract design system from any URL → DESIGN.md |
 | `memi uninstall` | Remove all Memoire artifacts |
 
 All commands support `--json` for structured output.
