@@ -22,6 +22,7 @@ import { initWorkspace, readSoul } from "./workspace-init.js";
 import { NoteLoader } from "../notes/loader.js";
 import { CanvasHealer } from "../figma/canvas-healer.js";
 import { extractDesignSystemREST } from "../figma/rest-client.js";
+import { auditTokensForWcag, type WcagTokenReport } from "../figma/wcag-token-checker.js";
 
 export interface MemoireConfig {
   projectRoot: string;
@@ -150,6 +151,15 @@ export class MemoireEngine extends EventEmitter {
   /** Deep copy of the current design system, useful for diffing before/after pulls. */
   snapshotDesignSystem(): DesignSystem {
     return JSON.parse(JSON.stringify(this.registry.designSystem));
+  }
+
+  /**
+   * WA-404 — Run a WCAG token audit against the current design system.
+   * Exposes the audit to MCP tools and agents without re-implementing the logic.
+   * Call after pullDesignSystem() or pullDesignSystemREST() for fresh data.
+   */
+  auditDesignSystemWcag(): WcagTokenReport {
+    return auditTokensForWcag(this.registry.designSystem.tokens);
   }
 
   /** Get or create the agent bridge (lazy — needs connected ws-server). */

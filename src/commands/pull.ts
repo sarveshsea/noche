@@ -3,6 +3,7 @@ import type { MemoireEngine } from "../engine/core.js";
 import { checkCapabilities, formatCapabilityError } from "../engine/capabilities.js";
 import { diffDesignSystem } from "../engine/token-differ.js";
 import { ui } from "../tui/format.js";
+import { auditTokensForWcag, type WcagTokenReport } from "../figma/wcag-token-checker.js";
 
 export interface PullPayload {
   status: "completed" | "failed";
@@ -20,6 +21,7 @@ export interface PullPayload {
   };
   elapsedMs: number;
   error?: string;
+  wcagReport?: WcagTokenReport;
 }
 
 export function registerPullCommand(program: Command, engine: MemoireEngine) {
@@ -29,7 +31,8 @@ export function registerPullCommand(program: Command, engine: MemoireEngine) {
     .option("--rest", "Pull via Figma REST API (no plugin required — needs FIGMA_TOKEN + FIGMA_FILE_KEY)")
     .option("--force", "Bypass the 5-minute pull cache and force a fresh pull")
     .option("--json", "Output pull results as JSON")
-    .action(async (opts: { rest?: boolean; force?: boolean; json?: boolean }) => {
+    .option("--wcag", "Run WCAG token audit after pull. Sets exit code 2 when failures are found.")
+    .action(async (opts: { rest?: boolean; force?: boolean; json?: boolean; wcag?: boolean }) => {
       const start = Date.now();
       await engine.init();
 
@@ -52,6 +55,13 @@ export function registerPullCommand(program: Command, engine: MemoireEngine) {
             elapsedMs: Date.now() - start,
           };
 
+          // WCAG audit — REST path
+          if (opts.wcag) {
+            const wcagReport = auditTokensForWcag(ds.tokens);
+            payload.wcagReport = wcagReport;
+            if (wcagReport.hasFailures) process.exitCode = 2;
+          }
+
           if (opts.json) {
             const after = engine.snapshotDesignSystem?.() ?? ds;
             const diff = diffDesignSystem(before, after);
@@ -71,6 +81,11 @@ export function registerPullCommand(program: Command, engine: MemoireEngine) {
           if (autoSpecs.length > 0) {
             console.log(`  Auto-generated ${autoSpecs.length} component specs — run \`memi generate\` to create code`);
           }
+
+          if (opts.wcag && payload.wcagReport) {
+            printWcagReport(payload.wcagReport);
+          }
+
           console.log("");
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
@@ -156,6 +171,13 @@ export function registerPullCommand(program: Command, engine: MemoireEngine) {
       const after = engine.snapshotDesignSystem?.() ?? engine.registry.designSystem;
       const diff = diffDesignSystem(before, after);
 
+      // WCAG audit — plugin path
+      if (opts.wcag) {
+        const wcagReport = auditTokensForWcag(ds.tokens);
+        payload.wcagReport = wcagReport;
+        if (wcagReport.hasFailures) process.exitCode = 2;
+      }
+
       if (opts.json) {
         (payload as unknown as Record<string, unknown>).diff = {
           hasChanges: diff.hasChanges,
@@ -204,6 +226,32 @@ export function registerPullCommand(program: Command, engine: MemoireEngine) {
       if (autoSpecs.length > 0) {
         console.log(`  Auto-generated ${autoSpecs.length} component specs — run \`memi generate\` to create code`);
       }
+
+      if (opts.wcag && payload.wcagReport) {
+        printWcagReport(payload.wcagReport);
+      }
+
       console.log("");
     });
+}
+
+/**
+ * Print a human-readable WCAG token audit summary to stdout.
+ * Failures are printed individually with token name, value, and ratio.
+ */
+function printWcagReport(report: WcagTokenReport): void {
+  const { summary, results } = report;
+  console.log();
+  console.log(`  wcag audit  ${summary.total} tokens checked`);
+  console.log(`  [pass]  ${String(summary.pass).padStart(2)}  no issues`);
+  if (summary.warn > 0) {
+    console.log(`  [warn]  ${String(summary.warn).padStart(2)}  low contrast (AA-large only)`);
+  }
+  if (summary.fail > 0) {
+    console.log(`  [fail]  ${String(summary.fail).padStart(2)}  inaccessible`);
+    console.log();
+    for (const r of results.filter((r) => r.status === "fail")) {
+      console.log(`    FAIL  ${r.tokenName}  ${r.issue ?? ""}  [${r.wcagCriterion ?? ""}]`);
+    }
+  }
 }
