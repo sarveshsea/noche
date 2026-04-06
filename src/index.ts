@@ -19,6 +19,8 @@
  *    memoire dataviz <name>    Create a dataviz spec
  *    memoire page <name>       Create a page spec
  *    memoire tokens            Export design tokens
+ *    memoire pull --rest       Pull design system via Figma REST API (no plugin)
+ *    memoire design-doc <url>  Extract design system from any URL → DESIGN.md
  */
 
 import { Command } from "commander";
