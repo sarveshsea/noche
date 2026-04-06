@@ -126,7 +126,7 @@ function formatTokenValue(value: unknown, type: string): string | number {
 
 // ── Config errors (not retried, always propagated) ───────
 
-class FigmaConfigError extends Error {
+export class FigmaConfigError extends Error {
   constructor(msg: string) {
     super(msg);
     this.name = "FigmaConfigError";
