@@ -13,6 +13,7 @@ import { AgentOrchestrator } from "../agents/orchestrator.js";
 import { DesignAnalyzer } from "../agents/design-analyzer.js";
 import { getAI, getTracker } from "../ai/index.js";
 import { ComponentSpecSchema, PageSpecSchema, DataVizSpecSchema } from "../specs/types.js";
+import { fetchPageAssets, parseCSSTokens } from "../research/css-extractor.js";
 
 function requireFigma(engine: MemoireEngine): void {
   if (!engine.figma.isConnected) {
@@ -421,6 +422,69 @@ export function registerTools(server: McpServer, engine: MemoireEngine): void {
           text: JSON.stringify(health, null, 2),
         }],
       };
+    },
+  );
+
+  // ── design_doc ────────────────────────────────────────
+  server.tool(
+    "design_doc",
+    "Extract a design system from any public URL and return a structured DESIGN.md. Fetches HTML + stylesheets, parses CSS tokens, and synthesizes with Claude.",
+    {
+      url: z.string().url().describe("Public URL to extract design system from"),
+      raw: z.boolean().default(false).describe("Return raw extracted tokens instead of AI-synthesized DESIGN.md"),
+    },
+    async ({ url, raw }) => {
+      try {
+        const assets = await fetchPageAssets(url);
+        if (!assets.html && assets.cssBlocks.length === 0) {
+          return { isError: true, content: [{ type: "text" as const, text: `Could not fetch ${url}` }] };
+        }
+        const tokens = parseCSSTokens(assets.cssBlocks);
+
+        if (raw) {
+          return {
+            content: [{
+              type: "text" as const,
+              text: JSON.stringify({
+                url,
+                title: assets.title,
+                tokens: {
+                  cssVarCount: Object.keys(tokens.cssVars).length,
+                  colorCount: tokens.colors.length,
+                  fontCount: tokens.fonts.length,
+                  cssVars: tokens.cssVars,
+                  colors: tokens.colors,
+                  fonts: tokens.fonts,
+                  fontSizes: tokens.fontSizes,
+                  spacing: tokens.spacing,
+                  radii: tokens.radii,
+                  shadows: tokens.shadows,
+                },
+              }, null, 2),
+            }],
+          };
+        }
+
+        const ai = getAI();
+        if (!ai) {
+          return { isError: true, content: [{ type: "text" as const, text: "ANTHROPIC_API_KEY required for AI synthesis. Use raw=true for parsed tokens without AI." }] };
+        }
+
+        const varSample = Object.entries(tokens.cssVars).slice(0, 60).map(([k, v]) => `${k}: ${v}`).join("\n");
+        const response = await ai.complete({
+          system: "You are a design system analyst. Extract precise, actionable design systems from raw CSS data.",
+          messages: [{
+            role: "user",
+            content: `Extract a DESIGN.md from: ${url}\nTitle: ${assets.title}\n\nCSS Variables:\n${varSample || "(none)"}\n\nColors: ${tokens.colors.slice(0, 30).join(", ") || "(none)"}\nFonts: ${tokens.fonts.slice(0, 8).join(" | ") || "(none)"}\nFont sizes: ${tokens.fontSizes.slice(0, 12).join(", ") || "(none)"}\nSpacing: ${tokens.spacing.slice(0, 12).join(", ") || "(none)"}\nRadii: ${tokens.radii.slice(0, 8).join(", ") || "(none)"}\nShadows: ${tokens.shadows.slice(0, 4).join("; ") || "(none)"}\n\nOutput a DESIGN.md with: ## Color System, ## Typography, ## Spacing, ## Borders & Surfaces, ## Component Patterns, ## Voice & Tone, ## Do / Don't, ## Tailwind Config Sketch. Be specific, use actual values.`,
+          }],
+          model: "deep",
+          maxTokens: 4096,
+        });
+
+        return { content: [{ type: "text" as const, text: response.content }] };
+      } catch (err) {
+        return { isError: true, content: [{ type: "text" as const, text: `design_doc failed: ${(err as Error).message}` }] };
+      }
     },
   );
 
