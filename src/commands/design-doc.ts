@@ -51,11 +51,22 @@ export function registerDesignDocCommand(program: Command, engine: MemoireEngine
           throw new Error(`Could not fetch ${url} — check the URL and try again`);
         }
 
+        if (!opts.json && assets.title && assets.title !== url) {
+          console.log(`  · "${assets.title}"`);
+        }
+
         // 2. Parse CSS tokens
         const tokens = parseCSSTokens(assets.cssBlocks);
 
         if (!opts.json) {
-          console.log(`  · Parsed ${Object.keys(tokens.cssVars).length} CSS variables, ${tokens.colors.length} colors, ${tokens.fonts.length} fonts`);
+          const varCount = Object.keys(tokens.cssVars).length;
+          const summary = [
+            varCount > 0 ? `${varCount} CSS vars` : null,
+            tokens.colors.length > 0 ? `${tokens.colors.length} colors` : null,
+            tokens.fonts.length > 0 ? `${tokens.fonts.length} fonts` : null,
+            tokens.radii.length > 0 ? `${tokens.radii.length} radii` : null,
+          ].filter(Boolean).join(", ");
+          console.log(`  · ${summary || "no tokens extracted"}`);
         }
 
         // 3. Generate DESIGN.md via Claude (or fallback to raw extraction)
