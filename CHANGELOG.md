@@ -6,6 +6,47 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v0.9.0 — 2026-04-06 (WCAG Sprint)
+
+### Commits
+| Hash | Message |
+|------|---------|
+| `58e6bcf` | fix(wcag): update test snapshots and metadata for WCAG sprint |
+| `561ec0a` | feat(wcag): Blueprint 5 — preview gallery WCAG 2.2 AA landmarks |
+| `5cca31e` | feat(wcag): Blueprint 4 — pull --wcag post-pull token audit |
+| `309c7b5` | feat(wcag): Blueprint 3 — memi audit --wcag command |
+| `d61fe17` | feat(wcag): Blueprint 2 — Zod WCAG spec validators |
+| `fe57cc8` | feat(wcag): Blueprint 1 — design-doc contrast report |
+
+### New Features
+
+**Blueprint 1 — `design-doc` contrast report**
+`parseCSSTokens` now returns a `contrastPairs` field with every extracted color checked against white and black. `memi design-doc` prints a failure summary in the terminal and adds a `## Contrast` section to DESIGN.md. The `--wcag` flag dumps the full table for all pairs, not just failures.
+
+**Blueprint 2 — Zod WCAG spec validators**
+`touchTarget` now validates against the WCAG 2.5.8 24×24px minimum with a descriptive error message. `focusWidth` (min 2px) and `focusContrastRatio` (min 3:1) enforce WCAG 2.4.11. A new optional `colorContrast` block documents AA/AAA intent on every component spec. The spec command formats Zod errors as aligned `[field]  message` columns.
+
+**Blueprint 3 — `memi audit --wcag`**
+New dedicated audit command. Runs 5 checks per spec (contrast, aria, keyboard, touch, focus), emits WCAG criterion codes (1.4.3, 4.1.2, 2.1.1, 2.5.8, 2.4.11) in `--json` output, and exits non-zero on failures. `--component <name>` for CI targeting.
+
+**Blueprint 4 — `pull --wcag`**
+Post-pull WCAG report on the design system. `src/figma/wcag-token-checker.ts` checks color tokens (contrast vs white, matching WebAIM semantics) and spacing tokens (24px minimum). Exit code 2 on failures. `auditDesignSystemWcag()` method on `MemoireEngine` for MCP/agent use.
+
+**Blueprint 5 — Preview gallery landmarks**
+`<header>`, `<nav aria-label>`, `<main id="main-content" tabindex="-1">`, `<footer>`, heading hierarchy (h1→h2), skip-to-content link, `aria-live="polite"` on status region, `:focus-visible` global focus style. Also fixed a bug where `${CSS}` was escaped (`\${CSS}`) in the template literal, preventing the stylesheet from being injected.
+
+### Key Design Decisions
+
+- **Contrast vs white, not max-against-extremes** — `auditTokensForWcag` uses contrast against white as the check surface. `maxContrastAgainstExtremes` (taking the best of white/black) always returns ≥4.58 for any color, making warn/fail unreachable. The vs-white approach matches WebAIM and reflects real-world foreground-on-white usage.
+
+- **Warn tier uses #787878, not #767676** — WCAG precision differences between tools: our formula gives #767676 a 4.54:1 vs white (pass), while WebAIM reports 4.48. Using #787878 (4.42:1) gives unambiguous test coverage for the warn tier without fighting floating-point rounding.
+
+- **Exit code 2 for WCAG failures** — `pull --wcag` sets exit code 2 (not 1) on WCAG violations. Exit code 1 is infrastructure error (can't connect, can't write). This lets CI pipelines distinguish "tool failed" from "design system has accessibility debt".
+
+- **`colorContrast` is declarative, not enforced** — The spec schema field documents intent; `memi audit --wcag` enforces it. Separating declaration from enforcement means teams can adopt incrementally without breaking existing spec creation.
+
+---
+
 ## v0.8.0 — 2026-04-06
 
 ### Commits
