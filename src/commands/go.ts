@@ -44,7 +44,7 @@ export function registerGoCommand(program: Command, engine: MemoireEngine) {
         preview: { started: false, skipped: false },
       };
 
-      if (!json) console.log(ui.brand("FULL PIPELINE"));
+      if (!json) console.log(ui.brand(opts.rest ? "FULL PIPELINE  (REST mode)" : "FULL PIPELINE"));
 
       // 1. Initialize
       const initSpinner = !json ? ora({ text: "Initializing...", indent: 2, color: "cyan" }).start() : null;
