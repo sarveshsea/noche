@@ -16,9 +16,7 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-      - run: npm ci
-        env:
-          npm_config_optional: "false"
+      - run: npm ci --omit=optional
       - run: npm run build
       - run: npm publish --provenance --access public
         env:

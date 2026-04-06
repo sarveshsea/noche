@@ -17,9 +17,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: npm ci
-        env:
-          npm_config_optional: "false"
+      - run: npm ci --omit=optional
       - run: npm run lint
       - run: npm test -- --run
       - run: npm run build
