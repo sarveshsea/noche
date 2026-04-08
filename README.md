@@ -15,6 +15,8 @@
   <a href="https://www.npmjs.com/package/@sarveshsea/memoire"><img src="https://img.shields.io/npm/dw/@sarveshsea/memoire?color=black" alt="weekly downloads"></a>
   <a href="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml"><img src="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/sarveshsea/m-moire/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/tests-318%20passing-black" alt="318 tests passing">
+  <img src="https://img.shields.io/badge/MCP%20tools-20-black" alt="20 MCP tools">
 </p>
 
 <p align="center">

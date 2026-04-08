@@ -1,0 +1,77 @@
+# Contributing to Memoire
+
+## Ways to contribute
+
+- **Bug reports** — use the bug report template
+- **Feature requests** — use the feature request template
+- **Notes (skill packs)** — the fastest way to extend Memoire without touching the core
+- **MCP tool improvements** — add tools, improve descriptions, fix edge cases
+- **Test coverage** — we run 318 tests; adding more is always welcome
+- **Documentation** — README, inline JSDoc, or examples
+
+## Notes (skill packs)
+
+Notes are the easiest contribution. A Note is a folder with a `note.json` manifest and one or more markdown skill files.
+
+```
+my-note/
+  note.json
+  my-note.md
+```
+
+`note.json` format:
+```json
+{
+  "name": "my-note",
+  "version": "1.0.0",
+  "description": "What this note teaches",
+  "category": "craft | research | connect | generate",
+  "activateOn": ["keyword1", "keyword2"],
+  "skills": ["my-note.md"]
+}
+```
+
+Install and test locally:
+```bash
+memi notes install ./my-note
+memi notes list
+```
+
+Share as a GitHub repo and others can install with:
+```bash
+memi notes install github:you/my-note
+```
+
+## Development setup
+
+```bash
+git clone https://github.com/sarveshsea/m-moire
+cd m-moire
+npm install
+npm test
+npm run build
+```
+
+Run a command from source:
+```bash
+npx tsx src/index.ts doctor
+```
+
+## Tests
+
+```bash
+npm test               # run all 318 tests
+npm test -- --watch    # watch mode
+```
+
+Tests live alongside source in `src/**/__tests__/`. Each module has its own test file.
+
+## Submitting a PR
+
+1. Fork the repo
+2. Create a branch: `feat/my-feature` or `fix/the-bug`
+3. Make your change with tests
+4. Run `npm test && npm run lint`
+5. Open a PR — describe what changed and why
+
+Commits follow conventional commits: `feat:`, `fix:`, `docs:`, `chore:`.
