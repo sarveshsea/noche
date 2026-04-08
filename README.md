@@ -15,7 +15,7 @@
   <a href="https://www.npmjs.com/package/@sarveshsea/memoire"><img src="https://img.shields.io/npm/dw/@sarveshsea/memoire?color=black" alt="weekly downloads"></a>
   <a href="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml"><img src="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/sarveshsea/m-moire/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="License"></a>
-  <img src="https://img.shields.io/badge/tests-318%20passing-black" alt="318 tests passing">
+  <img src="https://img.shields.io/badge/tests-698%20passing-black" alt="698 tests passing">
   <img src="https://img.shields.io/badge/MCP%20tools-20-black" alt="20 MCP tools">
 </p>
 
@@ -61,10 +61,18 @@ Requires Node.js 20+. Figma Desktop needed only for the real-time WebSocket brid
 
 ## Quick start
 
+**New user? One command sets everything up:**
+
+```bash
+memi setup             # token → file → plugin → bridge → MCP config → test pull
+```
+
+Or step by step:
+
 ```bash
 memi init              # scaffold workspace
 memi connect           # start Figma bridge
-memi pull              # extract design system
+memi pull              # extract design system (auto-falls back to REST)
 memi generate          # produce React code
 memi preview           # open preview dashboard
 ```
@@ -92,9 +100,11 @@ Your specs, generated code, and .env files are never touched.
 
 | Command | What it does |
 |---------|-------------|
+| `memi setup` | Full onboarding: token → file → plugin → bridge → MCP config → test pull |
 | `memi init` | Initialize workspace with starter specs |
 | `memi connect` | Start Figma bridge, report plugin health |
-| `memi pull` | Extract tokens, components, styles from Figma |
+| `memi connect --background` | Start bridge as a background daemon |
+| `memi pull` | Extract tokens, components, styles from Figma (auto-falls back to REST) |
 | `memi pull --rest` | Pull via REST API — no plugin or Figma Desktop required |
 | `memi spec <type> <name>` | Create a component, page, or dataviz spec |
 | `memi generate [name]` | Generate shadcn/ui code from specs |
@@ -167,11 +177,12 @@ Memoire exposes 20 tools and 3 resources over stdio. Any MCP-compatible AI tool 
 
 **Cursor** — add to `.cursor/mcp.json` (same format).
 
-Or generate the config automatically:
+Or generate and install the config automatically:
 
 ```bash
-memi mcp config --target claude-code   # prints .mcp.json block
-memi mcp config --target cursor        # prints .cursor/mcp.json block
+memi mcp config --install              # writes to .mcp.json in project root
+memi mcp config --install --global     # writes to ~/.claude/settings.json
+memi mcp config --target cursor --install   # writes to .cursor/mcp.json
 ```
 
 ### 20 tools
@@ -334,7 +345,7 @@ Built-in categories: craft, research, connect, generate.
 - Commander.js for CLI
 - WebSocket for Figma bridge
 - Pino for structured logging
-- Vitest for testing (318 tests)
+- Vitest for testing (698 tests)
 
 ---
 

@@ -6,11 +6,21 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
-## v0.9.0 — 2026-04-06 (WCAG Sprint)
+## v0.9.0 — 2026-04-08 (WCAG + Onboarding Sprint)
 
 ### Commits
 | Hash | Message |
 |------|---------|
+| `6a00c05` | feat(setup): instant token validation, memi setup command, mcp config --install |
+| `39a5b62` | feat(connect,pull): REST auto-fallback + background bridge mode |
+| `a0e3320` | feat(notes): add docker-environments Note + fix focusWidth TS errors |
+| `85d4f57` | chore: auto-publish workflow, issue templates, CONTRIBUTING guide |
+| `478ab88` | docs: improve README — badges, works-with table, MCP config snippets |
+| `263dc35` | fix(engine): load .env.local automatically so FIGMA_TOKEN works without shell export |
+| `5873848` | fix(plugin): scan all pages for components, not just current page |
+| `4ad5413` | fix(bridge): write bridge.json lock so pull/sync reuse running memi connect bridge |
+| `9bf2700` | fix(rest-client): absorb 403 on variables endpoint for Free/Starter plan files |
+| `28a5d65` | chore: bump plugin widget-meta to v0.9.0 |
 | `58e6bcf` | fix(wcag): update test snapshots and metadata for WCAG sprint |
 | `561ec0a` | feat(wcag): Blueprint 5 — preview gallery WCAG 2.2 AA landmarks |
 | `5cca31e` | feat(wcag): Blueprint 4 — pull --wcag post-pull token audit |
@@ -19,6 +29,24 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `fe57cc8` | feat(wcag): Blueprint 1 — design-doc contrast report |
 
 ### New Features
+
+**`memi setup` — zero-friction onboarding**
+Single command that handles the full Figma + Claude Code setup. Validates token via REST immediately (shows `@handle` and email on paste — no more waiting until `memi pull` to find out the token was wrong). Validates file key. Checks plugin health and auto-reinstalls if stale. Copies manifest path to clipboard on macOS. Starts bridge in background. Writes `.mcp.json` automatically. Runs a test pull to confirm the full chain. Prints a ready summary. Collapses the typical 2-hour debugging session into a 5-minute guided flow.
+
+**Instant token validation in `memi connect`**
+`GET /v1/me` is called the moment a token is pasted. Shows `@handle (email)` immediately. `401` surfaces a clear message pointing to `figma.com/settings` instead of surfacing as a cryptic error 10 minutes later during pull.
+
+**`memi connect --background`**
+Spawns a detached bridge process and exits immediately — no terminal tab required to keep the bridge alive. Polls `bridge.json` for up to 8 seconds and confirms the port before exiting.
+
+**`memi pull` auto REST fallback**
+When no bridge is running and `FIGMA_TOKEN` + `FIGMA_FILE_KEY` are available, `memi pull` falls back to the REST API automatically — no `--rest` flag needed, no waiting for a plugin timeout. Also falls back after a plugin timeout. Prints a tip to run `memi connect --background` for real-time sync.
+
+**`memi mcp config --install`**
+Writes the MCP config directly to the target file instead of printing JSON to copy manually. `--install` writes to `.mcp.json` in the project root. `--install --global` writes to `~/.claude/settings.json`. Merges safely into existing config without overwriting other `mcpServers` entries.
+
+**`docker-environments` Note**
+New `connect` category Note covering Docker-aware Mémoire operation: Figma bridge port-forwarding topology, CI/CD headless WCAG + spec pipelines, shared MCP server as a team service, agent workers as isolated containers, and devcontainer setup. Auto-activates when `Dockerfile`, `docker-compose.yml`, or `.devcontainer/` is detected in the project root.
 
 **Blueprint 1 — `design-doc` contrast report**
 `parseCSSTokens` now returns a `contrastPairs` field with every extracted color checked against white and black. `memi design-doc` prints a failure summary in the terminal and adds a `## Contrast` section to DESIGN.md. The `--wcag` flag dumps the full table for all pairs, not just failures.
