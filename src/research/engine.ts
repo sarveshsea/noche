@@ -1,10 +1,33 @@
 /**
  * Research Engine — Transforms raw qualitative/quantitative data
  * into structured, actionable research artifacts.
+ *
+ * ## Store Format
+ * The research store is persisted as `research/insights.json` with this shape:
+ * ```json
+ * {
+ *   "insights": [{ "id": "insight-1", "finding": "...", "confidence": "high|medium|low",
+ *                  "source": "...", "evidence": [...], "tags": [...], "createdAt": "..." }],
+ *   "personas": [{ "name": "...", "role": "...", "goals": [...], "painPoints": [...] }],
+ *   "themes":   [{ "name": "...", "description": "...", "insights": ["insight-1"], "frequency": 3 }],
+ *   "sources":  [{ "name": "...", "type": "excel|transcript|web|figjam-stickies", "processedAt": "..." }]
+ * }
+ * ```
+ *
+ * ## Deduplication
+ * Insights are deduplicated by a SHA-256 content hash of the `finding` text.
+ * Re-running `from-file` on the same file will not produce duplicate entries.
+ *
+ * ## Supported Input Types
+ * - Excel/CSV files via `fromFile()` — looks for response, rating, and user columns
+ * - FigJam stickies via `fromStickies()` — clusters by theme proximity
+ * - Interview transcripts via `fromTranscript()` — speaker-aware insight extraction
+ * - Web URLs via `fromUrls()` — cross-validated web research findings
  */
 
 import { writeFile, mkdir, readFile } from "fs/promises";
 import { join } from "path";
+import { createHash } from "crypto";
 import { createLogger } from "../engine/logger.js";
 import type { MemoireEvent } from "../engine/core.js";
 import { parseExcel } from "./excel-parser.js";
@@ -62,6 +85,8 @@ export class ResearchEngine {
     sources: [],
   };
   private insightCounter = 0;
+  /** Short SHA-256 hashes of already-stored insight content, used for deduplication. */
+  private insightHashes = new Set<string>();
 
   constructor(config: ResearchConfig) {
     this.config = config;
@@ -76,6 +101,11 @@ export class ResearchEngine {
       if (parsed && typeof parsed === "object" && Array.isArray(parsed.insights)) {
         this.store = parsed;
         this.insightCounter = this.store.insights.length;
+        // Rebuild dedup hash set from existing insights
+        this.insightHashes.clear();
+        for (const insight of this.store.insights) {
+          this.insightHashes.add(insightContentHash(insight.finding));
+        }
       } else {
         this.log.warn("insights.json has unexpected shape — starting fresh");
       }
@@ -303,10 +333,15 @@ export class ResearchEngine {
     return report;
   }
 
+  /** Return a snapshot of all extracted research insights. */
   getInsights(): ResearchInsight[] {
     return this.store.insights;
   }
 
+  /**
+   * Return the full research store (insights, personas, themes, sources).
+   * The returned object is a live reference — do not mutate it directly.
+   */
   getStore(): ResearchStore {
     return this.store;
   }
@@ -394,12 +429,20 @@ export class ResearchEngine {
 
   // ── Private ──────────────────────────────────────────────
 
-  private addInsight(data: Omit<ResearchInsight, "id" | "createdAt">): ResearchInsight {
+  private addInsight(data: Omit<ResearchInsight, "id" | "createdAt">): ResearchInsight | null {
+    // Deduplicate by content hash — skip identical findings already in the store
+    const hash = insightContentHash(data.finding);
+    if (this.insightHashes.has(hash)) {
+      this.log.debug({ finding: data.finding.slice(0, 60) }, "Skipping duplicate insight");
+      return null;
+    }
+
     const insight: ResearchInsight = {
       ...data,
       id: `insight-${++this.insightCounter}`,
       createdAt: new Date().toISOString(),
     };
+    this.insightHashes.add(hash);
     this.store.insights.push(insight);
     return insight;
   }
@@ -541,4 +584,14 @@ export class ResearchEngine {
       timestamp: new Date(),
     });
   }
+}
+
+// ── Helpers ──────────────────────────────────────────────
+
+/**
+ * Compute a short (8-char) SHA-256 hex hash of an insight's finding text.
+ * Used for deduplication — identical findings produce the same hash.
+ */
+function insightContentHash(finding: string): string {
+  return createHash("sha256").update(finding.trim().toLowerCase()).digest("hex").slice(0, 8);
 }

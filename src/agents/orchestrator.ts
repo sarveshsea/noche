@@ -206,6 +206,21 @@ export class AgentOrchestrator {
             task.error = err instanceof Error ? err.message : String(err);
             task.completedAt = new Date().toISOString();
 
+            log.error(
+              {
+                taskId: task.id,
+                taskName: task.name,
+                agentType: task.agentType,
+                planId: plan.id,
+                error: task.error,
+              },
+              "Sub-task failed: [%s] %s (agent: %s) — %s",
+              task.id,
+              task.name,
+              task.agentType,
+              task.error,
+            );
+
             await this.updateAgentBox(
               this.makeAgentBoxUpdate(plan, task, taskIndex, "error"),
             );

@@ -103,6 +103,44 @@ function skillToManifest(skill: SkillRegistryEntry, registryVersion: string): No
 
 // ── Note Loader ──────────────────────────────────────────
 
+/**
+ * NoteLoader discovers and loads Mémoire Notes from all sources.
+ *
+ * ## Note Manifest Format
+ * Each Note is a directory containing a `note.json` manifest:
+ * ```json
+ * {
+ *   "name": "my-note",
+ *   "version": "1.0.0",
+ *   "description": "...",
+ *   "category": "craft|research|connect|generate",
+ *   "tags": [],
+ *   "skills": [{
+ *     "file": "my-note.md",
+ *     "name": "My Note",
+ *     "activateOn": "component-creation",
+ *     "freedomLevel": "high"
+ *   }],
+ *   "dependencies": []
+ * }
+ * ```
+ *
+ * ## Activation Context Matching
+ * The `activateOn` field in each skill is matched against the `INTENT_TO_ACTIVATION`
+ * map in `types.ts`. When the orchestrator classifies an intent, it looks up which
+ * activation contexts apply, then activates all skills whose `activateOn` value
+ * appears in that set. Skills with `activateOn: "always"` are always activated.
+ *
+ * ## Load Sources (in priority order, later overrides earlier)
+ * 1. Built-in skills from `skills/registry.json` (adapted to Note format)
+ * 2. Built-in Note packages from `notes/` directory in the npm package
+ * 3. User-installed Notes from `.memoire/notes/` in the project workspace
+ * 4. Workspace skill notes from `<projectRoot>/skills/<name>/SKILL.md`
+ *
+ * ## Caching
+ * Note manifests are cached in memory keyed by `<noteDir>:<mtime>`.
+ * The cache is invalidated automatically when a `note.json` file changes on disk.
+ */
 export class NoteLoader {
   private projectRoot: string;
   private _notes: InstalledNote[] = [];

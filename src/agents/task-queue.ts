@@ -165,7 +165,20 @@ export class TaskQueue extends EventEmitter {
     task.error = error;
     task.completedAt = Date.now();
     this.emit("task-failed", { taskId, agentId, error });
-    log.warn({ taskId, agentId, error }, "Task failed");
+    log.error(
+      {
+        taskId,
+        taskName: task.name,
+        role: task.role,
+        claimedBy: agentId,
+        error,
+        durationMs: task.claimedAt ? Date.now() - task.claimedAt : null,
+      },
+      "Task failed: [%s] claimed by agent %s — %s",
+      taskId,
+      agentId,
+      error,
+    );
     this.deferPersist();
     return true;
   }
@@ -319,9 +332,23 @@ export class TaskQueue extends EventEmitter {
     for (const task of this.tasks.values()) {
       if ((task.status === "claimed" || task.status === "running") && task.claimedAt) {
         if (now - task.claimedAt > task.timeoutMs) {
-          log.warn({ taskId: task.id, agentId: task.claimedBy }, "Task timed out — reclaiming");
+          const error = `Timed out after ${task.timeoutMs}ms: ${task.name}`;
+          log.error(
+            {
+              taskId: task.id,
+              taskName: task.name,
+              role: task.role,
+              claimedBy: task.claimedBy,
+              timeoutMs: task.timeoutMs,
+              elapsedMs: now - task.claimedAt,
+            },
+            "Task timed out: [%s] claimed by agent %s — exceeded %dms limit",
+            task.id,
+            task.claimedBy,
+            task.timeoutMs,
+          );
           task.status = "timeout";
-          task.error = `Timed out after ${task.timeoutMs}ms: ${task.name}`;
+          task.error = error;
           task.completedAt = now;
           this.emit("task-timeout", { taskId: task.id, agentId: task.claimedBy });
           this.emit("task-failed", { taskId: task.id, agentId: task.claimedBy, error: task.error });
