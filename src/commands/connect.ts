@@ -293,8 +293,8 @@ export function registerConnectCommand(program: Command, engine: MemoireEngine) 
           console.log(ui.dim("  Open the Mémoire plugin in Figma to connect"));
           console.log(ui.dim("  Run `memi connect --json` to check status"));
         } else {
-          console.log(ui.warn("Bridge started but port not confirmed yet"));
-          console.log(ui.dim("  Run `memi connect --json` to check status"));
+          console.log(ui.warn("Bridge started but port not confirmed yet — check status with: memi connect --json"));
+          console.log(ui.dim("  If it never confirms, run: memi connect (without --background)"));
         }
         console.log();
         return;
@@ -375,7 +375,7 @@ export function registerConnectCommand(program: Command, engine: MemoireEngine) 
           console.log(ui.ok(`Token valid — connected as @${user.handle} (${user.email})`));
         } catch {
           process.stdout.write("\r" + " ".repeat(40) + "\r");
-          console.log(ui.warn("Token saved but could not be validated — check it's correct"));
+          console.log(ui.warn("Token saved but could not be validated — check internet, or test with: memi pull --rest"));
         }
 
         // ── File key ──────────────────────────────────
@@ -405,8 +405,7 @@ export function registerConnectCommand(program: Command, engine: MemoireEngine) 
         console.log();
 
         if (plugin.source === "local" && plugin.symlinked) {
-          console.log(ui.warn("manifest.json is a symlink — Figma may reject it"));
-          console.log("  Run " + ui.bold("npm install -g @sarveshsea/memoire") + " to fix");
+          console.log(ui.warn("manifest.json is a symlink — Figma may reject it. Fix with: npm install -g @sarveshsea/memoire"));
           console.log();
         }
 
@@ -510,7 +509,7 @@ export function registerConnectCommand(program: Command, engine: MemoireEngine) 
 
         engine.figma.on("plugin-disconnected", () => {
           const remaining = engine.figma.wsServer?.connectedClients?.length ?? 0;
-          console.log(ui.warn(`Plugin disconnected (${remaining} remaining)`));
+          console.log(ui.warn(`Plugin disconnected (${remaining} remaining) — reopen Mémoire in Figma to reconnect`));
         });
 
         engine.figma.on("chat", (data: { text: string; from: string; file: string }) => {

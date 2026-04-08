@@ -127,7 +127,7 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
       const existing = await readStatus(engine);
       if (existing && isProcessAlive(existing.pid)) {
         console.log();
-        console.log(ui.warn("Daemon already running (PID " + existing.pid + ")"));
+        console.log(ui.warn("Daemon already running (PID " + existing.pid + ") — stop it first with: memi daemon stop"));
         console.log(ui.dots("Preview", `http://localhost:${existing.port}`));
         console.log(ui.dots("Figma", `port ${existing.figmaPort}`));
         console.log();
@@ -258,7 +258,7 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
       });
 
       engine.figma.on("plugin-disconnected", () => {
-        console.log(ui.warn("Figma plugin disconnected"));
+        console.log(ui.warn("Figma plugin disconnected — reopen Mémoire in Figma Desktop to reconnect"));
       });
 
       console.log(ui.active("Daemon running. Waiting for Figma plugin..."));
@@ -358,7 +358,7 @@ export function registerDaemonCommand(program: Command, engine: MemoireEngine): 
         }
 
         console.log();
-        console.log(ui.warn(`Daemon stale — PID ${status.pid} is not running`));
+        console.log(ui.warn(`Daemon stopped unexpectedly (PID ${status.pid} gone) — restart with: memi daemon start`));
         console.log(ui.active("Cleaning up stale files..."));
         await cleanupFiles(engine);
         console.log(ui.ok("Cleaned"));
