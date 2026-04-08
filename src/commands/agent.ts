@@ -81,6 +81,8 @@ export function registerAgentCommand(program: Command, engine: MemoireEngine): v
         console.log(ui.dots("PID", String(entry.pid)));
         console.log(ui.dots("Capabilities", entry.capabilities.join(", ")));
         console.log();
+        console.log(ui.dim(`  To stop: memi agent kill ${entry.id}`));
+        console.log();
         console.log(ui.active("Agent running. Waiting for tasks..."));
         console.log();
       }
@@ -211,11 +213,29 @@ export function registerAgentCommand(program: Command, engine: MemoireEngine): v
         return;
       }
 
+      const now = Date.now();
+
       console.log();
       console.log(ui.section("AGENT REGISTRY"));
       console.log(ui.dots("Total", String(agents.length)));
       console.log(ui.dots("Online", String(agents.filter((a) => a.status === "online").length)));
       console.log(ui.dots("Busy", String(agents.filter((a) => a.status === "busy").length)));
+
+      if (agents.length > 0) {
+        console.log();
+        for (const a of agents) {
+          const ageMs = now - a.lastHeartbeat;
+          const stale = ageMs > 30_000;
+          const heartbeatLabel = stale
+            ? ui.red(`stale (${formatAge(ageMs)} ago)`)
+            : ui.dim(`${formatAge(ageMs)} ago`);
+          const statusLabel = stale ? ui.red("stale") : a.status === "online" ? ui.green(a.status) : ui.dim(a.status);
+          const roleCol = a.role.padEnd(24, " ");
+          console.log(`    ${roleCol}  ${statusLabel.padEnd(10)}  heartbeat: ${heartbeatLabel}`);
+          console.log(`    ${ui.dim(`id: ${a.id}`)}`);
+        }
+      }
+
       console.log();
       console.log(ui.section("TASK QUEUE"));
       console.log(ui.dots("Pending", String(queueStats.pending)));
@@ -224,4 +244,11 @@ export function registerAgentCommand(program: Command, engine: MemoireEngine): v
       console.log(ui.dots("Failed", String(queueStats.failed)));
       console.log();
     });
+}
+
+function formatAge(ms: number): string {
+  if (ms < 1_000) return `${ms}ms`;
+  if (ms < 60_000) return `${Math.floor(ms / 1_000)}s`;
+  if (ms < 3_600_000) return `${Math.floor(ms / 60_000)}m`;
+  return `${Math.floor(ms / 3_600_000)}h`;
 }

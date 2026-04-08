@@ -76,6 +76,19 @@ export function registerValidateCommand(program: Command, engine: MemoireEngine)
       const validCount = results.filter((r) => r.valid).length;
       const invalidCount = results.filter((r) => !r.valid).length;
 
+      // Determine exit codes:
+      //   0 = all valid
+      //   1 = schema validation errors
+      //   2 = WCAG / accessibility check failures (warnings from accessibility paths)
+      const hasWcagWarnings = results.some((r) =>
+        r.warnings.some(
+          (w) =>
+            /wcag|a11y|accessibility|aria|focus|contrast|touch|keyboard/i.test(w.message) ||
+            /wcag|a11y|accessibility|aria|focus|contrast|touch|keyboard/i.test(w.path)
+        )
+      );
+      const exitCode = invalidCount > 0 ? 1 : hasWcagWarnings ? 2 : 0;
+
       if (opts.json) {
         const payload: ValidatePayload = {
           status: invalidCount > 0 ? "invalid" : "valid",
@@ -87,7 +100,7 @@ export function registerValidateCommand(program: Command, engine: MemoireEngine)
           results,
         };
         console.log(JSON.stringify(payload, null, 2));
-        process.exitCode = invalidCount > 0 ? 1 : 0;
+        process.exitCode = exitCode;
         return;
       }
 
@@ -125,8 +138,11 @@ export function registerValidateCommand(program: Command, engine: MemoireEngine)
       } else {
         console.log(ui.fail(`${invalidCount} invalid spec${invalidCount > 1 ? "s" : ""}. ${totalErrors} error${totalErrors !== 1 ? "s" : ""}, ${totalWarnings} warning${totalWarnings !== 1 ? "s" : ""}.`));
       }
+      if (exitCode === 2) {
+        console.log(ui.dim("  Exit code 2: WCAG/accessibility warnings detected."));
+      }
       console.log();
 
-      process.exitCode = invalidCount > 0 ? 1 : 0;
+      process.exitCode = exitCode;
     });
 }

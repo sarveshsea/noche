@@ -256,6 +256,29 @@ export const ui = {
   red: chalk.red,
   cyan: chalk.cyan,
 
+  // ── Table ───────────────────────────────────────────
+
+  /**
+   * Render an aligned dot-leader table and print each row.
+   *
+   * printTable([["Framework", "Next.js"], ["Language", "TypeScript"]])
+   *
+   *   Framework ·················· Next.js
+   *   Language ··················· TypeScript
+   *
+   * @param rows   Array of [label, value] pairs.
+   * @param opts   Optional indent level (default 0 = 2-space prefix from dots()).
+   */
+  printTable(rows: [string, string][], opts?: { indent?: number }): void {
+    const indent = opts?.indent ?? 0;
+    const prefix = " ".repeat(indent * 2);
+    for (const [label, value] of rows) {
+      const line = ui.dots(label, value);
+      // dots() already applies 2-space prefix; extra indent stacks on top
+      console.log(prefix + line.trimStart());
+    }
+  },
+
   // ── Utility ─────────────────────────────────────────
 
   /** 2n-space indented text */

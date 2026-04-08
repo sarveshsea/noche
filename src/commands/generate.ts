@@ -156,6 +156,9 @@ export function registerGenerateCommand(program: Command, engine: MemoireEngine)
                 error: null,
               });
               generatedFiles.push(entryFile);
+              if (!opts.json) {
+                console.log(ui.ok(`+ ${entryFile}`));
+              }
             } catch (err) {
               const msg = err instanceof Error ? err.message : String(err);
               results.push({

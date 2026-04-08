@@ -39,6 +39,32 @@ export function registerTokensCommand(program: Command, engine: MemoireEngine) {
         console.log(`  shadcn:   ${mappingPath}`);
       }
 
+      // Summary by category
+      let colorCount = 0;
+      let spacingCount = 0;
+      let typographyCount = 0;
+      let otherCount = 0;
+      for (const token of ds.tokens) {
+        const nameLower = token.name.toLowerCase();
+        const typeLower = (token.type ?? "").toLowerCase();
+        if (nameLower.includes("color") || nameLower.includes("bg") || nameLower.includes("text") || typeLower === "color") {
+          colorCount++;
+        } else if (nameLower.includes("space") || nameLower.includes("gap") || nameLower.includes("pad") || nameLower.includes("margin") || typeLower === "spacing") {
+          spacingCount++;
+        } else if (nameLower.includes("font") || nameLower.includes("size") || typeLower === "typography" || typeLower === "font") {
+          typographyCount++;
+        } else {
+          otherCount++;
+        }
+      }
+      console.log();
+      const parts: string[] = [
+        `${colorCount} color token${colorCount !== 1 ? "s" : ""}`,
+        `${spacingCount} spacing token${spacingCount !== 1 ? "s" : ""}`,
+        `${typographyCount} typography token${typographyCount !== 1 ? "s" : ""}`,
+      ];
+      if (otherCount > 0) parts.push(`${otherCount} other`);
+      console.log(`  ${parts.join(", ")}`);
       console.log();
     });
 }
