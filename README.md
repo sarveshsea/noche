@@ -26,6 +26,10 @@
   <a href="CHANGELOG.md">Changelog</a>
 </p>
 
+<p align="center">
+  <img src="assets/demo.gif" alt="Memoire demo: spec a component, generate code, configure MCP" width="800" />
+</p>
+
 ---
 
 ## What it does
