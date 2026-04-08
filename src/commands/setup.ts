@@ -145,7 +145,7 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
         const inputToken = await ask("Paste Figma token");
 
         if (!inputToken) {
-          console.log(ui.fail("Token is required to continue"));
+          console.log(ui.fail("Token required — generate one at figma.com > Settings > Account > Personal Access Tokens, then re-run: memi setup"));
           process.exit(1);
         }
 
@@ -161,7 +161,7 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
         } catch (err) {
           process.stdout.write("\r" + " ".repeat(40) + "\r");
           const msg = err instanceof FigmaConfigError ? err.message : String(err);
-          console.log(ui.fail(`Token invalid: ${msg}`));
+          console.log(ui.fail(`Token invalid: ${msg} — generate a new one at figma.com > Settings > Account > Personal Access Tokens, then re-run: memi setup`));
           process.exit(1);
         }
       }
@@ -184,7 +184,7 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
         } catch (err) {
           process.stdout.write("\r" + " ".repeat(50) + "\r");
           const msg = err instanceof FigmaConfigError ? err.message : "File inaccessible";
-          console.log(ui.warn(`Existing file key failed: ${msg} — re-enter below`));
+          console.log(ui.warn(`Existing file key failed: ${msg} — paste the full Figma URL below to re-enter it`));
           fileKey = null;
         }
       }
@@ -214,7 +214,7 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
           } catch (err) {
             process.stdout.write("\r" + " ".repeat(50) + "\r");
             const msg = err instanceof FigmaConfigError ? err.message : String(err);
-            console.log(ui.warn(`Could not validate: ${msg} — saving anyway`));
+            console.log(ui.warn(`Could not validate file key: ${msg} — saving anyway. Verify the URL is from figma.com/design/... and you have view access`));
             await writeEnvVar(root, "FIGMA_FILE_KEY", resolvedKey);
             process.env.FIGMA_FILE_KEY = resolvedKey;
             fileKey = resolvedKey;
@@ -236,14 +236,13 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
         await new Promise<void>((resolve) => {
           const postinstall = join(root, "node_modules", "@sarveshsea", "memoire", "scripts", "postinstall.mjs");
           execFile(process.execPath, [postinstall], (err) => {
-            if (err) console.log(ui.warn(`Reinstall failed: ${err.message} — continuing`));
+            if (err) console.log(ui.warn(`Reinstall failed: ${err.message} — run manually: npm install -g @sarveshsea/memoire`));
             else console.log(ui.ok("Plugin reinstalled"));
             resolve();
           });
         });
       } else if (plugin.health === "missing") {
-        console.log(ui.warn("Plugin not found at ~/.memoire/plugin/"));
-        console.log("  Run: npm install -g @sarveshsea/memoire");
+        console.log(ui.warn("Plugin not found at ~/.memoire/plugin/ — install it with: npm install -g @sarveshsea/memoire"));
       }
 
       const manifestPath = plugin.manifestPath;
@@ -295,8 +294,8 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
           console.log("  Open Mémoire in Figma to connect the plugin");
           summary.bridge = `port ${port}`;
         } else {
-          console.log(ui.warn("Bridge starting — may take a moment"));
-          console.log("  Run `memi connect --json` to check status");
+          console.log(ui.warn("Bridge took longer than expected to start — check with: memi connect --json"));
+          console.log("  If it never starts, run: memi connect");
           summary.bridge = "starting";
         }
       }
@@ -361,7 +360,7 @@ export function registerSetupCommand(program: Command, engine: MemoireEngine): v
         } catch (err) {
           process.stdout.write("\r" + " ".repeat(60) + "\r");
           const msg = err instanceof Error ? err.message : String(err);
-          console.log(ui.warn(`Pull failed: ${msg}`));
+          console.log(ui.warn(`Pull failed: ${msg} — check your token and file key, then retry with: memi pull --rest`));
           summary.pull = `failed: ${msg}`;
         }
       }
