@@ -6,6 +6,17 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v0.9.1 — 2026-04-08 (Polish)
+
+### Commits
+| Hash | Message |
+|------|---------|
+| `542c37b` | fix: update mcp config display to show all 20 tools (was hardcoded to 14) |
+| `f4c4bbe` | fix: raise process MaxListeners to silence exit listener warning |
+| `0554f74` | feat: add demo GIF to README and assets |
+
+---
+
 ## v0.9.0 — 2026-04-08 (WCAG + Onboarding Sprint)
 
 ### Commits
