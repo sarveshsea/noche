@@ -1,6 +1,20 @@
 /**
- * shadcn Mapper — Maps component specs to shadcn/ui primitives
+ * shadcn Mapper — Maps ComponentSpec objects to shadcn/ui primitives
  * and generates production-ready React + TypeScript components.
+ *
+ * Inputs:
+ *   - ComponentSpec (from src/specs/types.ts)
+ *   - CodegenContext containing the project context and design system tokens
+ *
+ * Outputs:
+ *   - ComponentCode: { component: string (TSX), barrel: string (index.ts) }
+ *
+ * Key responsibilities:
+ *   1. Resolve shadcnBase references to the correct shadcn import statements
+ *   2. Build a typed props interface from spec.props declarations
+ *   3. Build variant type unions and runtime variant class maps
+ *   4. Compose component body using shadcn primitives (Card, Button, Input, etc.)
+ *   5. Substitute design token hex values with Tailwind utility classes
  */
 
 import type { ComponentSpec } from "../specs/types.js";
@@ -49,6 +63,13 @@ const SHADCN_IMPORTS: Record<string, string> = {
   Pagination: `import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"`,
 };
 
+/**
+ * Generate a React + TypeScript component from a ComponentSpec.
+ *
+ * @param spec - The component spec describing props, variants, shadcn base, and design tokens.
+ * @param ctx  - Codegen context providing the project path and design system registry.
+ * @returns    ComponentCode with `component` (the .tsx source) and `barrel` (index.ts re-export).
+ */
 export function generateComponent(spec: ComponentSpec, ctx: CodegenContext): ComponentCode {
   const imports = buildImports(spec);
   const propsInterface = buildPropsInterface(spec);
@@ -163,9 +184,15 @@ function buildComponentBody(spec: ComponentSpec, tokens: DesignToken[] = [], ctx
   if (variantLogic) lines.push(variantLogic, "");
   lines.push("  return (");
   const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
-  const variantClass = spec.variants.length > 1 ? ", variantClasses" : "";
   const defaultCls = substituteTokensInClasses(defaultClasses(spec), tokens);
-  lines.push(`    <div className={cn("${defaultCls}"${variantClass}, className)}${styleAttr} {...props}>`);
+  const hasVariants = spec.variants.length > 1;
+  // Avoid emitting cn("", ...) when there are no base classes
+  const cnArgs = [
+    defaultCls ? `"${defaultCls}"` : null,
+    hasVariants ? "variantClasses" : null,
+    "className",
+  ].filter(Boolean).join(", ");
+  lines.push(`    <div className={cn(${cnArgs})}${styleAttr} {...props}>`);
 
   for (const [name, type] of Object.entries(spec.props)) {
     if (type === "boolean" || type === "boolean?") {
@@ -323,9 +350,14 @@ function buildCardComponent(spec: ComponentSpec, hasBadge: boolean, tokenStyles?
   if (variantLogic) lines.push(variantLogic, "");
   lines.push("  return (");
   const styleAttr = tokenStyles ? ` style={${tokenStyles}}` : "";
-  const variantClass = spec.variants.length > 1 ? ", variantClasses" : "";
   const defaultCls = substituteTokensInClasses(defaultClasses(spec), tokens);
-  lines.push(`    <Card className={cn("${defaultCls}"${variantClass}, className)}${styleAttr} {...props}>`);
+  const hasCardVariants = spec.variants.length > 1;
+  const cardCnArgs = [
+    defaultCls ? `"${defaultCls}"` : null,
+    hasCardVariants ? "variantClasses" : null,
+    "className",
+  ].filter(Boolean).join(", ");
+  lines.push(`    <Card className={cn(${cardCnArgs})}${styleAttr} {...props}>`);
 
   if (titleProp || descProp) {
     lines.push("      <CardHeader>");

@@ -1,6 +1,19 @@
 /**
- * DataViz Generator — Creates chart/graph components from DataViz specs.
- * Uses Recharts wrapped in shadcn Card components.
+ * DataViz Generator — Creates chart/graph components from DataVizSpec objects.
+ *
+ * Inputs:
+ *   - DataVizSpec (from src/specs/types.ts) — defines chartType, dataShape, interactions, etc.
+ *   - CodegenContext — provides design system tokens and project context.
+ *
+ * Outputs:
+ *   - DataVizCode: { chart: string (TSX), barrel: string (index.ts) }
+ *
+ * Key responsibilities:
+ *   1. Map chartType to the correct Recharts component import and JSX
+ *   2. Generate typed data-point interface from dataShape fields
+ *   3. Wrap chart in shadcn Card for consistent visual framing
+ *   4. Emit an accessible <details> data-table fallback when spec.accessibility.dataTableFallback is true
+ *   5. Inline sample data constant when spec.sampleData is provided
  */
 
 import type { DataVizSpec } from "../specs/types.js";
@@ -54,6 +67,13 @@ const CHART_COLORS = [
   "hsl(var(--chart-5))",
 ];
 
+/**
+ * Generate a Recharts-based chart component from a DataVizSpec.
+ *
+ * @param spec - The dataviz spec describing chart type, data shape, and accessibility requirements.
+ * @param ctx  - Codegen context providing design system and project information.
+ * @returns    DataVizCode with `chart` (the .tsx source) and `barrel` (index.ts re-export).
+ */
 export function generateDataViz(spec: DataVizSpec, ctx: CodegenContext): DataVizCode {
   const rechartsConfig = RECHARTS_COMPONENTS[spec.chartType];
   if (!rechartsConfig && spec.library === "recharts") {

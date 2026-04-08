@@ -1,6 +1,23 @@
 /**
- * Code Generator — Produces shadcn-native React + TypeScript + Tailwind
- * components from specs. All output uses shadcn/ui primitives.
+ * Code Generator — Orchestrates spec-to-code generation for all spec types.
+ *
+ * Inputs:
+ *   - AnySpec (ComponentSpec | PageSpec | DataVizSpec | DesignSpec | IASpec)
+ *   - CodegenContext: project context + design system tokens
+ *   - CodegenConfig: output directory, registry reference, optional event callback
+ *
+ * Outputs:
+ *   - CodegenResult: entryFile path, list of written files, original spec
+ *
+ * Key responsibilities:
+ *   1. Hash-based cache invalidation — skip unchanged specs to avoid redundant writes
+ *   2. Route to sub-generators (shadcn-mapper, dataviz-generator, page-generator)
+ *   3. Write generated files to disk under atomic-design-correct output folders
+ *   4. Check that referenced shadcn components are installed in components/ui/
+ *   5. Record generation state in the registry for status/watch commands
+ *
+ * All output uses shadcn/ui primitives + Tailwind utility classes.
+ * No CSS modules, styled-components, or inline style objects are emitted.
  */
 
 import { createHash } from "crypto";
@@ -41,6 +58,15 @@ export class CodeGenerator {
     this.config = config;
   }
 
+  /**
+   * Generate code from a spec and write all output files to disk.
+   *
+   * Skips generation when spec + design system hash matches a previous run.
+   * Returns a CodegenResult describing the written files.
+   *
+   * @param spec - Any Mémoire spec (component, page, dataviz, design, ia).
+   * @param ctx  - Codegen context with project and design system data.
+   */
   async generate(spec: AnySpec, ctx: CodegenContext): Promise<CodegenResult> {
     // Hash-based caching — skip generation when spec + design system unchanged
     const specHash = computeSpecHash(spec, ctx);

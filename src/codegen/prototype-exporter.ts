@@ -14,6 +14,7 @@
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import type { PageSpec, DataVizSpec, ComponentSpec, AnySpec } from "../specs/types.js";
+import { isPageSpec, isDataVizSpec } from "../specs/guards.js";
 import type { Registry } from "../engine/registry.js";
 
 export interface PrototypeConfig {
@@ -342,7 +343,7 @@ export async function buildScenesFromSpecs(
   });
 
   // Each page spec becomes a scene
-  const pages = specs.filter((s) => s.type === "page");
+  const pages = specs.filter(isPageSpec);
   for (const page of pages) {
     scenes.push({
       name: page.name,
@@ -357,7 +358,7 @@ export async function buildScenesFromSpecs(
   }
 
   // DataViz specs get their own scenes
-  const dataviz = specs.filter((s) => s.type === "dataviz");
+  const dataviz = specs.filter(isDataVizSpec);
   for (const dv of dataviz) {
     scenes.push({
       name: `DataViz: ${dv.name}`,

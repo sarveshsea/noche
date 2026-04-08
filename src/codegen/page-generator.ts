@@ -1,6 +1,19 @@
 /**
- * Page Generator — Creates full page layouts from Page specs.
- * Uses shadcn layout components (Sidebar, etc.) with responsive design.
+ * Page Generator — Creates full page layout components from PageSpec objects.
+ *
+ * Inputs:
+ *   - PageSpec (from src/specs/types.ts) — defines layout, sections, responsive breakpoints, etc.
+ *   - CodegenContext — provides design system and project context.
+ *
+ * Outputs:
+ *   - PageCode: { page: string (TSX), barrel: string (index.ts) }
+ *
+ * Key responsibilities:
+ *   1. Resolve the layout template (sidebar-main, full-width, centered, dashboard, split, marketing)
+ *   2. Build section components with appropriate grid/flex classes per layout type
+ *   3. Emit responsive Tailwind breakpoint classes from spec.responsive
+ *   4. Derive page-level TypeScript prop types from section prop values
+ *   5. Import section components from the generated/ directory
  */
 
 import type { PageSpec } from "../specs/types.js";
@@ -90,6 +103,13 @@ const LAYOUT_TEMPLATES: Record<string, { imports: string[]; wrapper: (content: s
   },
 };
 
+/**
+ * Generate a React + TypeScript page component from a PageSpec.
+ *
+ * @param spec - The page spec describing layout, sections, responsive config, and metadata.
+ * @param ctx  - Codegen context providing design system and project information.
+ * @returns    PageCode with `page` (the .tsx source) and `barrel` (index.ts re-export).
+ */
 export function generatePage(spec: PageSpec, ctx: CodegenContext): PageCode {
   const layout = LAYOUT_TEMPLATES[spec.layout] ?? LAYOUT_TEMPLATES["full-width"];
   const sectionImports = new Set<string>();
@@ -121,7 +141,7 @@ export function generatePage(spec: PageSpec, ctx: CodegenContext): PageCode {
   const destructuredPageProps = ["className", ...Object.keys(dataProps)].join(", ");
   lines.push(`export function ${spec.name}({ ${destructuredPageProps} }: ${spec.name}Props) {`);
   lines.push("  return (");
-  lines.push(`    <div className={cn("", className)}>`);
+  lines.push(`    <div className={cn(className)}>`);
   lines.push(wrappedContent);
   lines.push("    </div>");
   lines.push("  )");
@@ -138,7 +158,7 @@ export function generatePage(spec: PageSpec, ctx: CodegenContext): PageCode {
 
 function buildSections(spec: PageSpec, imports: Set<string>): string {
   if (spec.sections.length === 0) {
-    return "          {/* Add sections to your page spec */}";
+    return "";
   }
 
   const lines: string[] = [];
