@@ -78,6 +78,10 @@ function validateName(name: string): void {
     console.log(ui.fail("Spec name cannot be empty."));
     process.exit(1);
   }
+  if (name.length > 128) {
+    console.log(ui.fail(`Spec name too long (${name.length} chars, max 128).`));
+    process.exit(1);
+  }
   if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name)) {
     console.log(ui.fail("Spec name must start with a letter and contain only letters, numbers, hyphens, or underscores."));
     process.exit(1);

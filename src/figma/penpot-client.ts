@@ -30,6 +30,25 @@ export interface PenpotPullResult {
   fileName: string;
 }
 
+// ── SSRF guard ───────────────────────────────────────────────
+
+function assertSafeBaseUrl(baseUrl: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    throw new Error(`Invalid PENPOT_BASE_URL: ${baseUrl}`);
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error(`PENPOT_BASE_URL must be http(s) (got ${parsed.protocol})`);
+  }
+  const host = parsed.hostname.toLowerCase();
+  const PRIVATE_IPV4 = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0)/;
+  if (host === "localhost" || host === "::1" || PRIVATE_IPV4.test(host)) {
+    throw new Error("PENPOT_BASE_URL cannot point to a private/loopback address");
+  }
+}
+
 // ── API client ────────────────────────────────────────────────
 
 async function rpc<T>(
@@ -37,6 +56,7 @@ async function rpc<T>(
   command: string,
   params: Record<string, string> = {},
 ): Promise<T> {
+  assertSafeBaseUrl(config.baseUrl);
   const url = new URL(`${config.baseUrl}/api/rpc/command/${command}`);
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v);
