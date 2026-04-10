@@ -26,8 +26,7 @@
 import { Command } from "commander";
 import { MemoireEngine } from "./engine/core.js";
 
-// 26 commands each register an exit listener — raise the limit
-process.setMaxListeners(40);
+// Commands each register process exit listeners — raise the limit to prevent MaxListenersExceededWarning
 import { registerConnectCommand } from "./commands/connect.js";
 import { registerPullCommand } from "./commands/pull.js";
 import { registerResearchCommand } from "./commands/research.js";
@@ -55,11 +54,11 @@ import { registerAgentCommand } from "./commands/agent.js";
 import { registerValidateCommand } from "./commands/validate.js";
 import { registerDesignDocCommand } from "./commands/design-doc.js";
 import { registerSetupCommand } from "./commands/setup.js";
+import { registerAuditCommand } from "./commands/audit.js";
 import { existsSync, rmSync } from "fs";
 import { join } from "path";
 
-// Prevent MaxListenersExceededWarning — commands attach cleanup handlers to process
-process.setMaxListeners(30);
+process.setMaxListeners(50); // 28+ commands each attach process exit handlers
 
 // Catch unhandled async errors so the CLI doesn't crash silently
 process.on("unhandledRejection", (reason) => {
@@ -125,6 +124,7 @@ registerAgentCommand(program, engine);
 registerValidateCommand(program, engine);
 registerDesignDocCommand(program, engine);
 registerSetupCommand(program, engine);
+registerAuditCommand(program, engine);
 
 // Uninstall command — removes all Mémoire artifacts
 program
