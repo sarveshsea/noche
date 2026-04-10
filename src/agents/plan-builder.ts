@@ -106,6 +106,8 @@ export class PlanBuilder {
         return this.decomposeAccessibilityCheck(intent, ctx);
       case "design-system-init":
         return this.decomposeDesignSystemInit(intent, ctx);
+      case "design-extract":
+        return this.decomposeDesignExtract(intent, ctx);
       default:
         return this.decomposeGeneral(intent, ctx);
     }
@@ -595,6 +597,31 @@ ${existingMappings}
   }
 
   // ── General Decomposition ──────────────────────────────
+
+  private decomposeDesignExtract(intent: string, _ctx: AgentContext): SubTask[] {
+    // Extract URL from intent string
+    const urlMatch = intent.match(/https?:\/\/[^\s]+/i);
+    const url = urlMatch ? urlMatch[0] : "(URL not found in intent — ask user to provide one)";
+    const t1 = this.makeTask(
+      "Extract design system from URL",
+      "design-auditor",
+      `Run \`memi extract ${url}\` to extract the design system from the target URL. ` +
+      `This will fetch HTML + CSS, parse tokens (colors, typography, spacing, radii, shadows), ` +
+      `and use Claude to synthesize a structured DESIGN.md. ` +
+      `Save the output and report: token counts, color palette, font families found.`,
+      [],
+      ["DESIGN.md"],
+    );
+    const t2 = this.makeTask(
+      "Convert extracted tokens to specs",
+      "token-engineer",
+      `Given the extracted DESIGN.md from step 1, create DesignSpec + DesignToken records in the registry. ` +
+      `Map colors to color tokens, font families to typography tokens, spacing to spacing tokens.`,
+      [t1.id],
+      [],
+    );
+    return [t1, t2];
+  }
 
   private decomposeGeneral(intent: string, ctx: AgentContext): SubTask[] {
     return [

@@ -22,6 +22,7 @@ export type IntentCategory =
   | "design-system-init"
   | "responsive-layout"
   | "accessibility-check"
+  | "design-extract"
   | "general";
 
 // ── Pattern Table ────────────────────────────────────────
@@ -45,6 +46,10 @@ export const INTENT_PATTERNS: [RegExp, IntentCategory][] = [
 
   // Dataviz
   [/\b(chart|graph|visualization|dataviz|dashboard\s?chart)\b/i, "dataviz-create"],
+
+  // Design extraction from URL
+  [/\b(extract|design.?doc|design\s+system\s+from|grab|scrape)\b.*\b(url|site|website|http)\b/i, "design-extract"],
+  [/\bhttps?:\/\//i, "design-extract"],
 
   // Meta operations
   [/\b(sync|push|figma)\b/i, "figma-sync"],
