@@ -32,6 +32,8 @@ export function registerGoCommand(program: Command, engine: MemoireEngine) {
     .option("--no-generate", "Skip code generation (pull and auto-spec only)")
     .option("--no-figma", "Skip Figma connection (offline mode — generate from existing specs)")
     .option("--rest", "Pull via Figma REST API instead of plugin (skips connect step)")
+    .option("--penpot", "Pull from Penpot instead of Figma")
+    .option("--no-stories", "Skip Storybook story generation")
     .option("-p, --port <port>", "Preview server port", "3333")
     .option("--json", "Output pipeline results as JSON")
     .action(async (opts) => {
@@ -45,11 +47,14 @@ export function registerGoCommand(program: Command, engine: MemoireEngine) {
         preview: { started: false, skipped: false },
       };
 
-      if (!json) console.log(ui.brand(opts.rest ? "FULL PIPELINE  (REST mode)" : "FULL PIPELINE"));
+      const mode = opts.rest ? "REST mode" : opts.penpot ? "Penpot mode" : "plugin mode";
+      if (!json) console.log(ui.brand(`FULL PIPELINE  (${mode})`));
 
       // 1. Initialize
       const initSpinner = !json ? ora({ text: "Initializing...", indent: 2, color: "cyan" }).start() : null;
       await engine.init();
+      // Apply --no-stories flag before any generation
+      engine.codegen.setOptions({ noStories: opts.stories === false });
       steps.init = true;
       initSpinner?.stop();
       if (!json) console.log(ui.ok("Project initialized"));
@@ -82,7 +87,27 @@ export function registerGoCommand(program: Command, engine: MemoireEngine) {
       }
 
       // 3. Pull design system
-      if (opts.rest && opts.figma !== false) {
+      if (opts.penpot && opts.figma !== false) {
+        // Penpot pull
+        const { pullFromPenpot } = await import("../figma/penpot-client.js");
+        const penpotToken = process.env.PENPOT_TOKEN;
+        const penpotFileId = process.env.PENPOT_FILE_ID;
+        const penpotBase = process.env.PENPOT_BASE_URL ?? "https://design.penpot.app";
+        const pullSpinner = !json ? ora({ text: "Pulling from Penpot...", indent: 2, color: "cyan" }).start() : null;
+        try {
+          if (!penpotToken || !penpotFileId) throw new Error("PENPOT_TOKEN and PENPOT_FILE_ID required");
+          const result = await pullFromPenpot({ baseUrl: penpotBase, token: penpotToken, fileId: penpotFileId });
+          await engine.registry.updateDesignSystem({ tokens: result.tokens, components: result.components, styles: result.styles, lastSync: new Date().toISOString() });
+          const ds = engine.registry.designSystem;
+          steps.pull = { completed: true, tokens: ds.tokens.length, components: ds.components.length };
+          pullSpinner?.stop();
+          if (!json) console.log(ui.ok(`Pulled ${ds.tokens.length} tokens from Penpot: "${result.fileName}"`));
+        } catch (err) {
+          pullSpinner?.stop();
+          steps.figma.error = err instanceof Error ? err.message : String(err);
+          if (!json) console.log(ui.warn("Penpot pull failed: " + steps.figma.error));
+        }
+      } else if (opts.rest && opts.figma !== false) {
         // REST pull — no plugin needed
         const pullSpinner = !json ? ora({ text: "Pulling design system via REST API...", indent: 2, color: "cyan" }).start() : null;
         try {
