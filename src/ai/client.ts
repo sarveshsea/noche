@@ -31,35 +31,56 @@ export class AnthropicClient {
     const modelId = getModelId(tier);
     const maxTokens = opts.maxTokens || getMaxOutput(tier);
 
-    const response = await this.sdk.messages.create({
-      model: modelId,
-      max_tokens: maxTokens,
-      temperature: opts.temperature ?? 0.3,
-      system: opts.system,
-      messages: opts.messages.map(m => ({
-        role: m.role,
-        content: serializeContent(m.content),
-      })),
-    });
+    const maxRetries = 3;
+    let lastError: Error | undefined;
 
-    const content = response.content
-      .filter(b => b.type === "text")
-      .map(b => (b as Anthropic.TextBlock).text)
-      .join("");
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await this.sdk.messages.create({
+          model: modelId,
+          max_tokens: maxTokens,
+          temperature: opts.temperature ?? 0.3,
+          system: opts.system,
+          messages: opts.messages.map(m => ({
+            role: m.role,
+            content: serializeContent(m.content),
+          })),
+        });
 
-    const usage: TokenUsage = {
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
-    };
+        const content = response.content
+          .filter(b => b.type === "text")
+          .map(b => (b as Anthropic.TextBlock).text)
+          .join("");
 
-    this.tracker.record(usage, tier, modelId);
+        const usage: TokenUsage = {
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+        };
 
-    return {
-      content,
-      model: modelId,
-      usage,
-      stopReason: response.stop_reason || "end_turn",
-    };
+        this.tracker.record(usage, tier, modelId);
+
+        return {
+          content,
+          model: modelId,
+          usage,
+          stopReason: response.stop_reason || "end_turn",
+        };
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        const status = (err as { status?: number }).status;
+
+        // Don't retry client errors (400, 401, 403, 404) — only transient/server errors
+        if (status && status >= 400 && status < 500) throw lastError;
+
+        if (attempt < maxRetries - 1) {
+          const backoff = Math.min(1000 * Math.pow(2, attempt), 8000);
+          log.warn({ attempt: attempt + 1, backoff, error: lastError.message }, "API call failed, retrying");
+          await new Promise(r => setTimeout(r, backoff));
+        }
+      }
+    }
+
+    throw lastError ?? new Error("AI completion failed after retries");
   }
 
   async *stream(opts: AICompletionOptions): AsyncGenerator<string, AIResponse> {

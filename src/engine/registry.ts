@@ -125,12 +125,14 @@ export class Registry extends EventEmitter {
       }
     }
 
-    // Load specs from specs/ directories
-    await this.loadSpecsFrom("components");
-    await this.loadSpecsFrom("pages");
-    await this.loadSpecsFrom("dataviz");
-    await this.loadSpecsFrom("design");
-    await this.loadSpecsFrom("ia");
+    // Load specs from specs/ directories (parallel for faster init)
+    await Promise.all([
+      this.loadSpecsFrom("components"),
+      this.loadSpecsFrom("pages"),
+      this.loadSpecsFrom("dataviz"),
+      this.loadSpecsFrom("design"),
+      this.loadSpecsFrom("ia"),
+    ]);
 
     // Load generation state
     try {

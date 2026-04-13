@@ -140,15 +140,17 @@ export function registerGoCommand(program: Command, engine: MemoireEngine) {
           console.log(ui.section("CODEGEN"));
         }
 
-        for (const spec of specs) {
-          if (spec.type === "design" || spec.type === "ia") continue;
-          try {
-            await engine.generateFromSpec(spec.name);
+        const genSpecs = specs.filter(s => s.type !== "design" && s.type !== "ia");
+        const results = await Promise.allSettled(
+          genSpecs.map(spec => engine.generateFromSpec(spec.name).then(() => spec.name)),
+        );
+        for (const result of results) {
+          if (result.status === "fulfilled") {
             generated++;
-            if (!json) console.log(ui.ok(spec.name));
-          } catch (err) {
+            if (!json) console.log(ui.ok(result.value));
+          } else {
             failed++;
-            if (!json) console.log(ui.warn(spec.name + ui.dim("  " + (err instanceof Error ? err.message : String(err)))));
+            if (!json) console.log(ui.warn(ui.dim("  " + result.reason?.message)));
           }
         }
 

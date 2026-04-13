@@ -596,21 +596,41 @@ export function generateStory(spec: ComponentSpec): string {
 export function substituteTokensInClasses(classes: string, tokens: DesignToken[]): string {
   let result = classes;
 
-  // Build a reverse map from token value → Tailwind class using the registry
+  // Build a reverse map from token hex values → CSS variable references
+  // This ensures generated code uses the project's own design tokens (e.g. bg-[var(--color-primary)])
+  // instead of hardcoded hex values (e.g. bg-[#1f2937])
   for (const token of tokens) {
     const value = Object.values(token.values)[0];
     if (typeof value !== "string") continue;
-    const hex = value.trim().toUpperCase();
-    const twClass = HEX_TO_TAILWIND[hex];
+    const hex = value.trim();
+    if (!hex.startsWith("#") && !hex.startsWith("rgb") && !hex.startsWith("hsl")) continue;
+
+    // First check if we have a standard Tailwind class for this hex
+    const twClass = HEX_TO_TAILWIND[hex.toUpperCase()];
     if (twClass) {
-      // Replace any occurrence of the raw hex (case-insensitive) in the class string
-      result = result.replace(new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), twClass);
+      result = result.replace(new RegExp(hex.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), twClass.replace("bg-", ""));
+      continue;
+    }
+
+    // Otherwise substitute with the token's CSS variable
+    if (token.cssVariable) {
+      const escaped = hex.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      // Replace bg-[#hex] → bg-[var(--token)]
+      result = result.replace(
+        new RegExp(`(bg-|text-|border-)\\[${escaped}\\]`, "gi"),
+        (match, prefix) => `${prefix}[var(${token.cssVariable})]`,
+      );
+      // Replace standalone hex in arbitrary values
+      result = result.replace(
+        new RegExp(`\\[${escaped}\\]`, "gi"),
+        `[var(${token.cssVariable})]`,
+      );
     }
   }
 
-  // Also apply the static lookup table
+  // Also apply the static lookup table for any remaining hex values
   for (const [hex, twClass] of Object.entries(HEX_TO_TAILWIND)) {
-    result = result.replace(new RegExp(hex.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), twClass);
+    result = result.replace(new RegExp(hex.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), twClass.replace("bg-", ""));
   }
 
   return result;

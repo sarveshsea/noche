@@ -77,6 +77,36 @@ Use this tool: at the start of any session that touches design tokens or compone
     },
   );
 
+  // ── pull_design_system_rest ─────────────────────────────
+  server.tool(
+    "pull_design_system_rest",
+    `Pull the design system from Figma via REST API — no plugin or Figma Desktop required.
+
+Prerequisites: FIGMA_TOKEN and FIGMA_FILE_KEY environment variables must be set. No bridge or plugin connection needed.
+
+Returns on success: { tokens: number, components: number, styles: number, lastSync: ISO timestamp }
+
+Error behavior: Throws if FIGMA_TOKEN or FIGMA_FILE_KEY are missing, or if the Figma API returns an error (403 = bad token, 404 = bad file key).
+
+Use this tool: when the Figma plugin is not available (CI, headless, remote), or when you want to pull tokens without starting the bridge. Equivalent to \`memi pull --rest\`.`,
+    {},
+    async () => {
+      await engine.pullDesignSystemREST();
+      const ds = engine.registry.designSystem;
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({
+            tokens: ds.tokens.length,
+            components: ds.components.length,
+            styles: ds.styles.length,
+            lastSync: ds.lastSync,
+          }, null, 2),
+        }],
+      };
+    },
+  );
+
   // ── get_specs ───────────────────────────────────────────
   server.tool(
     "get_specs",
