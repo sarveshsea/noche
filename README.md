@@ -12,8 +12,8 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@sarveshsea/memoire"><img src="https://img.shields.io/npm/v/@sarveshsea/memoire?color=black" alt="npm"></a>
   <a href="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml"><img src="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-698%20passing-black" alt="698 tests">
-  <img src="https://img.shields.io/badge/MCP%20tools-20-black" alt="20 MCP tools">
+  <img src="https://img.shields.io/badge/tests-700%20passing-black" alt="698 tests">
+  <img src="https://img.shields.io/badge/MCP%20tools-21-black" alt="20 MCP tools">
   <a href="https://github.com/sarveshsea/m-moire/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="MIT"></a>
   <a href="https://glama.ai/mcp/servers/sarveshsea/m-moire"><img src="https://glama.ai/mcp/servers/sarveshsea/m-moire/badges/score.svg?v=2" alt="MCP server score"></a>
 </p>
@@ -64,7 +64,7 @@ memi tokens                             # export as CSS / Tailwind / JSON / Styl
 
 ## Use with Claude Code / Cursor
 
-Memoire is an MCP server with 20 tools. Give your AI assistant direct access to your design system.
+Memoire is an MCP server with 21 tools. Give your AI assistant direct access to your design system.
 
 ```bash
 memi mcp config --install              # writes .mcp.json, done
@@ -179,7 +179,7 @@ src/
   engine/     Core orchestrator, registry, sync, pipeline
   figma/      WebSocket bridge + REST client + Penpot client
   agents/     Intent classifier, plan builder, task queue
-  mcp/        MCP server (20 tools, 3 resources, stdio)
+  mcp/        MCP server (21 tools, 3 resources, stdio)
   codegen/    shadcn/ui mapper, Storybook, dataviz, pages
   research/   Research engine (Excel, stickies, web)
   specs/      Spec types, Zod schemas, 62-component catalog

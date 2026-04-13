@@ -39,7 +39,8 @@ export function registerDesignDocCommand(program: Command, engine: MemoireEngine
     .option("--spec", "Also write a DesignSpec JSON to specs/")
     .option("--json", "Output results as JSON")
     .option("--wcag", "Include full contrast table for all extracted color pairs")
-    .action(async (url: string, opts: { output: string; spec?: boolean; json?: boolean; wcag?: boolean }) => {
+    .option("--timeout <ms>", "Fetch timeout in milliseconds", "15000")
+    .action(async (url: string, opts: { output: string; spec?: boolean; json?: boolean; wcag?: boolean; timeout?: string }) => {
       const start = Date.now();
       await engine.init();
 
@@ -50,7 +51,8 @@ export function registerDesignDocCommand(program: Command, engine: MemoireEngine
       try {
         // 1. Fetch page assets (HTML + CSS)
         if (!opts.json) console.log("  · Fetching HTML and stylesheets...");
-        const assets = await fetchPageAssets(url);
+        const timeout = parseInt(opts.timeout ?? "15000", 10) || 15000;
+        const assets = await fetchPageAssets(url, timeout);
 
         if (!assets.html && assets.cssBlocks.length === 0) {
           throw new Error(`Could not fetch ${url} — check the URL and try again`);

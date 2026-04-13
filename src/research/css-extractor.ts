@@ -131,11 +131,11 @@ function extractImportUrls(css: string, baseUrl: string): string[] {
  * Follows up to MAX_STYLESHEETS <link rel="stylesheet"> hrefs
  * and one level of @import rules within each stylesheet.
  */
-export async function fetchPageAssets(url: string): Promise<PageAssets> {
+export async function fetchPageAssets(url: string, timeoutMs: number = FETCH_TIMEOUT_MS): Promise<PageAssets> {
   assertPublicUrl(url);
   log.info({ url }, "Fetching page assets");
 
-  const html = await fetchText(url);
+  const html = await fetchText(url, timeoutMs);
   if (!html) {
     return { url, title: "", html: "", cssBlocks: [] };
   }

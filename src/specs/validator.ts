@@ -127,10 +127,9 @@ export function validateSpec(spec: unknown): ValidationResult {
     }
 
     if (level === "atom" && composesSpecs && composesSpecs.length > 0) {
-      warnings.push({
+      errors.push({
         path: "composesSpecs",
-        message: "Atoms should not compose other component specs — they are primitives",
-        suggestion: "Remove composesSpecs or change level to 'molecule'",
+        message: "Atoms cannot compose other specs — they are standalone primitives. Remove composesSpecs or change level to 'molecule'",
       });
     }
 
