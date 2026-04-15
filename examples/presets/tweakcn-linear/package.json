@@ -1,0 +1,25 @@
+{
+  "name": "@memoire-examples/tweakcn-linear",
+  "version": "0.1.0",
+  "description": "Linear-inspired Memoire Registry — indigo-violet on warm-white, crisp and editorial",
+  "homepage": "https://memoire.cv",
+  "license": "MIT",
+  "files": [
+    "registry.json",
+    "tokens/",
+    "components/",
+    "README.md"
+  ],
+  "keywords": [
+    "memoire-registry",
+    "design-system",
+    "design-tokens",
+    "shadcn",
+    "tweakcn",
+    "linear"
+  ],
+  "memoire": {
+    "registry": true,
+    "schemaVersion": "v1"
+  }
+}
