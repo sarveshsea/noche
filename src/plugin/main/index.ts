@@ -22,6 +22,11 @@ import {
   type ChangeBufferDropEvent,
 } from "./state/change-buffer.js";
 import { createJobsStore, type JobsStore } from "./state/jobs.js";
+import {
+  optionalFiniteNumber,
+  parseColorValue,
+  validateScreenshotParams,
+} from "./exec/figma-validators.js";
 
 interface PluginState {
   sessionId: string;
@@ -662,13 +667,17 @@ async function getComponentImage(nodeId: string, format: string): Promise<unknow
   if (!node) {
     throw new Error(`Node not found: ${nodeId}`);
   }
+  const validated = validateScreenshotParams({ format, scale: 2 });
+  if (!validated.ok) {
+    throw new Error(validated.error.message);
+  }
   const bytes = await node.exportAsync({
-    format: String(format || "PNG").toUpperCase(),
-    constraint: { type: "SCALE", value: 2 },
+    format: validated.value.format,
+    constraint: { type: "SCALE", value: validated.value.scale },
   });
   return {
     base64: figma.base64Encode(bytes),
-    format: format || "png",
+    format: validated.value.format,
   };
 }
 
@@ -699,9 +708,13 @@ async function createNode(params: Record<string, unknown>): Promise<unknown> {
   }
 
   if (name) node.name = String(name);
-  if (x !== undefined) node.x = Number(x);
-  if (y !== undefined) node.y = Number(y);
-  if (width && height && "resize" in node) node.resize(Number(width), Number(height));
+  const xNum = optionalFiniteNumber(x);
+  const yNum = optionalFiniteNumber(y);
+  if (xNum !== null) node.x = xNum;
+  if (yNum !== null) node.y = yNum;
+  const wNum = optionalFiniteNumber(width);
+  const hNum = optionalFiniteNumber(height);
+  if (wNum !== null && hNum !== null && "resize" in node) node.resize(wNum, hNum);
   if (params.fills && "fills" in node) node.fills = params.fills;
 
   if (parentId) {
@@ -723,29 +736,41 @@ async function updateNode(params: Record<string, unknown>): Promise<unknown> {
   for (const [key, value] of Object.entries(properties)) {
     switch (key) {
       case "name":
-        node.name = value;
+        node.name = String(value);
         break;
-      case "x":
-        node.x = value;
+      case "x": {
+        const n = optionalFiniteNumber(value);
+        if (n !== null) node.x = n;
         break;
-      case "y":
-        node.y = value;
+      }
+      case "y": {
+        const n = optionalFiniteNumber(value);
+        if (n !== null) node.y = n;
         break;
-      case "width":
-        if ("resize" in node) node.resize(Number(value), node.height);
+      }
+      case "width": {
+        const n = optionalFiniteNumber(value);
+        if (n !== null && "resize" in node) node.resize(n, node.height);
         break;
-      case "height":
-        if ("resize" in node) node.resize(node.width, Number(value));
+      }
+      case "height": {
+        const n = optionalFiniteNumber(value);
+        if (n !== null && "resize" in node) node.resize(node.width, n);
         break;
+      }
       case "visible":
-        node.visible = value;
+        node.visible = Boolean(value);
         break;
-      case "opacity":
-        node.opacity = value;
+      case "opacity": {
+        const n = optionalFiniteNumber(value);
+        if (n !== null) node.opacity = n;
         break;
-      case "rotation":
-        node.rotation = value;
+      }
+      case "rotation": {
+        const n = optionalFiniteNumber(value);
+        if (n !== null) node.rotation = n;
         break;
+      }
       case "characters":
         if (node.type === "TEXT") {
           await loadTextNodeFonts(node);
@@ -814,8 +839,11 @@ async function captureScreenshot(params: Record<string, unknown>): Promise<unkno
   if (!node) {
     throw new Error(`Node not found: ${String(params.nodeId)}`);
   }
-  const format = String(params.format || "PNG").toUpperCase();
-  const scale = Number(params.scale || 2);
+  const validated = validateScreenshotParams({ format: params.format, scale: params.scale });
+  if (!validated.ok) {
+    throw new Error(validated.error.message);
+  }
+  const { format, scale } = validated.value;
   const bytes = await node.exportAsync({
     format,
     constraint: { type: "SCALE", value: scale },
@@ -861,12 +889,9 @@ async function pushTokens(params: Record<string, unknown>): Promise<unknown> {
           var modeId = col.modes[0]?.modeId;
           if (modeId && token.values) {
             var firstValue = Object.values(token.values)[0];
-            if (typeof firstValue === "string" && firstValue.startsWith("#")) {
-              var hex = firstValue;
-              var r = parseInt(hex.slice(1, 3), 16) / 255;
-              var g = parseInt(hex.slice(3, 5), 16) / 255;
-              var b = parseInt(hex.slice(5, 7), 16) / 255;
-              v.setValueForMode(modeId, { r: r, g: g, b: b, a: 1 });
+            var parsedColor = parseColorValue(firstValue);
+            if (parsedColor) {
+              v.setValueForMode(modeId, parsedColor);
             } else {
               v.setValueForMode(modeId, firstValue);
             }
