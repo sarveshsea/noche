@@ -54,6 +54,14 @@ export async function installComponent(
   const specRaw = await readRegistryFile(resolved, ref.href);
   const spec = ComponentSpecSchema.parse(JSON.parse(specRaw));
 
+  // Stamp provenance so `memi view <Component>` can resolve the source
+  // registry later without requiring --from. Non-breaking — field is optional.
+  spec.__memoireSource = {
+    registry: resolved.registry.name,
+    version: resolved.registry.version,
+    installedAt: new Date().toISOString(),
+  };
+
   // Save into user's registry
   await engine.registry.saveSpec(spec);
   const specPath = join(engine.config.projectRoot, ".memoire", "specs", "components", `${spec.name}.json`);

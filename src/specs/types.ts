@@ -166,6 +166,19 @@ export const ComponentSpecSchema = z.object({
   tags: z.array(z.string()).default([]),
   createdAt: z.string().default(() => new Date().toISOString()),
   updatedAt: z.string().default(() => new Date().toISOString()),
+  /**
+   * Provenance metadata for specs installed via `memi add`.
+   * OPTIONAL — specs authored locally (e.g. via `memi spec`) will not
+   * have this field. The CLI uses it to resolve Marketplace URLs from
+   * a bare component name in `memi view`.
+   */
+  __memoireSource: z
+    .object({
+      registry: z.string().describe("Registry ref used to install (e.g. @acme/design-system)"),
+      version: z.string().optional().describe("Registry version at install time"),
+      installedAt: z.string().optional().describe("ISO timestamp of install"),
+    })
+    .optional(),
 });
 
 export type ComponentSpec = z.infer<typeof ComponentSpecSchema>;
