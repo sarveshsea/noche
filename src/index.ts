@@ -60,6 +60,8 @@ import { registerAuditCommand } from "./commands/audit.js";
 import { registerDiffCommand } from "./commands/diff.js";
 import { registerAddCommand } from "./commands/add.js";
 import { registerPublishCommand } from "./commands/publish.js";
+import { registerUpgradeCommand } from "./commands/upgrade.js";
+import { registerUpdateCommand } from "./commands/update.js";
 import { existsSync, rmSync } from "fs";
 import { join } from "path";
 
@@ -133,6 +135,8 @@ registerAuditCommand(program, engine);
 registerDiffCommand(program, engine);
 registerAddCommand(program, engine);
 registerPublishCommand(program, engine);
+registerUpgradeCommand(program, engine);
+registerUpdateCommand(program, engine);
 
 // Uninstall command — removes all Mémoire artifacts
 program
@@ -157,6 +161,34 @@ program
     console.log("    npm uninstall -g @sarveshsea/memoire");
     console.log();
   });
+
+// First-run welcome — standalone-binary users who run `memi` with no args.
+// Shown once per $HOME, gated by a stamp file so it never nags.
+if (process.argv.length === 2) {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE || "";
+    if (home) {
+      const { writeFileSync, mkdirSync } = await import("node:fs");
+      const stamp = join(home, ".memoire", ".first-run-done");
+      if (!existsSync(stamp)) {
+        console.log();
+        console.log("  ▸ Mémoire — AI-native design intelligence");
+        console.log();
+        console.log("  Get started:");
+        console.log("    memi connect           Pair with the Figma plugin");
+        console.log("    memi design-doc <url>  Extract any site's design system");
+        console.log("    memi --help            All commands");
+        console.log();
+        console.log("  Docs: https://memoire.cv   Issues: https://github.com/sarveshsea/m-moire/issues");
+        console.log();
+        mkdirSync(join(home, ".memoire"), { recursive: true });
+        writeFileSync(stamp, new Date().toISOString());
+      }
+    }
+  } catch {
+    // Never block the CLI on welcome-banner issues
+  }
+}
 
 // Parse and execute
 program.parse();

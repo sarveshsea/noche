@@ -40,6 +40,9 @@ export function registerPublishCommand(program: Command, engine: MemoireEngine) 
     .option("--homepage <url>", "Homepage URL (often your Figma file URL)")
     .option("--license <spdx>", "License identifier", "MIT")
     .option("--figma <url>", "Figma file URL (triggers REST pull before publish)")
+    .option("--framework <fw...>", "Bundle code for frameworks: react, vue, svelte (default: react)")
+    .option("--specs-only", "Publish specs only — do not bundle generated code")
+    .option("--push", "Run `npm publish --access public` after building the package")
     .option("--json", "Output results as JSON")
     .action(async (opts: {
       name: string;
@@ -49,6 +52,9 @@ export function registerPublishCommand(program: Command, engine: MemoireEngine) 
       homepage?: string;
       license?: string;
       figma?: string;
+      framework?: string[];
+      specsOnly?: boolean;
+      push?: boolean;
       json?: boolean;
     }) => {
       const start = Date.now();
@@ -94,6 +100,8 @@ export function registerPublishCommand(program: Command, engine: MemoireEngine) 
           specs: componentSpecs,
           memoireVersion: pkgVersion,
           sourceFigmaUrl: opts.figma,
+          frameworks: (opts.framework as Array<"react" | "vue" | "svelte">) ?? ["react"],
+          specsOnly: opts.specsOnly,
         });
         spinner?.stop();
 
@@ -122,12 +130,33 @@ export function registerPublishCommand(program: Command, engine: MemoireEngine) 
         console.log(ui.dots("Components", `${componentSpecs.length}`));
         console.log(ui.dim(`  (${formatElapsed(Date.now() - start)})`));
         console.log();
-        console.log(ui.dim("  Next steps:"));
-        console.log(`    cd ${result.outDir}`);
-        console.log("    npm publish --access public");
-        console.log();
-        console.log(ui.dim("  Then from any project:"));
-        console.log(`    memi add <Component> --from ${opts.name}`);
+
+        // Optional: run `npm publish --access public`
+        if (opts.push) {
+          const { spawnSync } = await import("node:child_process");
+          console.log(ui.dots("npm publish", "running..."));
+          const pub = spawnSync("npm", ["publish", "--access", "public"], {
+            cwd: result.outDir,
+            stdio: "inherit",
+          });
+          if (pub.status !== 0) {
+            console.log(ui.fail(`npm publish exited ${pub.status}. Package built at ${result.outDir}`));
+            process.exitCode = pub.status ?? 1;
+            return;
+          }
+          console.log(ui.ok(`Published ${opts.name}@${opts.version} to npm`));
+          console.log();
+          console.log(ui.dim("  From any project:"));
+          console.log(`    memi add <Component> --from ${opts.name}`);
+        } else {
+          console.log(ui.dim("  Next steps:"));
+          console.log(`    cd ${result.outDir}`);
+          console.log("    npm publish --access public");
+          console.log(ui.dim("  Or:  memi publish --name " + opts.name + " --push"));
+          console.log();
+          console.log(ui.dim("  Then from any project:"));
+          console.log(`    memi add <Component> --from ${opts.name}`);
+        }
         console.log();
       } catch (err) {
         spinner?.stop();

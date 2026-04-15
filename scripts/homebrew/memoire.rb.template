@@ -1,0 +1,40 @@
+# Homebrew formula template for Mémoire
+#
+# This file is a TEMPLATE. CI fills in @VERSION@ and @SHA_*@ placeholders on
+# every release and pushes the result to the homebrew-memoire tap repo.
+# Users install with:  brew install sarveshsea/memoire/memoire
+#
+class Memoire < Formula
+  desc "AI-native design intelligence engine — Figma, research, spec-driven codegen"
+  homepage "https://memoire.cv"
+  version "@VERSION@"
+  license "MIT"
+
+  on_macos do
+    on_arm do
+      url "https://github.com/sarveshsea/m-moire/releases/download/v@VERSION@/memi-darwin-arm64.tar.gz"
+      sha256 "@SHA_DARWIN_ARM64@"
+    end
+    on_intel do
+      url "https://github.com/sarveshsea/m-moire/releases/download/v@VERSION@/memi-darwin-x64.tar.gz"
+      sha256 "@SHA_DARWIN_X64@"
+    end
+  end
+
+  on_linux do
+    on_intel do
+      url "https://github.com/sarveshsea/m-moire/releases/download/v@VERSION@/memi-linux-x64.tar.gz"
+      sha256 "@SHA_LINUX_X64@"
+    end
+  end
+
+  def install
+    libexec.install Dir["*"]
+    (bin/"memi").write_env_script libexec/"memi", {}
+    (bin/"memoire").write_env_script libexec/"memi", {}
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/memi --version")
+  end
+end

@@ -3,8 +3,9 @@ import { TextMeasurer, getTextMeasurer } from "../text-measurer.js";
 
 let measurer: TextMeasurer;
 
-beforeEach(() => {
+beforeEach(async () => {
   measurer = new TextMeasurer();
+  await measurer.ready();
 });
 
 describe("TextMeasurer.measure", () => {

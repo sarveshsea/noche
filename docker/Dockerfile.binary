@@ -1,0 +1,42 @@
+# Mémoire container image — binary edition.
+#
+# For environments where binaries + tarballs are blocked at the firewall but
+# Docker pulls from ghcr.io are allowed (common in corporate networks).
+#
+# Run:
+#   docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/sarveshsea/memoire --help
+#
+# For `memi connect` the Figma plugin has to reach the container's WebSocket.
+#   docker run --rm -it -p 9223:9223 ghcr.io/sarveshsea/memoire connect
+
+FROM debian:bookworm-slim
+
+ARG TARGETARCH
+ARG VERSION=latest
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl tar \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) target="linux-x64" ;; \
+      arm64) echo "linux-arm64 not yet published" >&2; exit 1 ;; \
+      *) echo "unsupported arch ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    if [ "${VERSION}" = "latest" ]; then \
+      url="https://github.com/sarveshsea/m-moire/releases/latest/download/memi-${target}.tar.gz"; \
+    else \
+      url="https://github.com/sarveshsea/m-moire/releases/download/${VERSION}/memi-${target}.tar.gz"; \
+    fi; \
+    mkdir -p /opt/memoire; \
+    curl -fsSL "${url}" | tar -xz -C /opt/memoire --strip-components=1; \
+    chmod +x /opt/memoire/memi; \
+    ln -s /opt/memoire/memi /usr/local/bin/memi; \
+    ln -s /opt/memoire/memi /usr/local/bin/memoire
+
+WORKDIR /work
+EXPOSE 9223-9232
+
+ENTRYPOINT ["memi"]
+CMD ["--help"]

@@ -9,14 +9,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 ## v0.11.0 — 2026-04-15 (The Registry Pivot)
 
 ### The shift
-Memoire is no longer a "design system extractor." It's a **registry protocol** — the shadcn pattern, for entire design systems. Every Figma file can now be published to npm and installed anywhere.
+Memoire is no longer a "design system extractor." It's a **registry protocol** — the shadcn pattern, for entire design systems. Every Figma file can now be published to npm and installed anywhere as *real working code*, not just specs.
 
 ### New commands
-- **`memi publish --name @you/ds`** — Figma file → publishable npm package (registry.json + tokens + component specs + README)
-- **`memi add <Component> --from <registry>`** — install a component from any Memoire registry (npm, GitHub, HTTPS, local path)
-- **`memi init <name>`** — scaffold a registry package with your current design system
-- **`memi design-doc <url> --codegen`** — also emit Tailwind v4 `@theme` block
-- **`memi design-doc <url> --init <name>`** — extract URL + immediately build a registry package
+- **`memi publish --name @you/ds [--push]`** — Figma → npm package with registry.json + tokens + specs + **bundled React/Vue/Svelte code**. `--push` runs `npm publish --access public` automatically.
+- **`memi add <Component> --from <registry>`** — drops a working component file into `src/components/memoire/` immediately (uses bundled code — no local codegen required).
+- **`memi update <registry>`** — re-install every component from a registry at its latest version.
+- **`memi sync --auto-pr`** — on design system change, create a branch, commit, push, and open a PR via `gh`. The career-ops moment.
+- **`memi init <name>`** — scaffold a registry package with your current design system.
+- **`memi design-doc <url> --codegen`** — also emit Tailwind v4 `@theme` block.
+- **`memi design-doc <url> --init <name>`** — extract URL + immediately build a registry package.
 
 ### New modules
 - `src/registry/schema.ts` — Memoire Registry Protocol v1 (Zod schemas)
@@ -27,6 +29,26 @@ Memoire is no longer a "design system extractor." It's a **registry protocol** �
 
 ### Deprecations (removing in v0.12.0)
 `memi heartbeat`, `memi prototype`, `memi dashboard`, `memi list`, `memi research`, `memi ia` now emit deprecation warnings. Silence with `MEMOIRE_SILENCE_DEPRECATIONS=1`.
+
+### Standalone binaries — install without npm
+Mémoire now ships as a single executable per OS (`memi-darwin-arm64`, `memi-darwin-x64`, `memi-linux-x64`, `memi-win-x64`) via GitHub Releases. Fixes the top user complaint from locked-down work laptops — no Node, no npm, no admin rights.
+
+**Install channels:**
+- `curl -fsSL https://memoire.cv/install.sh | sh` — auto-patches shell rc, verifies SHA256
+- `irm https://memoire.cv/install.ps1 | iex` — auto-adds to Windows user PATH
+- `brew install sarveshsea/memoire/memoire` — Homebrew tap, auto-updated per release
+- `docker run ghcr.io/sarveshsea/memoire` — air-gapped envs
+- Manual archive + `SHA256SUMS.txt` download for proxy-blocked users
+
+**New commands:**
+- `memi upgrade` — self-update the binary in place (SHA-verified, atomic swap with rollback on failure)
+
+**Under the hood:**
+- Built with `bun build --compile` per [scripts/build-binary.mjs](scripts/build-binary.mjs), emitting per-archive `.sha256` and combined `SHA256SUMS.txt`
+- CI matrix in [.github/workflows/release-binaries.yml](.github/workflows/release-binaries.yml) produces 4 archives + Docker image + Homebrew formula bump per tag
+- New [src/utils/asset-path.ts](src/utils/asset-path.ts) resolves sidecar assets (`skills/`, `notes/`, `plugin/`, `preview/templates/`) in both npm and binary modes
+- `@napi-rs/canvas` moved to `optionalDependencies` with a character-width fallback so text measurement works even when the native module isn't available
+- First-run welcome banner in [src/index.ts](src/index.ts) shown once per `$HOME`, stamped so it never nags
 
 ### Tests
 20+ new tests across registry schema, publisher round-trip, and resolver SSRF guards.

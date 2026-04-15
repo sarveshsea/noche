@@ -65,7 +65,7 @@ export const CATALOG_CATEGORIES: Record<CatalogCategory, { label: string; descri
 
 type RawEntry = Partial<CatalogComponent> & Pick<CatalogComponent, "name" | "slug" | "level" | "category" | "description" | "prevalence" | "props">;
 
-const raw = catalogData as RawEntry[];
+const raw = catalogData as unknown as RawEntry[];
 
 export const COMPONENT_CATALOG: CatalogComponent[] = raw.map(r => ({
   aliases: [],

@@ -1,0 +1,32 @@
+{
+  "name": "Button",
+  "type": "component",
+  "level": "atom",
+  "purpose": "Primary action button with variants and accessible focus states",
+  "researchBacking": [],
+  "designTokens": { "source": "figma", "mapped": true },
+  "variants": ["default", "primary", "secondary", "destructive", "ghost"],
+  "props": {
+    "label": "string",
+    "disabled": "boolean?",
+    "icon": "ReactNode?"
+  },
+  "shadcnBase": ["Button"],
+  "composesSpecs": [],
+  "codeConnect": { "props": {}, "mapped": false },
+  "accessibility": {
+    "role": "button",
+    "ariaLabel": "optional",
+    "keyboardNav": true,
+    "focusStyle": "outline",
+    "focusWidth": "2px",
+    "touchTarget": "min-44",
+    "reducedMotion": false,
+    "liveRegion": "off",
+    "colorIndependent": true
+  },
+  "dataviz": null,
+  "tags": ["action", "primitive"],
+  "createdAt": "2026-04-15T00:00:00.000Z",
+  "updatedAt": "2026-04-15T00:00:00.000Z"
+}

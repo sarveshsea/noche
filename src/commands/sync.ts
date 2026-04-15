@@ -37,7 +37,9 @@ export function registerSyncCommand(program: Command, engine: MemoireEngine) {
     .option("--live", "Keep running and sync on every change (live mode)")
     .option("--direction <dir>", "Sync direction: figma-to-code, code-to-figma, bidirectional", "bidirectional")
     .option("--conflicts", "Show and resolve pending sync conflicts")
-    .action(async (opts: { json?: boolean; live?: boolean; direction?: string; conflicts?: boolean }) => {
+    .option("--auto-pr", "After sync, commit changes and open a PR via `gh pr create`")
+    .option("--base <branch>", "Base branch for --auto-pr (default: main)", "main")
+    .action(async (opts: { json?: boolean; live?: boolean; direction?: string; conflicts?: boolean; autoPr?: boolean; base?: string }) => {
       const start = Date.now();
       await engine.init();
 
@@ -163,6 +165,41 @@ export function registerSyncCommand(program: Command, engine: MemoireEngine) {
         console.log();
       }
 
+      // ── Auto-PR mode ──────────────────────────────────
+      if (opts.autoPr) {
+        const { openAutoPR } = await import("../sync/auto-pr.js");
+        const { readFile } = await import("node:fs/promises");
+        const { join } = await import("node:path");
+        let previous: import("../engine/registry.js").DesignSystem | null = null;
+        try {
+          previous = JSON.parse(await readFile(join(engine.config.projectRoot, ".memoire", "design-system.prev.json"), "utf-8"));
+        } catch { /* no prior snapshot */ }
+
+        const current = engine.registry.designSystem;
+        const diff = previous
+          ? computeDesignSystemDiff(previous, current)
+          : { tokens: { added: current.tokens.map(t => t.name), removed: [], changed: [] }, components: { added: current.components.map(c => c.name), removed: [] }, lastSync: current.lastSync, previousSync: null };
+
+        if (!opts.json) console.log(ui.active("Opening auto-PR..."));
+        const pr = await openAutoPR({ cwd: engine.config.projectRoot, diff, base: opts.base });
+
+        if (opts.json) {
+          console.log(JSON.stringify({ autoPr: pr }, null, 2));
+        } else {
+          if (pr.status === "opened") {
+            console.log(ui.ok(`PR opened: ${pr.prUrl}`));
+          } else if (pr.status === "pushed-no-gh") {
+            console.log(ui.ok(`Branch pushed: ${pr.branch}`));
+            console.log(ui.dim("  Install `gh` CLI to auto-open PRs: https://cli.github.com"));
+          } else if (pr.status === "skipped-no-changes") {
+            console.log(ui.dim("  No changes to PR."));
+          } else {
+            console.log(ui.fail(`Auto-PR failed: ${pr.error}`));
+          }
+          console.log();
+        }
+      }
+
       // ── Live mode ─────────────────────────────────────
       if (opts.live) {
         if (!opts.json) {
@@ -212,4 +249,47 @@ export function registerSyncCommand(program: Command, engine: MemoireEngine) {
         setInterval(() => {}, 60_000);
       }
     });
+}
+
+// ── Diff helper for --auto-pr ──────────────────────────────────
+
+function computeDesignSystemDiff(
+  previous: import("../engine/registry.js").DesignSystem,
+  current: import("../engine/registry.js").DesignSystem,
+): import("./diff.js").DiffPayload {
+  const prevTokens = new Map(previous.tokens.map(t => [t.name, t]));
+  const currTokens = new Map(current.tokens.map(t => [t.name, t]));
+
+  const added: string[] = [];
+  const removed: string[] = [];
+  const changed: { name: string; field: string; from: string; to: string }[] = [];
+
+  for (const [name, token] of currTokens) {
+    const prev = prevTokens.get(name);
+    if (!prev) { added.push(name); continue; }
+    const p = JSON.stringify(prev.values);
+    const c = JSON.stringify(token.values);
+    if (p !== c) {
+      changed.push({
+        name,
+        field: "values",
+        from: String(Object.values(prev.values)[0] ?? ""),
+        to: String(Object.values(token.values)[0] ?? ""),
+      });
+    }
+  }
+  for (const name of prevTokens.keys()) if (!currTokens.has(name)) removed.push(name);
+
+  const prevComps = new Set(previous.components.map(c => c.name));
+  const currComps = new Set(current.components.map(c => c.name));
+
+  return {
+    tokens: { added, removed, changed },
+    components: {
+      added: [...currComps].filter(n => !prevComps.has(n)),
+      removed: [...prevComps].filter(n => !currComps.has(n)),
+    },
+    lastSync: current.lastSync,
+    previousSync: previous.lastSync,
+  };
 }

@@ -1,0 +1,86 @@
+# Mémoire installer for Windows — no Node, no npm, no admin rights.
+#
+# Usage (PowerShell):
+#   irm https://memoire.cv/install.ps1 | iex
+#   & { iwr -useb https://memoire.cv/install.ps1 } -Version v0.11.0
+
+param(
+    [string]$Version = "latest",
+    [string]$InstallDir = "$env:USERPROFILE\.memoire",
+    [switch]$NoPath,
+    [switch]$NoVerify
+)
+
+$ErrorActionPreference = "Stop"
+
+$repo = "sarveshsea/m-moire"
+$target = "win-x64"
+$archive = "memi-$target.zip"
+
+if ($Version -eq "latest") {
+    $base = "https://github.com/$repo/releases/latest/download"
+} else {
+    $base = "https://github.com/$repo/releases/download/$Version"
+}
+$url = "$base/$archive"
+$sumsUrl = "$base/SHA256SUMS.txt"
+
+$tmp = Join-Path $env:TEMP "memoire-install-$(Get-Random)"
+New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+
+try {
+    Write-Host "-> Downloading $archive"
+    Invoke-WebRequest -Uri $url -OutFile (Join-Path $tmp $archive) -UseBasicParsing
+
+    if (-not $NoVerify) {
+        try {
+            Invoke-WebRequest -Uri $sumsUrl -OutFile (Join-Path $tmp "SHA256SUMS.txt") -UseBasicParsing
+            $actual = (Get-FileHash -Algorithm SHA256 (Join-Path $tmp $archive)).Hash.ToLower()
+            $expected = (Get-Content (Join-Path $tmp "SHA256SUMS.txt") | Where-Object { $_ -like "*$archive" } | Select-Object -First 1).Split()[0]
+            if ($expected -and $actual -ne $expected) {
+                throw "SHA256 mismatch: expected $expected, got $actual"
+            }
+            if ($expected) { Write-Host "✓ sha256 verified" }
+        } catch {
+            Write-Host "!  SHA256 verification skipped: $($_.Exception.Message)"
+        }
+    }
+
+    Write-Host "-> Extracting to $InstallDir"
+    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+    $appDir = Join-Path $InstallDir "app"
+    if (Test-Path $appDir) { Remove-Item -Recurse -Force $appDir }
+
+    Expand-Archive -Path (Join-Path $tmp $archive) -DestinationPath $tmp -Force
+    Move-Item (Join-Path $tmp "memi-$target") $appDir
+
+    $binDir = Join-Path $InstallDir "bin"
+    New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+
+    # Windows doesn't symlink reliably without admin — write a tiny shim .cmd.
+    $shim = Join-Path $binDir "memi.cmd"
+    Set-Content -Path $shim -Value "@echo off`r`n`"$appDir\memi.exe`" %*"
+
+    if (-not $NoPath) {
+        $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        if ($userPath -notlike "*$binDir*") {
+            $newPath = if ([string]::IsNullOrEmpty($userPath)) { $binDir } else { "$userPath;$binDir" }
+            [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+            Write-Host ""
+            Write-Host "Added $binDir to your user PATH."
+            Write-Host "Open a new terminal, then run:  memi connect"
+        } else {
+            Write-Host ""
+            Write-Host "memi is ready. Run:  memi connect"
+        }
+    } else {
+        Write-Host ""
+        Write-Host "Add to PATH manually:  $binDir"
+    }
+
+    Write-Host ""
+    Write-Host "Installed to: $InstallDir"
+}
+finally {
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $tmp
+}

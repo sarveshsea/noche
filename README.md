@@ -31,17 +31,18 @@
 Every company has 2-3 Figma files that should be **the** design system. Nobody made them distributable. Until now.
 
 ```bash
-# 1. Take your Figma file, make it a registry package
-npx @sarveshsea/memoire publish --name @you/design-system --figma https://figma.com/design/xxx
+# Publish your Figma file to npm in one command
+npx @sarveshsea/memoire publish --name @you/ds --figma https://figma.com/design/xxx --push
 
-# 2. From any project, install components by name
-npx @sarveshsea/memoire add Button --from @you/design-system
+# From any project, drop working code in
+npx @sarveshsea/memoire add Button --from @you/ds
+# → src/components/memoire/Button.tsx (real working code, not a spec)
 
-# 3. Or try it on any public URL with no Figma at all
-npx @sarveshsea/memoire design-doc https://stripe.com --codegen
+# When Figma changes, open a PR automatically
+memi sync --auto-pr
 ```
 
-The registry is a portable package: tokens as W3C DTCG JSON + Tailwind v4 `@theme` CSS + component specs. Publishable to npm, GitHub, or any static host.
+A registry bundles tokens (W3C DTCG JSON + Tailwind v4 `@theme` CSS), component specs, and **real generated code** for React / Vue / Svelte. Publishable to npm, GitHub, or any static host. See [`examples/starter-registry/`](./examples/starter-registry) to fork one.
 
 <p align="center">
   <img src="assets/demo.gif" alt="memoire extracting a design system from a URL" width="720" />
@@ -68,6 +69,40 @@ memi go --rest                          # same thing, no figma desktop needed
 memi go --penpot                        # same thing, from penpot
 memi tokens                             # export as CSS / Tailwind / JSON / Style Dictionary
 ```
+
+---
+
+## Install without npm (work laptops, locked-down environments)
+
+No Node, no npm, no admin rights.
+
+```bash
+# macOS / Linux — auto-patches your shell profile, verifies SHA256
+curl -fsSL https://memoire.cv/install.sh | sh
+
+# Windows (PowerShell) — auto-adds to user PATH
+irm https://memoire.cv/install.ps1 | iex
+
+# Homebrew (macOS / Linux)
+brew install sarveshsea/memoire/memoire
+
+# Docker (air-gapped envs where only ghcr.io is reachable)
+docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/sarveshsea/memoire --help
+
+# Self-update once installed
+memi upgrade
+```
+
+**Manual download** if `curl`, `brew`, and `docker` are all blocked — grab the archive from [GitHub Releases](https://github.com/sarveshsea/m-moire/releases/latest):
+
+| Platform                | Archive                          |
+|-------------------------|----------------------------------|
+| macOS (Apple Silicon)   | `memi-darwin-arm64.tar.gz`       |
+| macOS (Intel)           | `memi-darwin-x64.tar.gz`         |
+| Linux (x86_64)          | `memi-linux-x64.tar.gz`          |
+| Windows (x64)           | `memi-win-x64.zip`               |
+
+Verify with `SHA256SUMS.txt` (attached to every release). Extract, add `memi` to PATH, run `memi connect`. The `skills/`, `notes/`, `plugin/`, `preview/` directories must stay next to the binary — Mémoire loads them at runtime.
 
 ---
 

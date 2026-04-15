@@ -22,6 +22,9 @@ import type { DesignSystem } from "../engine/registry.js";
 import type { ComponentSpec } from "../specs/types.js";
 import { exportToStyleDictionary } from "../codegen/tailwind-tokens.js";
 import { generateTailwindV4Theme } from "../codegen/tailwind-v4.js";
+import { generateComponent } from "../codegen/shadcn-mapper.js";
+import { generateVueComponent } from "../codegen/vue-mapper.js";
+import { generateSvelteComponent } from "../codegen/svelte-mapper.js";
 import {
   REGISTRY_FILENAME,
   RegistrySchema,
@@ -42,6 +45,10 @@ export interface PublishInput {
   sourceFigmaUrl?: string;
   sourcePenpotFileId?: string;
   sourceDesignDocUrl?: string;
+  /** Frameworks to bundle real code for. Default: ["react"]. */
+  frameworks?: Array<"react" | "vue" | "svelte">;
+  /** Skip bundling code (specs only). Default: false. */
+  specsOnly?: boolean;
 }
 
 export interface PublishResult {
@@ -76,18 +83,50 @@ export async function publishRegistry(input: PublishInput): Promise<PublishResul
   await writeFile(tokensCssPath, tokensCss);
   written.push(tokensCssPath);
 
-  // 3. Write component specs
+  // 3. Write component specs + bundled code per framework
+  const frameworks = input.frameworks ?? ["react"];
+  const specsOnly = input.specsOnly ?? false;
   const componentRefs: RegistryComponentRef[] = [];
+
+  if (!specsOnly && specs.length > 0) {
+    await mkdir(join(outDir, "components", "code"), { recursive: true });
+    for (const fw of frameworks) {
+      await mkdir(join(outDir, "components", "code", fw), { recursive: true });
+    }
+  }
+
   for (const spec of specs) {
     const specPath = join(outDir, "components", `${spec.name}.json`);
     await writeFile(specPath, JSON.stringify(spec, null, 2));
     written.push(specPath);
-    componentRefs.push({
+
+    // Default ref (spec-only)
+    const ref: RegistryComponentRef = {
       name: spec.name,
       href: `./components/${spec.name}.json`,
       level: spec.level,
-      framework: "agnostic",
-    });
+      framework: specsOnly ? "agnostic" : frameworks[0],
+    };
+
+    // Bundle real code for each requested framework
+    if (!specsOnly) {
+      for (const fw of frameworks) {
+        const { content, ext } = generateFrameworkCode(spec, fw, designSystem);
+        const codePath = join(outDir, "components", "code", fw, `${spec.name}.${ext}`);
+        await writeFile(codePath, content);
+        written.push(codePath);
+
+        // First framework sets the default code ref
+        if (fw === frameworks[0]) {
+          ref.code = {
+            href: `./components/code/${fw}/${spec.name}.${ext}`,
+            framework: fw,
+          };
+        }
+      }
+    }
+
+    componentRefs.push(ref);
   }
 
   // 4. Write registry.json
@@ -133,6 +172,22 @@ export async function publishRegistry(input: PublishInput): Promise<PublishResul
   written.push(readmePath);
 
   return { outDir, registryPath, filesWritten: written };
+}
+
+function generateFrameworkCode(
+  spec: ComponentSpec,
+  framework: "react" | "vue" | "svelte",
+  ds: DesignSystem,
+): { content: string; ext: string } {
+  if (framework === "vue") {
+    return { content: generateVueComponent(spec, ds.tokens).component, ext: "vue" };
+  }
+  if (framework === "svelte") {
+    return { content: generateSvelteComponent(spec, ds.tokens).component, ext: "svelte" };
+  }
+  // react (default)
+  const ctx = { project: { framework: "react" } as unknown as import("../engine/project-context.js").ProjectContext, designSystem: ds };
+  return { content: generateComponent(spec, ctx).component, ext: "tsx" };
 }
 
 function buildReadme(registry: Registry, ds: DesignSystem, componentCount: number): string {

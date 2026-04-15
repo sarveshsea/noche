@@ -33,13 +33,15 @@ export function registerAddCommand(program: Command, engine: MemoireEngine) {
     .description("Install a component from a Memoire registry (npm / github / https / local)")
     .option("--from <registry>", "Registry reference (e.g. @acme/ds, github:user/repo, ./local/path)")
     .option("--tokens", "Also install tokens.css from the registry")
-    .option("--generate", "Generate code immediately after installing")
+    .option("--regenerate", "Run local codegen instead of using bundled code")
+    .option("--target <dir>", "Target directory (default: src/components/memoire)")
     .option("--list", "List components in the registry without installing")
     .option("--json", "Output as JSON")
     .action(async (component: string | undefined, opts: {
       from?: string;
       tokens?: boolean;
-      generate?: boolean;
+      regenerate?: boolean;
+      target?: string;
       list?: boolean;
       json?: boolean;
     }) => {
@@ -68,7 +70,8 @@ export function registerAddCommand(program: Command, engine: MemoireEngine) {
           from: opts.from,
           name: component,
           withTokens: opts.tokens,
-          generate: opts.generate,
+          regenerate: opts.regenerate,
+          targetDir: opts.target,
         });
         spinner?.stop();
 
@@ -89,15 +92,11 @@ export function registerAddCommand(program: Command, engine: MemoireEngine) {
 
         console.log();
         console.log(ui.ok(`Installed ${component} from ${result.source}`));
-        console.log(ui.dim(`  Spec: ${result.specPath}`));
+        if (result.codePath) console.log(ui.dim(`  Code:   ${result.codePath}`));
+        console.log(ui.dim(`  Spec:   ${result.specPath}`));
         if (result.tokensPath) console.log(ui.dim(`  Tokens: ${result.tokensPath}`));
-        for (const f of result.generatedFiles) console.log(ui.dim(`  Generated: ${f}`));
         console.log(ui.dim(`  (${formatElapsed(Date.now() - start)})`));
         console.log();
-        if (!opts.generate) {
-          console.log(ui.dim(`  Run \`memi generate ${component}\` to produce code.`));
-          console.log();
-        }
       } catch (err) {
         spinner?.stop();
         const msg = err instanceof Error ? err.message : String(err);

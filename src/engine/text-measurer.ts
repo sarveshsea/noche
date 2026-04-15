@@ -135,16 +135,23 @@ const DEFAULT_BREAKPOINTS: Record<string, number> = {
 export class TextMeasurer {
   private cache = new Map<string, PreparedText>();
   private maxCacheSize: number;
+  private initPromise: Promise<void>;
 
   constructor(maxCacheSize = 500) {
     this.maxCacheSize = maxCacheSize;
-    ensurePolyfill();
+    this.initPromise = ensurePolyfill();
+  }
+
+  /** Await canvas polyfill readiness. Optional — synchronous APIs fall back. */
+  async ready(): Promise<void> {
+    await this.initPromise;
   }
 
   /** Measure text: returns height and line count. */
   measure(text: string, opts: MeasureOptions): MeasureResult {
     const font = opts.font ?? "16px sans-serif";
     const lineHeight = opts.lineHeight ?? parseFontSize(font) * 1.5;
+    if (!polyfillInstalled) return approximateLayout(text, font, opts.maxWidth, lineHeight);
     const prepared = this.getPrepared(text, font);
     return layout(prepared, opts.maxWidth, lineHeight);
   }
@@ -153,6 +160,10 @@ export class TextMeasurer {
   measureDetailed(text: string, opts: MeasureOptions): DetailedMeasureResult {
     const font = opts.font ?? "16px sans-serif";
     const lineHeight = opts.lineHeight ?? parseFontSize(font) * 1.5;
+    if (!polyfillInstalled) {
+      const approx = approximateLayout(text, font, opts.maxWidth, lineHeight);
+      return { ...approx, lines: [] };
+    }
     const prepared = prepareWithSegments(text, font);
     const result = layoutWithLines(prepared, opts.maxWidth, lineHeight);
     return {

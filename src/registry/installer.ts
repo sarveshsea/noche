@@ -24,14 +24,18 @@ export interface InstallComponentOptions {
   name: string;
   /** Also install tokens.css into project */
   withTokens?: boolean;
-  /** Also run codegen immediately */
-  generate?: boolean;
+  /** Run local codegen instead of using bundled code. Default: false (prefer bundled code). */
+  regenerate?: boolean;
+  /** Target directory for bundled code install. Default: src/components/memoire */
+  targetDir?: string;
 }
 
 export interface InstallResult {
   spec: ComponentSpec;
   specPath: string;
   tokensPath?: string;
+  /** Path to the installed code file (when registry bundled code, or after regenerate) */
+  codePath?: string;
   generatedFiles: string[];
   source: string;
 }
@@ -60,17 +64,33 @@ export async function installComponent(
     tokensPath = await installTokens(engine.config.projectRoot, resolved, resolved.registry.tokens.href);
   }
 
-  // Run codegen if requested
+  // Install code — prefer bundled code from registry, fall back to local codegen
   const generatedFiles: string[] = [];
-  if (opts.generate) {
+  let codePath: string | undefined;
+  const targetDir = opts.targetDir ?? join(engine.config.projectRoot, "src", "components", "memoire");
+
+  if (!opts.regenerate && ref.code) {
+    // Bundled code in registry — write it directly
+    const codeContent = await readRegistryFile(resolved, ref.code.href);
+    const ext = ref.code.href.split(".").pop() || "tsx";
+    await mkdir(targetDir, { recursive: true });
+    codePath = join(targetDir, `${spec.name}.${ext}`);
+    await writeFile(codePath, codeContent);
+    generatedFiles.push(codePath);
+  } else {
+    // No bundled code (or --regenerate) — run local codegen
     const entryFile = await engine.generateFromSpec(spec.name);
-    if (entryFile) generatedFiles.push(entryFile);
+    if (entryFile) {
+      codePath = entryFile;
+      generatedFiles.push(entryFile);
+    }
   }
 
   return {
     spec,
     specPath,
     tokensPath,
+    codePath,
     generatedFiles,
     source: resolved.source,
   };

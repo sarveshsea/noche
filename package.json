@@ -89,7 +89,6 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@chenglou/pretext": "^0.0.3",
     "@modelcontextprotocol/sdk": "^1.26.0",
-    "@napi-rs/canvas": "^0.1.97",
     "chalk": "^5.4.0",
     "commander": "^12.1.0",
     "exceljs": "^4.4.0",
@@ -110,6 +109,7 @@
     "vitest": "^2.0.0"
   },
   "optionalDependencies": {
+    "@napi-rs/canvas": "^0.1.97",
     "@rollup/rollup-darwin-arm64": "^4.60.0",
     "@rollup/rollup-linux-x64-gnu": "^4.60.1"
   }
