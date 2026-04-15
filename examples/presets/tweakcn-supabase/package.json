@@ -1,0 +1,25 @@
+{
+  "name": "@memoire-examples/tweakcn-supabase",
+  "version": "0.1.0",
+  "description": "Supabase-inspired Memoire Registry — green on near-black, subtle and technical",
+  "homepage": "https://memoire.cv",
+  "license": "MIT",
+  "files": [
+    "registry.json",
+    "tokens/",
+    "components/",
+    "README.md"
+  ],
+  "keywords": [
+    "memoire-registry",
+    "design-system",
+    "design-tokens",
+    "shadcn",
+    "tweakcn",
+    "supabase"
+  ],
+  "memoire": {
+    "registry": true,
+    "schemaVersion": "v1"
+  }
+}

@@ -1,0 +1,56 @@
+/* @memoire-examples/tweakcn-supabase — green on near-black, mono-heavy */
+@import "tailwindcss";
+
+@theme {
+  /* Light */
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(15% 0.01 160);
+  --color-card: oklch(99% 0.005 160);
+  --color-card-foreground: oklch(15% 0.01 160);
+  --color-primary: oklch(72% 0.17 145);
+  --color-primary-foreground: oklch(12% 0.02 160);
+  --color-muted: oklch(95% 0.005 160);
+  --color-muted-foreground: oklch(45% 0.01 160);
+  --color-accent: oklch(72% 0.17 145);
+  --color-accent-foreground: oklch(12% 0.02 160);
+  --color-border: oklch(90% 0.005 160);
+  --color-input: oklch(92% 0.005 160);
+  --color-ring: oklch(72% 0.17 145);
+
+  /* Type */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 6px 20px -4px rgb(0 0 0 / 0.4);
+}
+
+.dark,
+:root.dark {
+  --color-background: oklch(12% 0.02 160);
+  --color-foreground: oklch(96% 0.005 160);
+  --color-card: oklch(16% 0.02 160);
+  --color-card-foreground: oklch(96% 0.005 160);
+  --color-primary: oklch(72% 0.17 145);
+  --color-primary-foreground: oklch(12% 0.02 160);
+  --color-muted: oklch(20% 0.015 160);
+  --color-muted-foreground: oklch(68% 0.01 160);
+  --color-accent: oklch(72% 0.17 145);
+  --color-accent-foreground: oklch(12% 0.02 160);
+  --color-border: oklch(24% 0.015 160);
+  --color-input: oklch(24% 0.015 160);
+  --color-ring: oklch(72% 0.17 145);
+}
