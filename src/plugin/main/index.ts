@@ -21,11 +21,11 @@ import {
   type ChangeBuffer,
   type ChangeBufferDropEvent,
 } from "./state/change-buffer.js";
+import { createJobsStore, type JobsStore } from "./state/jobs.js";
 
 interface PluginState {
   sessionId: string;
-  activeRunId: string | null;
-  jobs: Map<string, WidgetJob>;
+  jobs: JobsStore;
   selectionListenerActive: boolean;
   lastSelectionUpdate: number;
   selectionThrottleMs: number;
@@ -52,8 +52,15 @@ const BLOCKED_GLOBALS = [/\bFunction\s*\(/, /\bimport\s*\(/, /\brequire\s*\(/, /
 
 const state: PluginState = {
   sessionId: createRunId("widget"),
-  activeRunId: null,
-  jobs: new Map(),
+  jobs: createJobsStore({
+    onEmit: (job) =>
+      post({
+        channel: WIDGET_V2_CHANNEL,
+        source: "main",
+        type: "job",
+        job,
+      }),
+  }),
   selectionListenerActive: true,
   lastSelectionUpdate: 0,
   selectionThrottleMs: 180,
@@ -184,7 +191,7 @@ async function bootstrap(): Promise<void> {
       id: change.id,
       origin: change.origin ?? null,
       sessionId: state.sessionId,
-      runId: state.activeRunId,
+      runId: state.jobs.activeRunId(),
       pageId,
       timestamp: now,
     }));
@@ -209,7 +216,7 @@ async function bootstrap(): Promise<void> {
       count: changes.length,
       buffered: state.changeBuffer.size(),
       sessionId: state.sessionId,
-      runId: state.activeRunId,
+      runId: state.jobs.activeRunId(),
       updatedAt: now,
     });
   });
@@ -235,13 +242,19 @@ figma.ui.onmessage = async (message: WidgetUiEnvelope) => {
     return;
   }
 
-  const job = message.action ? startJob(message.requestId, message.command, message.action.kind, message.action.label) : null;
+  const job = message.action
+    ? state.jobs.start({
+        id: message.requestId,
+        command: message.command,
+        kind: message.action.kind,
+        label: message.action.label,
+      })
+    : null;
 
   try {
-    state.activeRunId = job?.runId ?? null;
     const result = await handleCommand(message.command, message.params ?? {});
     if (job) {
-      finishJob(job, "completed", summarizeCommandResult(message.command, result));
+      state.jobs.finishCompleted(job.id, summarizeCommandResult(message.command, result));
     }
     post({
       channel: WIDGET_V2_CHANNEL,
@@ -257,7 +270,7 @@ figma.ui.onmessage = async (message: WidgetUiEnvelope) => {
   } catch (error) {
     const messageText = error instanceof Error ? error.message : String(error);
     if (job) {
-      finishJob(job, "failed", undefined, messageText);
+      state.jobs.finishFailed(job.id, messageText);
     }
     post({
       channel: WIDGET_V2_CHANNEL,
@@ -270,8 +283,6 @@ figma.ui.onmessage = async (message: WidgetUiEnvelope) => {
       runId: job?.runId ?? null,
       error: messageText,
     });
-  } finally {
-    state.activeRunId = null;
   }
 };
 
@@ -292,50 +303,8 @@ function post(message: unknown): void {
   figma.ui.postMessage(message);
 }
 
-function startJob(id: string, command: WidgetCommandName, kind: WidgetJob["kind"], label: string): WidgetJob {
-  const now = Date.now();
-  const job: WidgetJob = {
-    id,
-    runId: createRunId("job"),
-    kind,
-    label,
-    command,
-    status: "running",
-    startedAt: now,
-    updatedAt: now,
-    progressText: "Running",
-  };
-  state.jobs.set(job.id, job);
-  post({
-    channel: WIDGET_V2_CHANNEL,
-    source: "main",
-    type: "job",
-    job,
-  });
-  return job;
-}
-
-function finishJob(job: WidgetJob, status: WidgetJobStatus, summary?: string, error?: string): void {
-  const next: WidgetJob = {
-    ...job,
-    status,
-    updatedAt: Date.now(),
-    finishedAt: Date.now(),
-    progressText: status === "completed" ? "Done" : "Failed",
-    summary,
-    error,
-  };
-  state.jobs.set(next.id, next);
-  post({
-    channel: WIDGET_V2_CHANNEL,
-    source: "main",
-    type: "job",
-    job: next,
-  });
-}
-
 function snapshotJobs(): WidgetJob[] {
-  return Array.from(state.jobs.values()).sort((left, right) => right.updatedAt - left.updatedAt);
+  return state.jobs.all().sort((left, right) => right.updatedAt - left.updatedAt);
 }
 
 async function handleCommand(command: WidgetCommandName, params: Record<string, unknown>): Promise<unknown> {

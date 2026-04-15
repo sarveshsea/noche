@@ -1,5 +1,9 @@
 // Typed errors for the widget. Command handlers return Result<T, WidgetError>
 // so the bridge can serialize a structured payload instead of a bare string.
+// Avoids optional chaining, nullish coalescing, and Array.prototype.includes
+// to satisfy the ES2017 bundle contract enforced by build-plugin.test.ts.
+
+import { arrayIncludes } from "./compat.js";
 
 export const WIDGET_ERROR_CODES = [
   "E_BAD_MESSAGE",
@@ -42,7 +46,7 @@ export function makeError(
   const err: WidgetError = {
     code,
     message,
-    retryable: options.retryable ?? isRetryableByDefault(code),
+    retryable: options.retryable === undefined ? isRetryableByDefault(code) : options.retryable,
   };
   if (options.detail) err.detail = options.detail;
   if (options.cause) err.cause = normalizeCause(options.cause);
@@ -69,12 +73,9 @@ export function fromUnknown(value: unknown, fallbackCode: WidgetErrorCode = "E_U
 export function isWidgetError(value: unknown): value is WidgetError {
   if (!value || typeof value !== "object") return false;
   const v = value as Partial<WidgetError>;
-  return (
-    typeof v.code === "string" &&
-    (WIDGET_ERROR_CODES as readonly string[]).includes(v.code) &&
-    typeof v.message === "string" &&
-    typeof v.retryable === "boolean"
-  );
+  if (typeof v.code !== "string") return false;
+  if (!arrayIncludes(WIDGET_ERROR_CODES, v.code as WidgetErrorCode)) return false;
+  return typeof v.message === "string" && typeof v.retryable === "boolean";
 }
 
 export type Result<T, E = WidgetError> =
