@@ -6,6 +6,31 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v0.12.1 — 2026-04-15 (Marketplace wiring)
+
+### The hook
+The CLI now knows about `memoire.cv/components` — Memoire's upcoming Marketplace — and wires both ends of the registry loop to it.
+
+### New
+- **`memi view <Component>`** — opens the component's Marketplace page in the system browser. Accepts a bare name (`memi view Button`), a fully-qualified ref (`memi view @acme/ds/Button`), or `--from @acme/ds`. Supports `--print` (stdout only) and `--json` (structured output, no browser).
+- **`memi publish` success message** now surfaces the Marketplace URLs where the registry and each component will appear after `npm publish` finishes — making the "what happens next" explicit.
+- **Provenance tracking** — `memi add` now stamps `__memoireSource: { registry, version, installedAt }` onto the installed spec. This lets `memi view <Component>` resolve the right Marketplace URL from a bare name. Field is optional; existing specs continue to load.
+- **`MARKETPLACE_BASE_URL` constant** in `src/registry/constants.ts`, overridable via `MEMOIRE_MARKETPLACE_URL` env var for dev/staging.
+- **9 new tests** across `view.test.ts` (ref parsing, URL assembly, `--from`, local-spec resolution, `--json`) and `publish-message.test.ts` (success-message Marketplace lines). 806 total (up from 797).
+
+### Flow
+```bash
+# Install a component from a registry
+memi add Button --from @acme/ds
+
+# See it on the Marketplace
+memi view Button                          # opens memoire.cv/components/@acme/ds/Button
+memi view @acme/ds/Card --print           # stdout only
+memi view Button --json                   # { url, component, registry }
+```
+
+---
+
 ## v0.12.0 — 2026-04-15 (tweakcn integration)
 
 ### The hook

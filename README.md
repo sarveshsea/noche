@@ -38,11 +38,15 @@ npx @sarveshsea/memoire publish --name @you/ds --figma https://figma.com/design/
 npx @sarveshsea/memoire add Button --from @you/ds
 # → src/components/memoire/Button.tsx (real working code, not a spec)
 
+# Jump to the component's page on the Marketplace
+memi view Button
+# → opens https://memoire.cv/components/@you/ds/Button
+
 # When Figma changes, open a PR automatically
 memi sync --auto-pr
 ```
 
-A registry bundles tokens (W3C DTCG JSON + Tailwind v4 `@theme` CSS), component specs, and **real generated code** for React / Vue / Svelte. Publishable to npm, GitHub, or any static host. See [`examples/starter-registry/`](./examples/starter-registry) to fork one.
+A registry bundles tokens (W3C DTCG JSON + Tailwind v4 `@theme` CSS), component specs, and **real generated code** for React / Vue / Svelte. Publishable to npm, GitHub, or any static host. Every published registry is indexed on the [Memoire Marketplace](https://memoire.cv/components) within an hour of `npm publish`. See [`examples/starter-registry/`](./examples/starter-registry) to fork one.
 
 ### Designed in tweakcn? Publish with Memoire.
 
