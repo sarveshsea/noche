@@ -65,12 +65,47 @@ interface UiState {
     latencyMs: number | null;
     lastPingSentAt: number;
     scanTimer: number | null;
+    offlineSince: number | null;
   };
 }
 
 const PORT_START = 9223;
 const PORT_END = 9232;
 const LOG_LIMIT = 80;
+
+const OFFLINE_CTA_GRACE_MS = 5000;
+
+// Tab + action registries (#47, #48). Data-driven rather than hardcoded
+// so new panels/actions can be added by appending to these lists.
+interface TabDef {
+  id: "jobs" | "selection" | "system";
+  label: string;
+  count: (s: UiState) => number | null;
+}
+
+const TABS: TabDef[] = [
+  { id: "jobs", label: "Jobs", count: (s) => s.jobs.length || null },
+  { id: "selection", label: "Selection", count: (s) => (s.selection.count > 0 ? s.selection.count : null) },
+  { id: "system", label: "System", count: () => null },
+];
+
+interface ActionDef {
+  id: string;
+  label: string;
+  requiresConnection: boolean;
+  requiresSelection?: boolean;
+  primary?: boolean;
+  hiddenIfConnected?: boolean;
+}
+
+const ACTIONS: ActionDef[] = [
+  { id: "sync", label: "sync", requiresConnection: true, primary: true },
+  { id: "inspect", label: "inspect", requiresConnection: true },
+  { id: "capture", label: "capture", requiresConnection: true, requiresSelection: true },
+  { id: "changes", label: "changes", requiresConnection: true },
+  { id: "page-tree", label: "tree", requiresConnection: true },
+  { id: "retry", label: "reconnect", requiresConnection: false },
+];
 
 const TRUSTED_PARENT_ORIGINS = new Set<string>([
   "https://www.figma.com",
@@ -144,6 +179,7 @@ const state: UiState = {
     latencyMs: null,
     lastPingSentAt: 0,
     scanTimer: null,
+    offlineSince: Date.now(),
   },
 };
 
@@ -438,7 +474,15 @@ function scheduleReconnect(): void {
 }
 
 function setBridgeStage(stage: UiState["bridge"]["stage"]): void {
+  const prev = state.bridge.stage;
   state.bridge.stage = stage;
+  // Track the moment we became offline so the CTA can wait out a grace
+  // window before nagging the operator (#53).
+  if (stage === "offline" && prev !== "offline") {
+    state.bridge.offlineSince = Date.now();
+  } else if (stage === "connected") {
+    state.bridge.offlineSince = null;
+  }
   state.connection = {
     ...state.connection,
     stage: stage === "connected" ? "connected" : stage === "scanning" ? "scanning" : stage === "reconnecting" ? "reconnecting" : "offline",
@@ -824,19 +868,12 @@ function render(): void {
       </div>
 
       <div class="toolbar">
-        <button class="tool-btn primary" data-action="sync" ${isConnected ? "" : "disabled"}>sync</button>
-        <button class="tool-btn" data-action="inspect" ${isConnected ? "" : "disabled"}>inspect</button>
-        <button class="tool-btn" data-action="capture" ${hasSelection && isConnected ? "" : "disabled"}>capture</button>
-        <button class="tool-btn" data-action="changes" ${isConnected ? "" : "disabled"}>changes</button>
-        <button class="tool-btn" data-action="page-tree" ${isConnected ? "" : "disabled"}>tree</button>
-        <button class="tool-btn" data-action="retry">reconnect</button>
+        ${ACTIONS.map((a) => renderActionButton(a, { isConnected, hasSelection })).join("")}
       </div>
 
       <div class="content">
         <div class="tabstrip">
-          <button class="tab ${state.activeTab === "jobs" ? "active" : ""}" data-tab="jobs">Jobs${state.jobs.length ? ` (${state.jobs.length})` : ""}</button>
-          <button class="tab ${state.activeTab === "selection" ? "active" : ""}" data-tab="selection">Selection${hasSelection ? ` (${state.selection.count})` : ""}</button>
-          <button class="tab ${state.activeTab === "system" ? "active" : ""}" data-tab="system">System</button>
+          ${TABS.map((t) => renderTabButton(t)).join("")}
         </div>
         <div class="tab-panel ${state.activeTab === "jobs" ? "active" : ""}">
           <div class="jobs-list">${renderJobs()}</div>
@@ -867,12 +904,32 @@ function render(): void {
   });
 
   app.querySelectorAll<HTMLButtonElement>("[data-action]").forEach((button) => {
-    button.onclick = () => handleAction(button.dataset.action || "");
+    button.onclick = () => {
+      const action = button.dataset.action || "";
+      if (action === "retry-job") {
+        handleRetryJob({
+          command: button.dataset.jobCommand || "",
+          kind: button.dataset.jobKind || "",
+          label: button.dataset.jobLabel || "",
+        });
+        return;
+      }
+      handleAction(action);
+    };
   });
 
   app.querySelectorAll<HTMLButtonElement>("[data-node-action]").forEach((button) => {
     button.onclick = () => handleNodeAction(button.dataset.nodeAction || "", button.dataset.nodeId || "");
   });
+}
+
+// Re-dispatches a previously-failed command with identical command/kind/label
+// (#51). Params aren't preserved on the job record so retry is only offered
+// for commands whose defaults match the original invocation; this covers the
+// common sync/inspect/changes/page-tree failures.
+function handleRetryJob(ctx: { command: string; kind: string; label: string }): void {
+  if (!ctx.command || !isWidgetCommandName(ctx.command)) return;
+  requestCommand(ctx.command, {}, ctx.label || "Retry", (ctx.kind || "sync") as WidgetJob["kind"]);
 }
 
 function handleAction(action: string): void {
@@ -956,11 +1013,13 @@ function handleNodeAction(action: string, nodeId: string): void {
 
 function renderJobs(): string {
   const overview = buildJobsOverview(state.jobs);
+  const cta = renderOfflineCta();
   if (!state.jobs.length) {
-    return emptyCard("No jobs", "Run sync or inspect to begin.");
+    return cta + emptyCard("No jobs", "Run sync or inspect to begin.");
   }
 
   const cards: string[] = [];
+  if (cta) cards.push(cta);
   cards.push(`
     <article class="system-card">
       <div class="card-topline">
@@ -1030,7 +1089,12 @@ function renderJobs(): string {
           <div>${escapeHtml(job.command || job.kind)} · ${escapeHtml(formatElapsedTime(job))}</div>
           <div class="mono">run ${escapeHtml(job.runId)}</div>
           <div>${escapeHtml(job.summary || job.progressText || "Running")}</div>
-          ${job.error ? `<div class="mono">${escapeHtml(job.error)}</div>` : ""}
+          ${job.error ? `<div class="mono">${escapeHtml(formatJobError(job.error))}</div>` : ""}
+          ${job.status === "failed" && job.command ? `
+            <div class="inline-actions">
+              <button class="tool-btn" data-action="retry-job" data-job-command="${escapeHtml(job.command)}" data-job-kind="${escapeHtml(job.kind)}" data-job-label="${escapeHtml(job.label)}">Retry</button>
+            </div>
+          ` : ""}
         </div>
       </article>
     `));
@@ -1345,6 +1409,59 @@ function emptyCard(title: string, copy: string): string {
       <div class="stack">
         <strong class="card-title">${escapeHtml(title)}</strong>
         <span class="muted">${escapeHtml(copy)}</span>
+      </div>
+    </article>
+  `;
+}
+
+// Jobs may carry an error that's either a plain string or a JSON-encoded
+// WidgetError from JobsStore.finishFailed. Show the human message when
+// the payload parses; otherwise fall back to the raw string.
+function formatJobError(raw: string): string {
+  if (raw.charAt(0) !== "{") return raw;
+  try {
+    const parsed = JSON.parse(raw) as { code?: string; message?: string };
+    if (parsed && typeof parsed.message === "string") {
+      return (parsed.code ? parsed.code + ": " : "") + parsed.message;
+    }
+  } catch {
+    // fallthrough
+  }
+  return raw;
+}
+
+function renderTabButton(tab: TabDef): string {
+  const count = tab.count(state);
+  const suffix = count ? ` (${count})` : "";
+  const active = state.activeTab === tab.id ? "active" : "";
+  return `<button class="tab ${active}" data-tab="${escapeHtml(tab.id)}">${escapeHtml(tab.label)}${suffix}</button>`;
+}
+
+function renderActionButton(action: ActionDef, ctx: { isConnected: boolean; hasSelection: boolean }): string {
+  let disabled = false;
+  if (action.requiresConnection && !ctx.isConnected) disabled = true;
+  if (action.requiresSelection && !ctx.hasSelection) disabled = true;
+  const cls = action.primary ? "tool-btn primary" : "tool-btn";
+  return `<button class="${cls}" data-action="${escapeHtml(action.id)}"${disabled ? " disabled" : ""}>${escapeHtml(action.label)}</button>`;
+}
+
+// Offline CTA (#53). Rendered at the top of the content area when the
+// bridge has been offline for more than OFFLINE_CTA_GRACE_MS. Drives
+// operators to run `memi connect` instead of waiting through the silent
+// port scan.
+function renderOfflineCta(): string {
+  if (state.bridge.stage !== "offline") return "";
+  if (state.bridge.offlineSince === null) return "";
+  if (Date.now() - state.bridge.offlineSince < OFFLINE_CTA_GRACE_MS) return "";
+  return `
+    <article class="empty-card" role="status" aria-live="polite">
+      <div class="stack">
+        <strong class="card-title">Mémoire bridge not found</strong>
+        <span class="muted">Start the Control Plane so the widget can connect.</span>
+        <code class="mono">memi connect</code>
+        <div class="inline-actions">
+          <button class="tool-btn primary" data-action="retry">Scan again</button>
+        </div>
       </div>
     </article>
   `;
