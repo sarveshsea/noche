@@ -23,7 +23,7 @@ export function registerInitCommand(program: Command, engine: MemoireEngine) {
       const root = engine.config.projectRoot;
 
       // ── Brand ───────────────────────────────────────
-      console.log(ui.brand("AI-Native Design Intelligence Engine"));
+      console.log(ui.brand("Registry-First Design System Workflow"));
 
       // ── Detect ──────────────────────────────────────
       const detect = ora({ text: "Detecting project...", indent: 2, color: "cyan" }).start();

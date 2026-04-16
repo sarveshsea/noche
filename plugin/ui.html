@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    Defense-in-depth CSP for the Figma plugin UI iframe (#7).
+    - script-src 'self' 'unsafe-inline': Figma plugin bundler inlines the
+      UI entrypoint as an inline <script> in the built ui.html, so we must
+      allow 'unsafe-inline' for scripts. The build pipeline is
+      trusted-by-design (no user-controlled script content).
+    - connect-src restricted to ws(s)://localhost:9223-9232 for the
+      Mémoire bridge. Wildcard origin is deliberately disallowed.
+    - object-src/base-uri 'none' closes common exfiltration vectors.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src ws://localhost:9223 ws://localhost:9224 ws://localhost:9225 ws://localhost:9226 ws://localhost:9227 ws://localhost:9228 ws://localhost:9229 ws://localhost:9230 ws://localhost:9231 ws://localhost:9232; object-src 'none'; base-uri 'none'; frame-ancestors *;">
   <title>Mémoire Control Plane</title>
   <script>var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
@@ -121,7 +132,9 @@ const WIDGET_COMMAND_NAMES = [
   "getPageList",
   "getPageTree",
   "captureScreenshot",
-  "pushTokens"
+  "pushTokens",
+  // Phase 6: exposes the operator-surface snapshot for `memi doctor --json`.
+  "widgetSnapshot"
 ];
 function isWidgetV2Envelope(value) {
   return Boolean(
@@ -134,11 +147,40 @@ function createRunId(prefix = "run") {
 function isWidgetCommandName(value) {
   return typeof value === "string" && arrayIncludes(WIDGET_COMMAND_NAMES, value);
 }
+function getCrypto() {
+  const g = globalThis;
+  return g.crypto ? g.crypto : null;
+}
+function byteHex(byte) {
+  const text = (byte & 255).toString(16);
+  return text.length >= 2 ? text : "0" + text;
+}
+function uuidv4() {
+  const c = getCrypto();
+  if (c && c.randomUUID) return c.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (c && c.getRandomValues) {
+    c.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  bytes[6] = bytes[6] & 15 | 64;
+  bytes[8] = bytes[8] & 63 | 128;
+  let out = "";
+  for (let i = 0; i < 16; i += 1) {
+    out += byteHex(bytes[i]);
+    if (i === 3 || i === 5 || i === 7 || i === 9) out += "-";
+  }
+  return out;
+}
 const BRIDGE_V2_CHANNEL = "memoire.bridge.v2";
 function isBridgeEnvelope(value) {
-  return Boolean(
-    value && typeof value === "object" && "channel" in value && value.channel === BRIDGE_V2_CHANNEL && "type" in value
-  );
+  if (!value || typeof value !== "object") return false;
+  const v = value;
+  if (v.channel !== BRIDGE_V2_CHANNEL) return false;
+  if (typeof v.type !== "string") return false;
+  if (v.type === "command" && !isWidgetCommandName(v.method)) return false;
+  return true;
 }
 function createBridgeCommandEnvelope(id, method, params = {}) {
   return {
@@ -751,13 +793,64 @@ function unique(values) {
 const PORT_START = 9223;
 const PORT_END = 9232;
 const LOG_LIMIT = 80;
+const OFFLINE_CTA_GRACE_MS = 5e3;
+const TABS = [
+  { id: "jobs", label: "Jobs", count: (s) => s.jobs.length || null },
+  { id: "selection", label: "Selection", count: (s) => s.selection.count > 0 ? s.selection.count : null },
+  { id: "system", label: "System", count: () => null }
+];
+const ACTIONS = [
+  { id: "sync", label: "sync", requiresConnection: true, primary: true },
+  { id: "inspect", label: "inspect", requiresConnection: true },
+  { id: "capture", label: "capture", requiresConnection: true, requiresSelection: true },
+  { id: "changes", label: "changes", requiresConnection: true },
+  { id: "page-tree", label: "tree", requiresConnection: true },
+  { id: "retry", label: "reconnect", requiresConnection: false }
+];
+const TRUSTED_PARENT_ORIGINS = /* @__PURE__ */ new Set([
+  "https://www.figma.com",
+  "https://figma.com",
+  "https://staging.figma.com",
+  "",
+  // Figma desktop delivers with empty origin
+  "null"
+  // Some desktop builds report literal "null"
+]);
+function isTrustedMessageOrigin(origin) {
+  return TRUSTED_PARENT_ORIGINS.has(origin);
+}
 const MAX_JOBS = 24;
 const MAX_AGENT_STATUSES = 48;
 const PENDING_REQUEST_TIMEOUT_MS = 35e3;
+const COMMAND_TIMEOUTS_MS = {
+  captureScreenshot: 9e4,
+  getComponentImage: 6e4,
+  getVariables: 6e4,
+  getComponents: 6e4,
+  getStyles: 6e4,
+  getPageTree: 45e3,
+  getFileData: 45e3,
+  pushTokens: 6e4,
+  execute: 3e4,
+  getSelection: 8e3,
+  getStickies: 1e4,
+  getChanges: 8e3,
+  getPageList: 8e3,
+  createNode: 15e3,
+  updateNode: 15e3,
+  deleteNode: 1e4,
+  setSelection: 8e3,
+  navigateTo: 8e3
+};
+function timeoutForCommand(command) {
+  const t = COMMAND_TIMEOUTS_MS[command];
+  return t != null ? t : PENDING_REQUEST_TIMEOUT_MS;
+}
 const pendingBridgeRequests = /* @__PURE__ */ new Map();
 const pendingRequestTimers = /* @__PURE__ */ new Map();
 let app = null;
 let bootstrapped = false;
+let keepaliveInterval = null;
 const bootstrapOnReady = () => {
   document.removeEventListener("DOMContentLoaded", bootstrapOnReady);
   bootstrap();
@@ -806,7 +899,9 @@ const state = {
     reconnectDelayMs: 2e3,
     latencyMs: null,
     lastPingSentAt: 0,
-    scanTimer: null
+    scanTimer: null,
+    offlineSince: Date.now(),
+    reconnectAttempts: 0
   }
 };
 bootstrap();
@@ -826,9 +921,10 @@ function bootstrap() {
   bootstrapped = true;
   render();
   bindPluginMessages();
+  bindLifecycleCleanup();
   sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
   window.setTimeout(scanBridge, 200);
-  window.setInterval(function keepalive() {
+  keepaliveInterval = window.setInterval(function keepalive() {
     sendToMain({ channel: WIDGET_V2_CHANNEL, source: "ui", type: "ping" });
     if (state.bridge.ws && state.bridge.ws.readyState === WebSocket.OPEN) {
       state.bridge.lastPingSentAt = Date.now();
@@ -845,6 +941,9 @@ function bootstrap() {
 function bindPluginMessages() {
   window.onmessage = (event) => {
     var _a, _b;
+    if (!isTrustedMessageOrigin(event.origin)) {
+      return;
+    }
     const message = (_a = event.data) == null ? void 0 : _a.pluginMessage;
     if (!message || !isWidgetV2Envelope(message)) {
       return;
@@ -928,6 +1027,22 @@ function bindPluginMessages() {
     }
   };
 }
+let scanCandidates = [];
+let scanGenerationId = 0;
+function orderedScanPorts() {
+  const ports = [];
+  for (let p = PORT_START; p <= PORT_END; p += 1) ports.push(p);
+  const cached = readCachedPort();
+  const preferred = cached !== null ? cached : state.bridge.port;
+  if (preferred && preferred >= PORT_START && preferred <= PORT_END) {
+    const idx = ports.indexOf(preferred);
+    if (idx > 0) {
+      ports.splice(idx, 1);
+      ports.unshift(preferred);
+    }
+  }
+  return ports;
+}
 function scanBridge() {
   if (state.bridge.stage === "scanning") {
     return;
@@ -935,94 +1050,112 @@ function scanBridge() {
   setBridgeStage("scanning");
   state.bridge.portsTried = [];
   scheduleRender();
-  const startPort = state.bridge.port && state.bridge.port >= PORT_START && state.bridge.port <= PORT_END ? state.bridge.port : PORT_START;
-  tryNextPort(startPort);
-}
-function nextScanPort(current) {
-  const next = current >= PORT_END ? PORT_START : current + 1;
-  return next;
-}
-function tryNextPort(port) {
-  if (state.bridge.portsTried.length >= PORT_END - PORT_START + 1) {
+  scanGenerationId += 1;
+  const generation = scanGenerationId;
+  closeScanCandidates();
+  const ports = orderedScanPorts();
+  let settledPorts = 0;
+  let adopted = false;
+  const scanTimeout = window.setTimeout(() => {
+    if (adopted || generation !== scanGenerationId) return;
+    closeScanCandidates();
     setBridgeStage("offline");
     scheduleReconnect();
-    return;
+    scheduleRender();
+  }, 3e3);
+  const onCandidateSettle = () => {
+    if (adopted || generation !== scanGenerationId) return;
+    settledPorts += 1;
+    if (settledPorts >= ports.length) {
+      window.clearTimeout(scanTimeout);
+      setBridgeStage("offline");
+      scheduleReconnect();
+      scheduleRender();
+    }
+  };
+  for (const port of ports) {
+    state.bridge.portsTried.push(port);
+    let ws;
+    try {
+      ws = new WebSocket("ws://localhost:" + port);
+    } catch (e) {
+      onCandidateSettle();
+      continue;
+    }
+    scanCandidates.push(ws);
+    let candidateSettled = false;
+    ws.onmessage = (event) => {
+      if (generation !== scanGenerationId) return;
+      let parsed;
+      try {
+        parsed = JSON.parse(event.data);
+      } catch (e) {
+        addLog("warn", "Dropped malformed bridge frame", {
+          port,
+          preview: String(event.data).slice(0, 120)
+        });
+        return;
+      }
+      if (!parsed || typeof parsed !== "object") return;
+      const payload = parsed;
+      if (payload.type === "pong" && state.bridge.lastPingSentAt > 0) {
+        state.bridge.latencyMs = Date.now() - state.bridge.lastPingSentAt;
+      }
+      if (!adopted) {
+        const isIdentify = payload.type === "identify" && payload.channel === "memoire.bridge.v2";
+        const isPong = payload.type === "pong" && payload.channel === "memoire.bridge.v2";
+        if (isIdentify || isPong) {
+          adopted = true;
+          candidateSettled = true;
+          window.clearTimeout(scanTimeout);
+          scanCandidates = scanCandidates.filter((candidate) => candidate !== ws);
+          closeScanCandidates();
+          adoptBridge(ws, port, payload);
+          return;
+        }
+      }
+      handleBridgeMessage(payload);
+    };
+    ws.onerror = () => {
+      if (candidateSettled || generation !== scanGenerationId) return;
+      candidateSettled = true;
+      onCandidateSettle();
+    };
+    ws.onclose = () => {
+      if (state.bridge.ws === ws) {
+        const lastPort = state.bridge.port;
+        state.bridge.ws = null;
+        state.bridge.port = lastPort;
+        state.jobs = disconnectActiveJobs(state.jobs);
+        cleanupPendingRequests();
+        setBridgeStage("reconnecting");
+        addLog("warn", "Bridge disconnected");
+        scheduleRender();
+        scheduleReconnect();
+        return;
+      }
+      if (candidateSettled || generation !== scanGenerationId) return;
+      candidateSettled = true;
+      onCandidateSettle();
+    };
   }
-  if (state.bridge.portsTried.indexOf(port) >= 0) {
-    tryNextPort(nextScanPort(port));
-    return;
-  }
-  state.bridge.portsTried.push(port);
-  let ws;
-  try {
-    ws = new WebSocket("ws://localhost:" + port);
-  } catch (e) {
-    tryNextPort(nextScanPort(port));
-    return;
-  }
-  let settled = false;
-  const timeout = window.setTimeout(function onScanTimeout() {
-    if (settled) return;
-    settled = true;
+}
+function closeScanCandidates() {
+  for (const ws of scanCandidates) {
     try {
       ws.close();
     } catch (e) {
     }
-    tryNextPort(nextScanPort(port));
-  }, 2500);
-  ws.onmessage = function onScanMessage(event) {
-    var payload;
-    try {
-      payload = JSON.parse(event.data);
-    } catch (e) {
-      return;
-    }
-    if (payload.type === "pong" && state.bridge.lastPingSentAt > 0) {
-      state.bridge.latencyMs = Date.now() - state.bridge.lastPingSentAt;
-    }
-    if (!settled) {
-      var isIdentify = payload.type === "identify" && payload.channel === "memoire.bridge.v2";
-      var isPong = payload.type === "pong" && payload.channel === "memoire.bridge.v2";
-      if (isIdentify || isPong) {
-        settled = true;
-        window.clearTimeout(timeout);
-        adoptBridge(ws, port, payload);
-        return;
-      }
-    }
-    handleBridgeMessage(payload);
-  };
-  ws.onerror = function onScanError() {
-    if (settled) return;
-    settled = true;
-    window.clearTimeout(timeout);
-    tryNextPort(nextScanPort(port));
-  };
-  ws.onclose = function onScanClose() {
-    if (!settled) {
-      settled = true;
-      window.clearTimeout(timeout);
-      tryNextPort(nextScanPort(port));
-      return;
-    }
-    if (state.bridge.ws === ws) {
-      var lastPort = state.bridge.port;
-      state.bridge.ws = null;
-      state.bridge.port = lastPort;
-      state.jobs = disconnectActiveJobs(state.jobs);
-      cleanupPendingRequests();
-      setBridgeStage("reconnecting");
-      addLog("warn", "Bridge disconnected");
-      scheduleRender();
-      scheduleReconnect();
-    }
-  };
+  }
+  scanCandidates = [];
 }
 function adoptBridge(ws, port, payload) {
   state.bridge.ws = ws;
   state.bridge.port = port;
   state.bridge.name = payload.name || "Mémoire";
   state.bridge.reconnectDelayMs = 2e3;
+  state.bridge.reconnectAttempts = 0;
+  writeCachedPort(port);
   setBridgeStage("connected");
   addLog("success", `Connected :${port}`);
   forwardToBridge({
@@ -1036,19 +1169,35 @@ function adoptBridge(ws, port, payload) {
     requestCommand("getSelection", {}, "Auto-inspect", "selection");
   }, 300);
 }
+const MAX_RECONNECT_ATTEMPTS = 20;
 function scheduleReconnect() {
   if (state.bridge.scanTimer) {
     return;
   }
-  const delay = state.bridge.reconnectDelayMs;
+  if (state.bridge.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    addLog("error", "Bridge unreachable after " + MAX_RECONNECT_ATTEMPTS + " attempts", {
+      code: "E_BRIDGE_UNREACHABLE"
+    });
+    return;
+  }
+  state.bridge.reconnectAttempts += 1;
+  const base = state.bridge.reconnectDelayMs;
+  const jitter = (Math.random() - 0.5) * 0.4 * base;
+  const delay = Math.max(500, Math.round(base + jitter));
   state.bridge.scanTimer = window.setTimeout(() => {
     state.bridge.scanTimer = null;
     scanBridge();
   }, delay);
-  state.bridge.reconnectDelayMs = Math.min(delay * 1.5, 15e3);
+  state.bridge.reconnectDelayMs = Math.min(base * 1.5, 15e3);
 }
 function setBridgeStage(stage) {
+  const prev = state.bridge.stage;
   state.bridge.stage = stage;
+  if (stage === "offline" && prev !== "offline") {
+    state.bridge.offlineSince = Date.now();
+  } else if (stage === "connected") {
+    state.bridge.offlineSince = null;
+  }
   state.connection = __spreadProps(__spreadValues({}, state.connection), {
     stage: stage === "connected" ? "connected" : stage === "scanning" ? "scanning" : stage === "reconnecting" ? "reconnecting" : "offline",
     port: state.bridge.port,
@@ -1057,12 +1206,27 @@ function setBridgeStage(stage) {
     reconnectDelayMs: stage === "reconnecting" ? state.bridge.reconnectDelayMs : null
   });
 }
+const MAX_WS_BUFFERED_BYTES = 4 * 1024 * 1024;
 function forwardToBridge(payload) {
-  if (!state.bridge.ws || state.bridge.ws.readyState !== WebSocket.OPEN) {
+  const ws = state.bridge.ws;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    return false;
+  }
+  if (ws.bufferedAmount > MAX_WS_BUFFERED_BYTES) {
+    addLog("warn", "Bridge send rejected — socket buffer exceeded threshold", {
+      bufferedAmount: ws.bufferedAmount
+    });
+    state.bridge.ws = null;
+    try {
+      ws.close();
+    } catch (e) {
+    }
+    setBridgeStage("reconnecting");
+    scheduleReconnect();
     return false;
   }
   try {
-    state.bridge.ws.send(JSON.stringify(payload));
+    ws.send(JSON.stringify(payload));
     return true;
   } catch (e) {
     state.bridge.ws = null;
@@ -1072,16 +1236,82 @@ function forwardToBridge(payload) {
   }
 }
 function cleanupPendingRequests() {
-  for (var timerId of pendingRequestTimers.values()) {
-    window.clearTimeout(timerId);
-  }
+  const timers = Array.from(pendingRequestTimers.values());
   pendingBridgeRequests.clear();
   pendingRequestTimers.clear();
+  inFlightDedupeKeys.clear();
+  for (const timerId of timers) {
+    window.clearTimeout(timerId);
+  }
 }
+function bindLifecycleCleanup() {
+  const release = () => {
+    cleanupPendingRequests();
+    if (keepaliveInterval !== null) {
+      window.clearInterval(keepaliveInterval);
+      keepaliveInterval = null;
+    }
+    if (state.bridge.scanTimer) {
+      window.clearTimeout(state.bridge.scanTimer);
+      state.bridge.scanTimer = null;
+    }
+    const ws = state.bridge.ws;
+    state.bridge.ws = null;
+    if (ws) {
+      try {
+        ws.close();
+      } catch (e) {
+      }
+    }
+  };
+  window.addEventListener("pagehide", release);
+  window.addEventListener("beforeunload", release);
+}
+const LAST_PORT_KEY = "memoire.bridge.lastGoodPort";
+function readCachedPort() {
+  try {
+    const raw = window.localStorage.getItem(LAST_PORT_KEY);
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isInteger(n) && n >= 9223 && n <= 9232 ? n : null;
+  } catch (e) {
+    return null;
+  }
+}
+function writeCachedPort(port) {
+  try {
+    window.localStorage.setItem(LAST_PORT_KEY, String(port));
+  } catch (e) {
+  }
+}
+const MAX_INBOUND_FRAME_CHARS = 256 * 1024;
 function handleBridgeMessage(payload) {
   var _a;
+  if (!payload || typeof payload !== "object") {
+    addLog("warn", "Rejected non-object bridge frame", {
+      typeofPayload: typeof payload
+    });
+    return;
+  }
+  try {
+    const serialized = JSON.stringify(payload);
+    if (serialized.length > MAX_INBOUND_FRAME_CHARS) {
+      addLog("warn", "Rejected oversized bridge frame", {
+        bytes: serialized.length,
+        max: MAX_INBOUND_FRAME_CHARS
+      });
+      return;
+    }
+  } catch (e) {
+    addLog("warn", "Rejected bridge frame with circular references");
+    return;
+  }
   const message = normalizeBridgeMessage(payload);
   if (!message) {
+    const shape = payload;
+    addLog("warn", "Rejected bridge frame — failed shape validation", {
+      type: typeof shape.type === "string" ? shape.type : "<unknown>"
+    });
     return;
   }
   switch (message.type) {
@@ -1133,17 +1363,26 @@ function handleBridgeCommand(message) {
   }
   var dispatch = createBridgeCommandDispatch(message);
   trackBridgeRequest(pendingBridgeRequests, dispatch.requestId, message);
+  var commandTimeout = timeoutForCommand(dispatch.command);
   var timerId = window.setTimeout(function onRequestTimeout() {
     var pending = pendingBridgeRequests.get(dispatch.requestId);
     if (pending) {
       pendingBridgeRequests.delete(dispatch.requestId);
       pendingRequestTimers.delete(dispatch.requestId);
       forwardToBridge(serializeBridgeEnvelope(
-        createBridgeResponseEnvelope(pending.bridgeId, void 0, "Request timed out: " + dispatch.command)
+        createBridgeResponseEnvelope(
+          pending.bridgeId,
+          void 0,
+          JSON.stringify({
+            code: "E_TIMEOUT",
+            message: "Request timed out: " + dispatch.command + " after " + commandTimeout + "ms",
+            retryable: true
+          })
+        )
       ));
-      addLog("warn", "Command timed out: " + dispatch.command);
+      addLog("warn", "Command timed out: " + dispatch.command, { afterMs: commandTimeout });
     }
-  }, PENDING_REQUEST_TIMEOUT_MS);
+  }, commandTimeout);
   pendingRequestTimers.set(dispatch.requestId, timerId);
   sendToMain({
     channel: WIDGET_V2_CHANNEL,
@@ -1161,6 +1400,7 @@ function handleCommandResult(message) {
     window.clearTimeout(timer);
     pendingRequestTimers.delete(message.requestId);
   }
+  releaseDedupe(message.requestId);
   var bridgeResponse = resolveBridgeResponse(pendingBridgeRequests, message);
   if (bridgeResponse) {
     forwardToBridge(serializeBridgeEnvelope(bridgeResponse));
@@ -1217,8 +1457,25 @@ function handleCommandResult(message) {
     addLog("info", "Read buffered changes", { count: Array.isArray(message.result) ? message.result.length : 0 });
   }
 }
+const inFlightDedupeKeys = /* @__PURE__ */ new Map();
+function dedupeKeyFor(command, params) {
+  const salient = [command];
+  if (typeof params.nodeId === "string") salient.push("n=" + params.nodeId);
+  if (typeof params.depth === "number") salient.push("d=" + String(params.depth));
+  if (typeof params.format === "string") salient.push("f=" + String(params.format));
+  return salient.join("|");
+}
 function requestCommand(command, params = {}, label = command, kind = "system") {
+  const dedupeKey = dedupeKeyFor(command, params);
+  if (inFlightDedupeKeys.has(dedupeKey)) {
+    addLog("info", "Command already in flight — skipped redundant dispatch", {
+      command,
+      dedupeKey
+    });
+    return;
+  }
   const requestId = createRunId("cmd");
+  inFlightDedupeKeys.set(dedupeKey, requestId);
   sendToMain({
     channel: WIDGET_V2_CHANNEL,
     source: "ui",
@@ -1228,6 +1485,14 @@ function requestCommand(command, params = {}, label = command, kind = "system") 
     params,
     action: { kind, label }
   });
+}
+function releaseDedupe(requestId) {
+  for (const [key, id] of inFlightDedupeKeys) {
+    if (id === requestId) {
+      inFlightDedupeKeys.delete(key);
+      return;
+    }
+  }
 }
 function recordSyncSummary(part, result, error) {
   const syncMessage = createBridgeSyncResultMessage(part, result, error);
@@ -1252,37 +1517,91 @@ function upsertAgentStatus(status) {
 }
 function addLog(level, message, detail) {
   state.logs.unshift({
-    id: createRunId("log"),
+    id: uuidv4(),
     level,
     message,
     detail,
     timestamp: Date.now()
   });
-  if (state.logs.length > LOG_LIMIT) {
-    state.logs = state.logs.slice(0, LOG_LIMIT);
+  while (state.logs.length > LOG_LIMIT) {
+    state.logs.pop();
   }
 }
 let renderScheduled = false;
+let renderDirty = false;
 let lastRenderTime = 0;
 const RENDER_THROTTLE_MS = 80;
 function scheduleRender() {
-  if (renderScheduled) return;
+  if (renderScheduled) {
+    renderDirty = true;
+    return;
+  }
   const elapsed = Date.now() - lastRenderTime;
   if (elapsed >= RENDER_THROTTLE_MS) {
+    renderDirty = false;
     render();
     return;
   }
   renderScheduled = true;
+  renderDirty = false;
   window.setTimeout(() => {
     renderScheduled = false;
+    const wasDirty = renderDirty;
+    renderDirty = false;
     render();
+    if (wasDirty) scheduleRender();
   }, RENDER_THROTTLE_MS - elapsed);
+}
+const slotSignatures = /* @__PURE__ */ new Map();
+let skeletonMounted = false;
+const STATIC_SHELL_HTML = `
+<div class="shell">
+  <div class="topbar">
+    <div class="brand-wrap">
+      <svg class="brand-flower" viewBox="0 0 120 120" width="22" height="22">
+        <defs><mask id="h"><rect width="120" height="120" fill="white"/><ellipse cx="60" cy="34" rx="10" ry="15" fill="black"/><ellipse cx="84" cy="52" rx="10" ry="15" transform="rotate(72 84 52)" fill="black"/><ellipse cx="75" cy="80" rx="10" ry="15" transform="rotate(144 75 80)" fill="black"/><ellipse cx="45" cy="80" rx="10" ry="15" transform="rotate(-144 45 80)" fill="black"/><ellipse cx="36" cy="52" rx="10" ry="15" transform="rotate(-72 36 52)" fill="black"/></mask></defs>
+        <g mask="url(#h)"><circle cx="60" cy="28" r="24" fill="#C24B38"/><circle cx="90" cy="50" r="24" fill="#C24B38"/><circle cx="78" cy="84" r="24" fill="#C24B38"/><circle cx="42" cy="84" r="24" fill="#C24B38"/><circle cx="30" cy="50" r="24" fill="#C24B38"/><circle cx="60" cy="58" r="18" fill="#C24B38"/></g>
+      </svg>
+    </div>
+    <div class="status-cluster" data-slot="status"></div>
+  </div>
+  <div class="context-bar" data-slot="context"></div>
+  <div class="toolbar" data-slot="toolbar"></div>
+  <div class="content">
+    <div class="tabstrip" data-slot="tabstrip"></div>
+    <div class="tab-panel active" data-slot="tab-content"></div>
+  </div>
+  <div class="ticker-wrap" data-slot="ticker"></div>
+</div>
+`;
+function hashString(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = hash + ((hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24)) >>> 0;
+  }
+  return hash.toString(16);
+}
+function writeSlotIfChanged(slot, html) {
+  const sig = hashString(html);
+  if (slotSignatures.get(slot) === sig) return false;
+  slotSignatures.set(slot, sig);
+  if (!app) return false;
+  const el = app.querySelector('[data-slot="' + slot + '"]');
+  if (!el) return false;
+  el.innerHTML = html;
+  return true;
 }
 function render() {
   if (!app) {
     return;
   }
   lastRenderTime = Date.now();
+  if (!skeletonMounted) {
+    app.innerHTML = STATIC_SHELL_HTML;
+    skeletonMounted = true;
+    slotSignatures.clear();
+  }
   const hasSelection = state.selection.nodes.length > 0;
   const selNode = state.selection.nodes[0];
   const latestLog = state.logs[0];
@@ -1290,96 +1609,87 @@ function render() {
   const portLabel = state.connection.port ? `:${state.connection.port}` : "";
   const latencyLabel = state.connection.latencyMs ? `${state.connection.latencyMs}ms` : "";
   const connMeta = [portLabel, latencyLabel].filter(Boolean).join(" / ");
-  app.innerHTML = `
-    <div class="shell">
-      <div class="topbar">
-        <div class="brand-wrap">
-          <svg class="brand-flower" viewBox="0 0 120 120" width="22" height="22">
-            <defs><mask id="h"><rect width="120" height="120" fill="white"/><ellipse cx="60" cy="34" rx="10" ry="15" fill="black"/><ellipse cx="84" cy="52" rx="10" ry="15" transform="rotate(72 84 52)" fill="black"/><ellipse cx="75" cy="80" rx="10" ry="15" transform="rotate(144 75 80)" fill="black"/><ellipse cx="45" cy="80" rx="10" ry="15" transform="rotate(-144 45 80)" fill="black"/><ellipse cx="36" cy="52" rx="10" ry="15" transform="rotate(-72 36 52)" fill="black"/></mask></defs>
-            <g mask="url(#h)"><circle cx="60" cy="28" r="24" fill="#C24B38"/><circle cx="90" cy="50" r="24" fill="#C24B38"/><circle cx="78" cy="84" r="24" fill="#C24B38"/><circle cx="42" cy="84" r="24" fill="#C24B38"/><circle cx="30" cy="50" r="24" fill="#C24B38"/><circle cx="60" cy="58" r="18" fill="#C24B38"/></g>
-          </svg>
-        </div>
-        <div class="status-cluster">
-          ${connMeta ? `<span class="conn-meta">${escapeHtml(connMeta)}</span>` : ""}
-          <div class="status-pill ${state.connection.stage}">
-            ${escapeHtml(connectionLabel())}
-          </div>
-        </div>
-      </div>
-
-      <div class="context-bar">
-        <div class="ctx-item">
-          <span class="ctx-label">file</span>
-          <span class="ctx-value">${escapeHtml(state.connection.fileName || "--")}</span>
-        </div>
-        <div class="ctx-sep"></div>
-        <div class="ctx-item">
-          <span class="ctx-label">page</span>
-          <span class="ctx-value">${escapeHtml(state.connection.pageName || "--")}</span>
-        </div>
-        ${hasSelection ? `
-          <div class="ctx-sep"></div>
-          <div class="ctx-item">
-            <span class="ctx-label">sel</span>
-            <span class="ctx-value">${escapeHtml(selNode ? selNode.name : `${state.selection.count}`)}${state.selection.count > 1 ? ` +${state.selection.count - 1}` : ""}</span>
-          </div>
-        ` : ""}
-        ${state.bufferedChanges > 0 ? `
-          <div class="ctx-sep"></div>
-          <div class="ctx-item">
-            <span class="ctx-label">buf</span>
-            <span class="ctx-value">${state.bufferedChanges}</span>
-          </div>
-        ` : ""}
-      </div>
-
-      <div class="toolbar">
-        <button class="tool-btn primary" data-action="sync" ${isConnected ? "" : "disabled"}>sync</button>
-        <button class="tool-btn" data-action="inspect" ${isConnected ? "" : "disabled"}>inspect</button>
-        <button class="tool-btn" data-action="capture" ${hasSelection && isConnected ? "" : "disabled"}>capture</button>
-        <button class="tool-btn" data-action="changes" ${isConnected ? "" : "disabled"}>changes</button>
-        <button class="tool-btn" data-action="page-tree" ${isConnected ? "" : "disabled"}>tree</button>
-        <button class="tool-btn" data-action="retry">reconnect</button>
-      </div>
-
-      <div class="content">
-        <div class="tabstrip">
-          <button class="tab ${state.activeTab === "jobs" ? "active" : ""}" data-tab="jobs">Jobs${state.jobs.length ? ` (${state.jobs.length})` : ""}</button>
-          <button class="tab ${state.activeTab === "selection" ? "active" : ""}" data-tab="selection">Selection${hasSelection ? ` (${state.selection.count})` : ""}</button>
-          <button class="tab ${state.activeTab === "system" ? "active" : ""}" data-tab="system">System</button>
-        </div>
-        <div class="tab-panel ${state.activeTab === "jobs" ? "active" : ""}">
-          <div class="jobs-list">${renderJobs()}</div>
-        </div>
-        <div class="tab-panel ${state.activeTab === "selection" ? "active" : ""}">
-          <div class="selection-list">${renderSelection()}</div>
-        </div>
-        <div class="tab-panel ${state.activeTab === "system" ? "active" : ""}">
-          <div class="system-list">${renderSystem()}</div>
-        </div>
-      </div>
-
-      ${latestLog ? `
-        <div class="ticker ${latestLog.level}">
-          <span class="ticker-dot"></span>
-          <span class="ticker-text">${escapeHtml(latestLog.message)}</span>
-          <span class="ticker-time">${escapeHtml(new Date(latestLog.timestamp).toLocaleTimeString())}</span>
-        </div>
-      ` : ""}
+  const statusHtml = `
+    ${connMeta ? `<span class="conn-meta">${escapeHtml(connMeta)}</span>` : ""}
+    <div class="status-pill ${state.connection.stage}">
+      ${escapeHtml(connectionLabel())}
     </div>
   `;
-  app.querySelectorAll("[data-tab]").forEach((button) => {
-    button.onclick = () => {
-      state.activeTab = button.dataset.tab;
-      render();
-    };
-  });
-  app.querySelectorAll("[data-action]").forEach((button) => {
-    button.onclick = () => handleAction(button.dataset.action || "");
-  });
-  app.querySelectorAll("[data-node-action]").forEach((button) => {
-    button.onclick = () => handleNodeAction(button.dataset.nodeAction || "", button.dataset.nodeId || "");
-  });
+  const contextHtml = `
+    <div class="ctx-item">
+      <span class="ctx-label">file</span>
+      <span class="ctx-value">${escapeHtml(state.connection.fileName || "--")}</span>
+    </div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item">
+      <span class="ctx-label">page</span>
+      <span class="ctx-value">${escapeHtml(state.connection.pageName || "--")}</span>
+    </div>
+    ${hasSelection ? `
+      <div class="ctx-sep"></div>
+      <div class="ctx-item">
+        <span class="ctx-label">sel</span>
+        <span class="ctx-value">${escapeHtml(selNode ? selNode.name : `${state.selection.count}`)}${state.selection.count > 1 ? ` +${state.selection.count - 1}` : ""}</span>
+      </div>
+    ` : ""}
+    ${state.bufferedChanges > 0 ? `
+      <div class="ctx-sep"></div>
+      <div class="ctx-item">
+        <span class="ctx-label">buf</span>
+        <span class="ctx-value">${state.bufferedChanges}</span>
+      </div>
+    ` : ""}
+  `;
+  const toolbarHtml = ACTIONS.map((a) => renderActionButton(a, { isConnected, hasSelection })).join("");
+  const tabstripHtml = TABS.map((t) => renderTabButton(t)).join("");
+  const activeTabBody = state.activeTab === "jobs" ? `<div class="jobs-list">${renderJobs()}</div>` : state.activeTab === "selection" ? `<div class="selection-list">${renderSelection()}</div>` : `<div class="system-list">${renderSystem()}</div>`;
+  const tabContentHtml = activeTabBody + `<!-- active:${state.activeTab} -->`;
+  const tickerHtml = latestLog ? `
+    <div class="ticker ${latestLog.level}">
+      <span class="ticker-dot"></span>
+      <span class="ticker-text">${escapeHtml(latestLog.message)}</span>
+      <span class="ticker-time">${escapeHtml(new Date(latestLog.timestamp).toLocaleTimeString())}</span>
+    </div>
+  ` : "";
+  writeSlotIfChanged("status", statusHtml);
+  writeSlotIfChanged("context", contextHtml);
+  const toolbarChanged = writeSlotIfChanged("toolbar", toolbarHtml);
+  const tabstripChanged = writeSlotIfChanged("tabstrip", tabstripHtml);
+  const tabContentChanged = writeSlotIfChanged("tab-content", tabContentHtml);
+  writeSlotIfChanged("ticker", tickerHtml);
+  if (tabstripChanged) {
+    app.querySelectorAll('[data-slot="tabstrip"] [data-tab]').forEach((button) => {
+      button.onclick = () => {
+        state.activeTab = button.dataset.tab;
+        render();
+      };
+    });
+  }
+  if (toolbarChanged || tabContentChanged) {
+    app.querySelectorAll("[data-action]").forEach((button) => {
+      button.onclick = () => {
+        const action = button.dataset.action || "";
+        if (action === "retry-job") {
+          handleRetryJob({
+            command: button.dataset.jobCommand || "",
+            kind: button.dataset.jobKind || "",
+            label: button.dataset.jobLabel || ""
+          });
+          return;
+        }
+        handleAction(action);
+      };
+    });
+  }
+  if (tabContentChanged) {
+    app.querySelectorAll("[data-node-action]").forEach((button) => {
+      button.onclick = () => handleNodeAction(button.dataset.nodeAction || "", button.dataset.nodeId || "");
+    });
+  }
+}
+function handleRetryJob(ctx) {
+  if (!ctx.command || !isWidgetCommandName(ctx.command)) return;
+  requestCommand(ctx.command, {}, ctx.label || "Retry", ctx.kind || "sync");
 }
 function handleAction(action) {
   switch (action) {
@@ -1421,6 +1731,7 @@ function handleAction(action) {
         state.bridge.scanTimer = null;
       }
       state.bridge.reconnectDelayMs = 2e3;
+      state.bridge.reconnectAttempts = 0;
       scanBridge();
       break;
   }
@@ -1455,10 +1766,12 @@ function handleNodeAction(action, nodeId) {
 }
 function renderJobs() {
   const overview = buildJobsOverview(state.jobs);
+  const cta = renderOfflineCta();
   if (!state.jobs.length) {
-    return emptyCard("No jobs", "Run sync or inspect to begin.");
+    return cta + emptyCard("No jobs", "Run sync or inspect to begin.");
   }
   const cards = [];
+  if (cta) cards.push(cta);
   cards.push(`
     <article class="system-card">
       <div class="card-topline">
@@ -1526,7 +1839,12 @@ function renderJobs() {
           <div>${escapeHtml(job.command || job.kind)} · ${escapeHtml(formatElapsedTime(job))}</div>
           <div class="mono">run ${escapeHtml(job.runId)}</div>
           <div>${escapeHtml(job.summary || job.progressText || "Running")}</div>
-          ${job.error ? `<div class="mono">${escapeHtml(job.error)}</div>` : ""}
+          ${job.error ? `<div class="mono">${escapeHtml(formatJobError(job.error))}</div>` : ""}
+          ${job.status === "failed" && job.command ? `
+            <div class="inline-actions">
+              <button class="tool-btn" data-action="retry-job" data-job-command="${escapeHtml(job.command)}" data-job-kind="${escapeHtml(job.kind)}" data-job-label="${escapeHtml(job.label)}">Retry</button>
+            </div>
+          ` : ""}
         </div>
       </article>
     `));
@@ -1733,7 +2051,10 @@ function formatHealSummary(summary) {
   return `round ${summary.round} · ${summary.issueCount} issue(s) · ${status}`;
 }
 function getAgentStatusKey(agent) {
-  return `${agent.runId}:${agent.taskId}:${agent.role}`;
+  const runId = agent.runId ? agent.runId : "∅run";
+  const taskId = agent.taskId ? agent.taskId : "∅task";
+  const role = agent.role ? agent.role : "∅role";
+  return runId + ":" + taskId + ":" + role;
 }
 function compareAgentStatuses(left, right) {
   var _a, _b;
@@ -1798,6 +2119,47 @@ function emptyCard(title, copy) {
       <div class="stack">
         <strong class="card-title">${escapeHtml(title)}</strong>
         <span class="muted">${escapeHtml(copy)}</span>
+      </div>
+    </article>
+  `;
+}
+function formatJobError(raw) {
+  if (raw.charAt(0) !== "{") return raw;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.message === "string") {
+      return (parsed.code ? parsed.code + ": " : "") + parsed.message;
+    }
+  } catch (e) {
+  }
+  return raw;
+}
+function renderTabButton(tab) {
+  const count = tab.count(state);
+  const suffix = count ? ` (${count})` : "";
+  const active = state.activeTab === tab.id ? "active" : "";
+  return `<button class="tab ${active}" data-tab="${escapeHtml(tab.id)}">${escapeHtml(tab.label)}${suffix}</button>`;
+}
+function renderActionButton(action, ctx) {
+  let disabled = false;
+  if (action.requiresConnection && !ctx.isConnected) disabled = true;
+  if (action.requiresSelection && !ctx.hasSelection) disabled = true;
+  const cls = action.primary ? "tool-btn primary" : "tool-btn";
+  return `<button class="${cls}" data-action="${escapeHtml(action.id)}"${disabled ? " disabled" : ""}>${escapeHtml(action.label)}</button>`;
+}
+function renderOfflineCta() {
+  if (state.bridge.stage !== "offline") return "";
+  if (state.bridge.offlineSince === null) return "";
+  if (Date.now() - state.bridge.offlineSince < OFFLINE_CTA_GRACE_MS) return "";
+  return `
+    <article class="empty-card" role="status" aria-live="polite">
+      <div class="stack">
+        <strong class="card-title">Mémoire bridge not found</strong>
+        <span class="muted">Start the Control Plane so the widget can connect.</span>
+        <code class="mono">memi connect</code>
+        <div class="inline-actions">
+          <button class="tool-btn primary" data-action="retry">Scan again</button>
+        </div>
       </div>
     </article>
   `;

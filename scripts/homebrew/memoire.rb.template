@@ -5,7 +5,7 @@
 # Users install with:  brew install sarveshsea/memoire/memoire
 #
 class Memoire < Formula
-  desc "AI-native design intelligence engine — Figma, research, spec-driven codegen"
+  desc "Registry-first CLI for publishing Figma design systems as installable packages"
   homepage "https://memoire.cv"
   version "@VERSION@"
   license "MIT"

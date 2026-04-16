@@ -6,7 +6,7 @@
 - **Feature requests** — use the feature request template
 - **Notes (skill packs)** — the fastest way to extend Memoire without touching the core
 - **MCP tool improvements** — add tools, improve descriptions, fix edge cases
-- **Test coverage** — we run 318 tests; adding more is always welcome
+- **Test coverage** — adding more is always welcome
 - **Documentation** — README, inline JSDoc, or examples
 
 ## Notes (skill packs)
@@ -60,7 +60,7 @@ npx tsx src/index.ts doctor
 ## Tests
 
 ```bash
-npm test               # run all 318 tests
+npm test               # run the full test suite
 npm test -- --watch    # watch mode
 ```
 

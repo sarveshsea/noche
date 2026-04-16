@@ -1,8 +1,42 @@
 # Mémoire Changelog
 
-Mémoire is an AI-native design intelligence engine. Designers use it to build their own products — connecting Figma, pulling design systems, generating production code.
+Mémoire is a registry-first design system CLI and MCP server. Teams use it to publish design systems, install real components, and connect Figma-driven workflows to code.
 
 This changelog tracks Mémoire itself: every version, commit, and architectural decision that shapes the tool.
+
+---
+
+## v0.12.3 — 2026-04-16 (Release hardening)
+
+### The fix
+This release closes the remaining gaps between the repo, shipped artifacts, and release automation so the next tag can publish cleanly without hidden version drift.
+
+### New
+- **Expanded release guard** — `scripts/check-release.mjs` now validates the shipped plugin bundle metadata, all example registries under `examples/`, the starter preset README version marker, and the synced preview changelog output.
+- **Release checks in more pipelines** — CI and release-binary workflows now run `npm run check:release`, so drift gets caught before tags or binaries are built.
+- **Reproducible installs in GitHub Actions** — publish, CI, and release-binary workflows now use `npm ci --ignore-scripts` instead of deleting the lockfile and performing a mutable install.
+
+### Fixed
+- Aligned `examples/starter-registry/registry.json` to the current Memoire release instead of leaving it pinned to `0.11.0`.
+- Rebuilt derived release artifacts so `plugin/widget-meta.json` and `preview/changelog.html` reflect `v0.12.3`.
+
+---
+
+## v0.12.2 — 2026-04-15 (Trust + positioning fixes)
+
+### The fix
+This release tightens Memoire's public story around the registry workflow and removes the stale version drift that was eroding trust across the repo.
+
+### New
+- **Registry-first positioning** across `package.json`, the CLI help text, first-run banner, Homebrew description, and README hero. The public surface now leads with `publish -> add -> design-doc` instead of the full legacy command spread.
+- **Release consistency check** via `scripts/check-release.mjs` and `npm run check:release`. It validates that `package.json`, `package-lock.json`, `CHANGELOG.md`, and the example preset registries all agree on the shipped Memoire version.
+- **Publish workflow guard** — `.github/workflows/publish.yml` now runs `npm run check:release` before linting and publishing so version drift fails early.
+
+### Fixed
+- Removed stale version examples from install and upgrade docs (`v0.11.0`) and replaced them with generic tagged examples.
+- Aligned the example preset registries and starter preset README to `v0.12.2` instead of the incorrect `v0.13.0`.
+- Removed hardcoded test/tool counts from key public docs where they had already drifted out of sync.
+- Updated deprecation warnings so they no longer claim removal in the already-passed `v0.12.0`.
 
 ---
 

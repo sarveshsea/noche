@@ -5,6 +5,7 @@
 import pino from "pino";
 
 const isProduction = process.env.NODE_ENV === "production";
+let prettyTransport: ReturnType<typeof pino.transport> | undefined;
 
 export function shouldUsePrettyTransport(): boolean {
   if (isProduction) return false;
@@ -13,19 +14,26 @@ export function shouldUsePrettyTransport(): boolean {
   return true;
 }
 
+function getPrettyTransport() {
+  if (!shouldUsePrettyTransport()) return undefined;
+  if (!prettyTransport) {
+    prettyTransport = pino.transport({
+      target: "pino-pretty",
+      options: {
+        colorize: true,
+        translateTime: "HH:MM:ss",
+        ignore: "pid,hostname",
+      },
+    });
+  }
+  return prettyTransport;
+}
+
 export function createLogger(name: string) {
-  return pino({
+  const options = {
     name,
     level: process.env.MEMOIRE_LOG_LEVEL ?? process.env.NOCHE_LOG_LEVEL ?? "warn",
-    transport: shouldUsePrettyTransport()
-      ? {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "HH:MM:ss",
-            ignore: "pid,hostname",
-          },
-        }
-      : undefined,
-  });
+  };
+  const transport = getPrettyTransport();
+  return transport ? pino(options, transport) : pino(options);
 }

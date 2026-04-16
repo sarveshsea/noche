@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Mémoire CLI — AI-Native Design Intelligence Engine
+ * Mémoire CLI — registry-first design system workflow
  *
  * Commands:
  *    memoire connect           Connect to Figma Desktop Bridge
@@ -28,45 +28,47 @@
 import { Command } from "commander";
 import { MemoireEngine } from "./engine/core.js";
 
-// Commands each register process exit listeners — raise the limit to prevent MaxListenersExceededWarning
-import { registerConnectCommand } from "./commands/connect.js";
-import { registerPullCommand } from "./commands/pull.js";
-import { registerResearchCommand } from "./commands/research.js";
-import { registerSpecCommand } from "./commands/spec.js";
-import { registerGenerateCommand } from "./commands/generate.js";
-import { registerPreviewCommand } from "./commands/preview.js";
-import { registerStatusCommand } from "./commands/status.js";
-import { registerDoctorCommand } from "./commands/doctor.js";
-import { registerDaemonCommand } from "./commands/daemon.js";
-import { registerHeartbeatCommand } from "./commands/heartbeat.js";
-import { registerSyncCommand } from "./commands/sync.js";
-import { registerTokensCommand } from "./commands/tokens.js";
-import { registerPrototypeCommand } from "./commands/prototype.js";
-import { registerInitCommand } from "./commands/init.js";
-import { registerDashboardCommand } from "./commands/dashboard.js";
-import { registerIACommand } from "./commands/ia.js";
-import { registerComposeCommand } from "./commands/compose.js";
-import { registerGoCommand } from "./commands/go.js";
-import { registerExportCommand } from "./commands/export.js";
-import { registerNotesCommand } from "./commands/notes.js";
-import { registerWatchCommand } from "./commands/watch.js";
-import { registerListCommand } from "./commands/list.js";
-import { registerMcpCommand } from "./commands/mcp.js";
-import { registerAgentCommand } from "./commands/agent.js";
-import { registerValidateCommand } from "./commands/validate.js";
-import { registerDesignDocCommand } from "./commands/design-doc.js";
-import { registerSetupCommand } from "./commands/setup.js";
-import { registerAuditCommand } from "./commands/audit.js";
-import { registerDiffCommand } from "./commands/diff.js";
-import { registerAddCommand } from "./commands/add.js";
-import { registerPublishCommand } from "./commands/publish.js";
-import { registerViewCommand } from "./commands/view.js";
-import { registerUpgradeCommand } from "./commands/upgrade.js";
-import { registerUpdateCommand } from "./commands/update.js";
 import { existsSync, rmSync } from "fs";
 import { join } from "path";
 
-process.setMaxListeners(50); // 28+ commands each attach process exit handlers
+// Some command modules attach process listeners during initialization. Raise the
+// limit before loading them so `memi --help` does not emit warnings.
+process.setMaxListeners(50);
+
+const { registerConnectCommand } = await import("./commands/connect.js");
+const { registerPullCommand } = await import("./commands/pull.js");
+const { registerResearchCommand } = await import("./commands/research.js");
+const { registerSpecCommand } = await import("./commands/spec.js");
+const { registerGenerateCommand } = await import("./commands/generate.js");
+const { registerPreviewCommand } = await import("./commands/preview.js");
+const { registerStatusCommand } = await import("./commands/status.js");
+const { registerDoctorCommand } = await import("./commands/doctor.js");
+const { registerDaemonCommand } = await import("./commands/daemon.js");
+const { registerHeartbeatCommand } = await import("./commands/heartbeat.js");
+const { registerSyncCommand } = await import("./commands/sync.js");
+const { registerTokensCommand } = await import("./commands/tokens.js");
+const { registerPrototypeCommand } = await import("./commands/prototype.js");
+const { registerInitCommand } = await import("./commands/init.js");
+const { registerDashboardCommand } = await import("./commands/dashboard.js");
+const { registerIACommand } = await import("./commands/ia.js");
+const { registerComposeCommand } = await import("./commands/compose.js");
+const { registerGoCommand } = await import("./commands/go.js");
+const { registerExportCommand } = await import("./commands/export.js");
+const { registerNotesCommand } = await import("./commands/notes.js");
+const { registerWatchCommand } = await import("./commands/watch.js");
+const { registerListCommand } = await import("./commands/list.js");
+const { registerMcpCommand } = await import("./commands/mcp.js");
+const { registerAgentCommand } = await import("./commands/agent.js");
+const { registerValidateCommand } = await import("./commands/validate.js");
+const { registerDesignDocCommand } = await import("./commands/design-doc.js");
+const { registerSetupCommand } = await import("./commands/setup.js");
+const { registerAuditCommand } = await import("./commands/audit.js");
+const { registerDiffCommand } = await import("./commands/diff.js");
+const { registerAddCommand } = await import("./commands/add.js");
+const { registerPublishCommand } = await import("./commands/publish.js");
+const { registerViewCommand } = await import("./commands/view.js");
+const { registerUpgradeCommand } = await import("./commands/upgrade.js");
+const { registerUpdateCommand } = await import("./commands/update.js");
 
 // Catch unhandled async errors so the CLI doesn't crash silently
 process.on("unhandledRejection", (reason) => {
@@ -78,7 +80,7 @@ const program = new Command();
 
 program
   .name("memoire")
-  .description("AI-Native Design Intelligence Engine")
+  .description("Registry-first design system CLI + MCP server")
   .version(
     (await import("../package.json", { with: { type: "json" } })).default.version
   );
@@ -104,41 +106,42 @@ if (!mcpMode) {
   });
 }
 
-// Register all commands
+// Register all commands. Put the publish/install workflow first so `memi --help`
+// leads with the core product surface instead of the long tail.
+registerInitCommand(program, engine);
+registerPublishCommand(program, engine);
+registerAddCommand(program, engine);
+registerUpdateCommand(program, engine);
+registerViewCommand(program, engine);
+registerDesignDocCommand(program, engine);
+registerMcpCommand(program, engine);
+registerSetupCommand(program, engine);
 registerConnectCommand(program, engine);
 registerPullCommand(program, engine);
-registerResearchCommand(program, engine);
-registerSpecCommand(program, engine);
+registerSyncCommand(program, engine);
 registerGenerateCommand(program, engine);
+registerTokensCommand(program, engine);
 registerPreviewCommand(program, engine);
+registerExportCommand(program, engine);
+registerValidateCommand(program, engine);
 registerStatusCommand(program, engine);
 registerDoctorCommand(program, engine);
-registerDaemonCommand(program, engine);
-registerHeartbeatCommand(program, engine);
-registerSyncCommand(program, engine);
-registerTokensCommand(program, engine);
-registerPrototypeCommand(program, engine);
-registerInitCommand(program, engine);
-registerDashboardCommand(program, engine);
-registerIACommand(program, engine);
-registerComposeCommand(program, engine);
+registerDiffCommand(program, engine);
 registerGoCommand(program, engine);
-registerExportCommand(program, engine);
 registerNotesCommand(program, engine);
 registerWatchCommand(program, engine);
-registerListCommand(program, engine);
-registerMcpCommand(program, engine);
-registerAgentCommand(program, engine);
-registerValidateCommand(program, engine);
-registerDesignDocCommand(program, engine);
-registerSetupCommand(program, engine);
 registerAuditCommand(program, engine);
-registerDiffCommand(program, engine);
-registerAddCommand(program, engine);
-registerPublishCommand(program, engine);
-registerViewCommand(program, engine);
+registerComposeCommand(program, engine);
+registerAgentCommand(program, engine);
+registerDaemonCommand(program, engine);
 registerUpgradeCommand(program, engine);
-registerUpdateCommand(program, engine);
+registerSpecCommand(program, engine);
+registerListCommand(program, engine);
+registerResearchCommand(program, engine);
+registerPrototypeCommand(program, engine);
+registerHeartbeatCommand(program, engine);
+registerDashboardCommand(program, engine);
+registerIACommand(program, engine);
 
 // Uninstall command — removes all Mémoire artifacts
 program
@@ -174,12 +177,12 @@ if (process.argv.length === 2) {
       const stamp = join(home, ".memoire", ".first-run-done");
       if (!existsSync(stamp)) {
         console.log();
-        console.log("  ▸ Mémoire — AI-native design intelligence");
+        console.log("  ▸ Mémoire — publishable design systems");
         console.log();
         console.log("  Get started:");
-        console.log("    memi connect           Pair with the Figma plugin");
-        console.log("    memi design-doc <url>  Extract any site's design system");
-        console.log("    memi --help            All commands");
+        console.log("    memi publish --name @you/ds --figma <url>");
+        console.log("    memi add Button --from @you/ds");
+        console.log("    memi design-doc <url>  Extract a site into DESIGN.md");
         console.log();
         console.log("  Docs: https://memoire.cv   Issues: https://github.com/sarveshsea/m-moire/issues");
         console.log();

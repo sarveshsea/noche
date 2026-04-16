@@ -11,7 +11,7 @@ Ready-to-submit entries for awesome lists and directories.
 **Entry:**
 
 ```markdown
-- [Memoire](https://github.com/sarveshsea/m-moire) by [sarveshsea](https://github.com/sarveshsea) - Design intelligence MCP server with 20 tools for Claude Code. Extract any website's design system from a URL (`design_doc`), pull tokens from Figma or Penpot, generate React + shadcn/ui components from specs, run design audits. One command: `npx @sarveshsea/memoire design-doc https://stripe.com`. 698 tests.
+- [Memoire](https://github.com/sarveshsea/m-moire) by [sarveshsea](https://github.com/sarveshsea) - Registry-first design system CLI and MCP server. Publish Figma or tweakcn systems to npm, install components with `memi add`, and connect Claude Code to the same workflow with `memi mcp config --install`.
 ```
 
 ---
@@ -23,27 +23,33 @@ Ready-to-submit entries for awesome lists and directories.
 **Entry:**
 
 ```markdown
-- [Memoire](https://github.com/sarveshsea/m-moire) 📇 🏠 - Design system MCP server. 20 tools: extract design tokens from any URL, pull from Figma (REST or WebSocket) and Penpot, generate React components from specs, run WCAG audits, sync tokens bidirectionally. `memi mcp config --install` to set up.
+- [Memoire](https://github.com/sarveshsea/m-moire) 📇 🏠 - Registry-first design system MCP server. Publish installable registries from Figma or tweakcn, pull tokens from Figma or Penpot, generate shadcn/ui code, and connect the workflow to Claude Code with `memi mcp config --install`.
 ```
 
 ---
 
 ## 3. Show HN Post
 
-**Title:** Show HN: Extract any website's design system with one command
+**Title:** Show HN: Publish your Figma design system as an installable npm registry
 
 **Body:**
 
 ```
-I built Memoire — a CLI + MCP server that extracts design systems from any public URL.
+I built Memoire — a registry-first CLI + MCP server for design systems.
 
-  npx @sarveshsea/memoire design-doc https://stripe.com
+  npx @sarveshsea/memoire publish --name @acme/ds --figma https://figma.com/design/xxx --push
 
-It fetches the HTML and all linked stylesheets, parses CSS for custom properties, colors, fonts, spacing, radii, and shadows, then uses Claude to synthesize a structured DESIGN.md with a Tailwind config sketch.
+That turns a Figma file into an npm package with tokens, specs, and real components.
 
-Also works as an MCP server (20 tools) for Claude Code / Cursor — pull tokens from Figma or Penpot, generate React + shadcn/ui components from JSON specs, run design audits.
+Then in any shadcn app:
 
-No account needed. No Figma required to get started. MIT licensed.
+  npx @sarveshsea/memoire add Button --from @acme/ds
+
+It also works as an MCP server for Claude Code / Cursor, so the same registry workflow can be driven from AI tools.
+
+There is also a `design-doc` path if you want to start from a public site URL instead of Figma.
+
+MIT licensed.
 
 https://github.com/sarveshsea/m-moire
 ```
@@ -54,48 +60,50 @@ https://github.com/sarveshsea/m-moire
 
 **Tweet 1 (hook):**
 ```
-i built a CLI that extracts any website's design system in 10 seconds
+i built a CLI that turns a Figma design system into an installable npm registry
 
-npx @sarveshsea/memoire design-doc https://stripe.com
+npx @sarveshsea/memoire publish --name @acme/ds --figma https://figma.com/design/xxx --push
 
-colors, typography, spacing, shadows, component patterns — all in a DESIGN.md with a Tailwind config sketch
+then from any shadcn app:
+npx @sarveshsea/memoire add Button --from @acme/ds
 
-no account. no figma. one command.
+tokens + real components, not screenshots or specs only
 ```
 
 **Tweet 2 (how it works):**
 ```
 how it works:
 
-1. fetches HTML + all linked stylesheets
-2. parses CSS: custom properties, colors, fonts, spacing, radii, shadows
-3. claude synthesizes into structured DESIGN.md
+1. pull from figma or load a tweakcn theme
+2. package tokens + specs + generated code
+3. publish to npm
+4. install components anywhere with `memi add`
 
-works on any SSR/static site. stripe, linear, vercel, github — all work.
+it’s basically the shadcn pattern for whole design systems
 ```
 
 **Tweet 3 (MCP angle):**
 ```
-it's also an MCP server with 20 tools
+it also runs as an MCP server
 
 add to claude code in one command:
   memi mcp config --install
 
 then your AI assistant can:
 - pull tokens from figma or penpot
-- generate react + shadcn/ui components
-- run WCAG design audits
-- extract design systems from URLs
+- generate shadcn/ui code from specs
+- audit and sync the design system
+- work against the same published registry
 ```
 
 **Tweet 4 (CTA):**
 ```
-698 tests. MIT licensed. works offline.
+MIT licensed. works offline. npm package + standalone binary.
 
 github.com/sarveshsea/m-moire
 
 try it:
-  npx @sarveshsea/memoire design-doc [your-favorite-site]
+  npx @sarveshsea/memoire publish --name @you/ds --figma [your-file]
 ```
 
 ---

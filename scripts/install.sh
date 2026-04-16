@@ -4,7 +4,7 @@
 #
 # Usage:
 #   curl -fsSL https://memoire.cv/install.sh | sh
-#   curl -fsSL https://memoire.cv/install.sh | sh -s -- --version v0.11.0
+#   curl -fsSL https://memoire.cv/install.sh | sh -s -- --version v1.2.3
 #   curl -fsSL https://memoire.cv/install.sh | sh -s -- --dir ~/bin/memoire
 #   curl -fsSL https://memoire.cv/install.sh | sh -s -- --no-path    # skip rc edit
 #   curl -fsSL https://memoire.cv/install.sh | sh -s -- --no-verify  # skip checksum

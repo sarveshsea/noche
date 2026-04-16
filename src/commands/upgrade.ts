@@ -63,7 +63,7 @@ export function registerUpgradeCommand(program: Command, _engine: MemoireEngine)
   program
     .command("upgrade")
     .description("Self-update the standalone memi binary to the latest release")
-    .option("--version <tag>", "Install a specific version (e.g. v0.11.0)", "latest")
+    .option("--version <tag>", "Install a specific version (e.g. v1.2.3)", "latest")
     .option("--check", "Check for updates without installing")
     .action(async (opts: { version: string; check?: boolean }) => {
       if (!isStandaloneBinary()) {

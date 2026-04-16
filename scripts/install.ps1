@@ -2,7 +2,7 @@
 #
 # Usage (PowerShell):
 #   irm https://memoire.cv/install.ps1 | iex
-#   & { iwr -useb https://memoire.cv/install.ps1 } -Version v0.11.0
+#   & { iwr -useb https://memoire.cv/install.ps1 } -Version v1.2.3
 
 param(
     [string]$Version = "latest",

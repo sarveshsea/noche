@@ -5,30 +5,21 @@
 <h1 align="center">memoire</h1>
 
 <p align="center">
-  <strong>Extract any website's design system. Generate production React components.</strong><br/>
-  One command. No account. No Figma required.
+  <strong>Publish Figma and tweakcn design systems as installable registries.</strong><br/>
+  Ship tokens and real components to npm. Install them into any shadcn app with one command.
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@sarveshsea/memoire"><img src="https://img.shields.io/npm/v/@sarveshsea/memoire?color=black" alt="npm"></a>
   <a href="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml"><img src="https://github.com/sarveshsea/m-moire/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-700%20passing-black" alt="698 tests">
-  <img src="https://img.shields.io/badge/MCP%20tools-21-black" alt="20 MCP tools">
   <a href="https://github.com/sarveshsea/m-moire/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="MIT"></a>
-  <a href="https://glama.ai/mcp/servers/sarveshsea/m-moire"><img src="https://glama.ai/mcp/servers/sarveshsea/m-moire/badges/score.svg?v=2" alt="MCP server score"></a>
-</p>
-
-<p align="center">
-  <a href="https://glama.ai/mcp/servers/sarveshsea/m-moire">
-    <img src="https://glama.ai/mcp/servers/sarveshsea/m-moire/badges/card.svg?v=2" alt="m-moire MCP server" width="400" />
-  </a>
 </p>
 
 ---
 
 ## The shadcn pattern, for entire design systems
 
-Every company has 2-3 Figma files that should be **the** design system. Nobody made them distributable. Until now.
+Memoire is registry-first. The primary loop is simple: publish a design system, install real components anywhere, then keep the registry updated as the source changes.
 
 ```bash
 # Publish your Figma file to npm in one command
@@ -38,15 +29,11 @@ npx @sarveshsea/memoire publish --name @you/ds --figma https://figma.com/design/
 npx @sarveshsea/memoire add Button --from @you/ds
 # → src/components/memoire/Button.tsx (real working code, not a spec)
 
-# Jump to the component's page on the Marketplace
-memi view Button
-# → opens https://memoire.cv/components/@you/ds/Button
-
-# When Figma changes, open a PR automatically
-memi sync --auto-pr
+# Or start from a live site and scaffold a registry from it
+npx @sarveshsea/memoire design-doc https://linear.app --init @you/linear-theme
 ```
 
-A registry bundles tokens (W3C DTCG JSON + Tailwind v4 `@theme` CSS), component specs, and **real generated code** for React / Vue / Svelte. Publishable to npm, GitHub, or any static host. Every published registry is indexed on the [Memoire Marketplace](https://memoire.cv/components) within an hour of `npm publish`. See [`examples/starter-registry/`](./examples/starter-registry) to fork one.
+A registry bundles tokens (W3C DTCG JSON + Tailwind v4 `@theme` CSS), component specs, and **real generated code** for React / Vue / Svelte. Publishable to npm, GitHub, or any static host. See [`examples/starter-registry/`](./examples/starter-registry) to fork one.
 
 ### Designed in tweakcn? Publish with Memoire.
 
@@ -72,11 +59,11 @@ The `--theme` flag parses both Tailwind v3 (`:root { --primary: ... }`) and v4 (
 
 | Input | Output |
 |-------|--------|
-| Any public URL | `DESIGN.md` with full token inventory + Tailwind config |
-| Figma file (REST or plugin) | Design tokens, components, styles |
-| Penpot file | Same tokens, same pipeline |
+| Figma file | npm-ready design system registry with tokens, specs, and real components |
+| tweakcn theme | Parsed tokens you can publish as a reusable registry |
+| Any public URL | `DESIGN.md` plus an optional starter registry scaffold |
 | JSON specs | React + TypeScript + Tailwind components (shadcn/ui) |
-| Generated components | Storybook stories + shadcn registry server |
+| Generated registries | Installable components for React / Vue / Svelte |
 
 ```bash
 npm i -g @sarveshsea/memoire
@@ -126,7 +113,7 @@ Verify with `SHA256SUMS.txt` (attached to every release). Extract, add `memi` to
 
 ## Use with Claude Code / Cursor
 
-Memoire is an MCP server with 21 tools. Give your AI assistant direct access to your design system.
+Memoire also runs as an MCP server, so your AI assistant can work directly with your design system after the registry workflow is in place.
 
 ```bash
 memi mcp config --install              # writes .mcp.json, done
@@ -145,7 +132,7 @@ Or add manually to `.mcp.json`:
 }
 ```
 
-**Tools include:** `pull_design_system`, `generate_code`, `create_spec`, `get_tokens`, `compose`, `design_doc`, `run_audit`, `capture_screenshot`, `analyze_design`, and [11 more](https://memoire.cv/docs).
+**Tools include:** `pull_design_system`, `generate_code`, `create_spec`, `get_tokens`, `compose`, `design_doc`, `run_audit`, `capture_screenshot`, `analyze_design`, and more in the [docs](https://memoire.cv/docs).
 
 ---
 
@@ -241,13 +228,13 @@ src/
   engine/     Core orchestrator, registry, sync, pipeline
   figma/      WebSocket bridge + REST client + Penpot client
   agents/     Intent classifier, plan builder, task queue
-  mcp/        MCP server (21 tools, 3 resources, stdio)
+  mcp/        MCP server (tools, resources, stdio)
   codegen/    shadcn/ui mapper, Storybook, dataviz, pages
   research/   Research engine (Excel, stickies, web)
   specs/      Spec types, Zod schemas, 62-component catalog
   preview/    Preview gallery, API server, shadcn registry
   notes/      Downloadable skill packs
-  commands/   28 CLI commands
+  commands/   CLI command surface
   plugin/     Figma plugin (Widget V2)
 ```
 
