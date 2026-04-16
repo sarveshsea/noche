@@ -14,7 +14,7 @@ This release closes the remaining gaps between the repo, shipped artifacts, and 
 ### New
 - **Expanded release guard** — `scripts/check-release.mjs` now validates the shipped plugin bundle metadata, all example registries under `examples/`, the starter preset README version marker, and the synced preview changelog output.
 - **Release checks in more pipelines** — CI and release-binary workflows now run `npm run check:release`, so drift gets caught before tags or binaries are built.
-- **Reproducible installs in GitHub Actions** — publish, CI, and release-binary workflows now use `npm ci --ignore-scripts` instead of deleting the lockfile and performing a mutable install.
+- **Linux-safe workflow installs** — publish, CI, and release-binary workflows regenerate `package-lock.json` on the runner before `npm install --ignore-scripts`, which restores the platform-native esbuild binaries needed for Ubuntu test and release jobs.
 
 ### Fixed
 - Aligned `examples/starter-registry/registry.json` to the current Memoire release instead of leaving it pinned to `0.11.0`.
