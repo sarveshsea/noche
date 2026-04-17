@@ -43,6 +43,12 @@ interface ResearchCommandPayload {
     summary: string;
     themes: number;
     topTheme: string | null;
+    personas: number;
+    opportunities: number;
+    topOpportunity: string | null;
+    risks: number;
+    topRisk: string | null;
+    contradictions: number;
   };
   report?: {
     path: string;
@@ -310,6 +316,7 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
         console.log("\n  Synthesizing research...\n");
       }
       const { themes, summary } = await engine.research.synthesize();
+      const store = engine.research.getStore();
 
       if (json) {
         console.log(JSON.stringify({
@@ -322,6 +329,12 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
             summary,
             themes: themes.length,
             topTheme: themes[0]?.name ?? null,
+            personas: store.personas.length,
+            opportunities: store.opportunities?.length ?? 0,
+            topOpportunity: store.opportunities?.[0]?.title ?? null,
+            risks: store.risks?.length ?? 0,
+            topRisk: store.risks?.[0]?.title ?? null,
+            contradictions: store.contradictions?.length ?? 0,
           },
         } satisfies ResearchCommandPayload, null, 2));
         return;

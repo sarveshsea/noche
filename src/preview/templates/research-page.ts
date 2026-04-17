@@ -14,7 +14,7 @@ const CSS = resolveAsset("research-page.css");
 const CLIENT_JS = resolveAsset("research-page.client.js");
 
 export function generateResearchDashboard(research: ResearchStore, generatedAt: string): string {
-  const { insights, themes, personas, sources } = research;
+  const { insights, themes, personas, sources, summary, opportunities = [], risks = [], contradictions = [] } = research;
   const highConf = insights.filter(i => i.confidence === "high");
   const medConf = insights.filter(i => i.confidence === "medium");
   const lowConf = insights.filter(i => i.confidence === "low");
@@ -117,6 +117,33 @@ ${CSS}
 
 <!-- Main -->
 <div class="main">
+
+${summary ? `<div style="border:1px solid var(--border);background:var(--panel);padding:18px 20px;margin-bottom:18px">
+  <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <div style="max-width:720px">
+      <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:8px">Executive Summary</div>
+      <div style="font-family:var(--sans);font-size:13px;line-height:1.7;color:var(--fg-soft)">${esc(summary.narrative)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:8px;min-width:260px">
+      <div style="border:1px solid var(--border);padding:10px 12px">
+        <div style="font-size:10px;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.14em">Opportunities</div>
+        <div style="font-size:20px;margin-top:4px">${opportunities.length}</div>
+      </div>
+      <div style="border:1px solid var(--border);padding:10px 12px">
+        <div style="font-size:10px;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.14em">Risks</div>
+        <div style="font-size:20px;margin-top:4px">${risks.length}</div>
+      </div>
+      <div style="border:1px solid var(--border);padding:10px 12px">
+        <div style="font-size:10px;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.14em">Contradictions</div>
+        <div style="font-size:20px;margin-top:4px">${contradictions.length}</div>
+      </div>
+      <div style="border:1px solid var(--border);padding:10px 12px">
+        <div style="font-size:10px;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.14em">Next Move</div>
+        <div style="font-size:11px;line-height:1.5;margin-top:4px">${esc(summary.nextActions[0] ?? "Run synthesis to generate next actions.")}</div>
+      </div>
+    </div>
+  </div>
+</div>` : ""}
 
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('insights',this)">Insights (${insights.length})</button>

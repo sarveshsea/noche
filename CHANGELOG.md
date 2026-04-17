@@ -6,6 +6,30 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v0.12.4 — 2026-04-16 (Growth surfaces)
+
+### The fix
+This release aligns the npm package, repo docs, example catalog, and launch assets around one public wedge: publish Figma or tweakcn design systems as installable shadcn registries.
+
+### New
+- **Featured registry catalog** — `examples/featured-registries.json` now ships a machine-readable fallback list for the website with three first-party showcases: `starter-saas`, `docs-blog`, and `dashboard`.
+- **Three first-party showcase registries** — `examples/presets/starter-saas`, `docs-blog`, and `dashboard` give new users installable packages with screenshots, install commands, and source links instead of an empty marketplace story.
+- **Growth docs pack** — new `docs/README.md`, `docs/DEMOS.md`, and `docs/LAUNCH.md` define the quickstart, demo scripts, and distribution copy around the registry-first pitch.
+- **README proof upgrades** — the package README now leads with two 60-second quickstarts, embeds the theme workflow poster, links to featured registries, and keeps MCP framed as an advanced layer instead of the main story.
+- **Release guard for featured content** — `scripts/check-release.mjs` now validates that the featured registry catalog exists, carries at least three entries, and points at real source folders and screenshots.
+
+### Fixed
+- Tightened npm metadata, CLI help text, and first-run messaging to the same installable-registry story.
+- Bumped every shipped example registry and starter README marker to `v0.12.4` so release checks stay green.
+
+### Research
+- **Richer insight model** — research artifacts now persist categories, sentiment, entities, signal tags, actors, source types, and supporting source links instead of only plain findings and tags.
+- **Deeper ingestion** — spreadsheet imports now emit row-level insights, repeated-signal synthesis, participant coverage, and rating summaries; transcript and web imports now preserve structured metadata for downstream synthesis.
+- **Decision-ready synthesis** — `memi research synthesize` now generates opportunities, risks, contradictions, personas, and an executive summary on top of themes.
+- **Upgraded reporting + preview** — research reports now include executive summary, coverage, opportunities, risks, contradictions, personas, and next moves; the preview dashboard surfaces the same summary layer.
+
+---
+
 ## v0.12.3 — 2026-04-16 (Release hardening)
 
 ### The fix

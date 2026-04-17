@@ -85,6 +85,12 @@ describe("research --json", () => {
         summary: "Synthesized 2 themes",
         themes: 2,
         topTheme: "Navigation",
+        personas: 1,
+        opportunities: 2,
+        topOpportunity: "Invest in Navigation",
+        risks: 1,
+        topRisk: "Navigation is a product risk",
+        contradictions: 1,
       },
     });
 
@@ -147,6 +153,9 @@ function makeResearchEngine(input?: { figmaConnected?: boolean }) {
           themes: [{ name: "Navigation" }, { name: "Trust" }],
           personas: [{ name: "PM" }],
           sources: [{ name: "CSV" }, { name: "FigJam" }],
+          opportunities: [{ title: "Invest in Navigation" }, { title: "Invest in Trust" }],
+          risks: [{ title: "Navigation is a product risk" }],
+          contradictions: [{ topic: "Navigation" }],
         };
       },
     },
